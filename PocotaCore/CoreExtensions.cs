@@ -2,20 +2,20 @@
 
 namespace Net.Leksi.Pocota.Core;
 
-public static class PocotaCoreExtensions
+public static class CoreExtensions
 {
     public static IServiceCollection AddPocotaCore(this IServiceCollection services, Action<IServiceCollection> configure)
     {
-        PocotaManager.AddPocotaCore(services, configure);
+        Manager.AddPocotaCore(services, configure);
         return services;
     }
 
-    public static IServiceCollection AddKeyMapping<TSource>(this IServiceCollection services, IEnumerable<string> fieldNames)
+    public static IServiceCollection AddKeyMapping<TSource>(this IServiceCollection services, IDictionary<string, Type> fieldDefinitions)
         where TSource: class
     {
-        if (services is PocotaManager instance)
+        if (services is Manager instance)
         {
-            instance.AddKeyMapping(typeof(TSource), fieldNames);
+            instance.AddKeyMapping(typeof(TSource), fieldDefinitions);
         }
         else
         {
@@ -24,11 +24,11 @@ public static class PocotaCoreExtensions
         return services;
     }
 
-    public static IServiceCollection AddKeyMapping(this IServiceCollection services, Type sourceType, IEnumerable<string> fieldNames)
+    public static IServiceCollection AddKeyMapping(this IServiceCollection services, Type sourceType, IDictionary<string, Type> fieldDefinitions)
     {
-        if (services is PocotaManager instance)
+        if (services is Manager instance)
         {
-            instance.AddKeyMapping(sourceType, fieldNames);
+            instance.AddKeyMapping(sourceType, fieldDefinitions);
         }
         else
         {
@@ -39,7 +39,7 @@ public static class PocotaCoreExtensions
 
     public static IServiceCollection AddKeyMapping(this IServiceCollection services, Type sourceType, Type exampleType)
     {
-        if (services is PocotaManager instance)
+        if (services is Manager instance)
         {
             instance.AddKeyMapping(sourceType, exampleType);
         }
@@ -53,7 +53,7 @@ public static class PocotaCoreExtensions
     public static IServiceCollection AddKeyMapping<TSource>(this IServiceCollection services, Type exampleType)
         where TSource : class
     {
-        if (services is PocotaManager instance)
+        if (services is Manager instance)
         {
             instance.AddKeyMapping(typeof(TSource), exampleType);
         }
@@ -68,7 +68,7 @@ public static class PocotaCoreExtensions
         where TSource : class
         where TExample : class
     {
-        if (services is PocotaManager instance)
+        if (services is Manager instance)
         {
             instance.AddKeyMapping(typeof(TSource), typeof(TExample));
         }

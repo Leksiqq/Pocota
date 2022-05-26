@@ -3,10 +3,11 @@ using Microsoft.Extensions.Hosting;
 using Moq;
 using Net.Leksi.Pocota.Core;
 using System.Diagnostics;
+using System.Linq;
 
 namespace PocotaTestProject;
 
-public class PocotaManagerTests
+public class ManagerTests
 {
     [OneTimeSetUp]
     public void OneTimeSetup()
@@ -32,24 +33,24 @@ public class PocotaManagerTests
             services.AddTransient<Poco2_2, Poco2>();
             services.AddTransient<Poco2_3, Poco2>();
             services.AddKeyMapping<Poco2, Poco1>();
-            services.AddKeyMapping<Poco1>(new string[] { "ID" });
+            services.AddKeyMapping<Poco1>(new Dictionary<string, Type> { { "ID", typeof(string) } });
         })).Build();
-        PocotaManager pm = host.Services.GetRequiredService<PocotaManager>();
+        Manager pm = host.Services.GetRequiredService<Manager>();
         var ex = Assert.Catch<InvalidOperationException>(() =>
         {
             pm.AddTransient<Poco3_1, Poco3>();
         });
-        Assert.That(ex.Message, Is.EqualTo($"{typeof(PocotaManager)} is already configured"));
+        Assert.That(ex.Message, Is.EqualTo($"{typeof(Manager)} is already configured"));
         ex = Assert.Catch<InvalidOperationException>(() =>
         {
             pm.AddKeyMapping<Poco3, Poco2>();
         });
-        Assert.That(ex.Message, Is.EqualTo($"{typeof(PocotaManager)} is already configured"));
+        Assert.That(ex.Message, Is.EqualTo($"{typeof(Manager)} is already configured"));
         ex = Assert.Catch<InvalidOperationException>(() =>
         {
-            pm.AddKeyMapping<Poco1>(new string[] { "ID" });
+            pm.AddKeyMapping<Poco1>(new Dictionary<string, Type> { { "ID", typeof(string) } });
         });
-        Assert.That(ex.Message, Is.EqualTo($"{typeof(PocotaManager)} is already configured"));
+        Assert.That(ex.Message, Is.EqualTo($"{typeof(Manager)} is already configured"));
     }
 
     [Test]
@@ -86,7 +87,7 @@ public class PocotaManagerTests
             Assert.That(ex.Message, Is.EqualTo($"targetType must be a class"));
             ex = Assert.Catch<ArgumentException>(() =>
             {
-                services.AddKeyMapping(typeof(int), new string[] { "ID" });
+                services.AddKeyMapping(typeof(int), new Dictionary<string, Type> { { "ID", typeof(string) } });
             });
             Assert.That(ex.Message, Is.EqualTo($"targetType must be a class"));
             ex = Assert.Catch<ArgumentException>(() =>
@@ -141,10 +142,10 @@ public class PocotaManagerTests
             services.AddTransient<Poco3_1, Poco3>();
             services.AddTransient<Poco3_2, Poco3>();
             services.AddTransient<Poco3_3, Poco3>();
-            services.AddKeyMapping<Poco1>(new string[] { "ID" });
+            services.AddKeyMapping<Poco1>(new Dictionary<string, Type> { { "ID", typeof(string) } });
             var ex = Assert.Catch<InvalidOperationException>(() =>
             {
-                services.AddKeyMapping<Poco1>(new string[] { "ID" });
+                services.AddKeyMapping<Poco1>(new Dictionary<string, Type> { { "ID", typeof(string) } });
             });
             Assert.That(ex.Message, Is.EqualTo($"Key for {typeof(Poco1)} is already mapped"));
             ex = Assert.Catch<InvalidOperationException>(() =>
@@ -221,10 +222,48 @@ public class PocotaManagerTests
                 services.AddTransient<Poco2_1, Poco2>();
                 services.AddTransient<Poco2_2, Poco2>();
                 services.AddTransient<Poco2_3, Poco2>();
-                services.AddKeyMapping<Poco3>(new[] { "ID" });
+                services.AddKeyMapping<Poco3>(new Dictionary<string, Type> { { "ID", typeof(string) } });
             })).Build();
         });
         Assert.That(ex.Message, Is.EqualTo($"Keys are mapped for not registered types: {typeof(Poco3)}"));
+    }
+
+    [Test]
+    public async Task TestThrowKeyRingConcurrent()
+    {
+        IHost host = Host.CreateDefaultBuilder().ConfigureServices(services => services.AddPocotaCore(services =>
+        {
+            services.AddTransient<Poco1_1, Poco1>();
+            services.AddKeyMapping<Poco1>(new Dictionary<string, Type>() { { "ID", typeof(int) } });
+        })).Build();
+
+        Manager pm = host.Services.GetRequiredService<Manager>();
+        Poco1_1 poco1_1 = pm.GetRequiredService<Poco1_1>();
+        Task[] tasks = new Task[2];
+        ManualResetEventSlim mrs1 = new ManualResetEventSlim();
+        mrs1.Reset();
+        ManualResetEventSlim mrs2 = new ManualResetEventSlim();
+        mrs2.Reset();
+        tasks[0] = Task.Run(() => 
+        {
+            KeyRing? keyRing = pm.GetKeyRing(poco1_1);
+            mrs1.Set();
+            mrs2.Wait();
+            keyRing["ID"] = 1234;
+            mrs1.Set();
+        });
+        tasks[1] = Task.Run(() =>
+        {
+            KeyRing? keyRing;
+            mrs1.Wait();
+            mrs1.Reset();
+            Assert.Catch<KeyRingConcurrentException>(() => keyRing = pm.GetKeyRing(poco1_1));
+            mrs2.Set();
+            mrs1.Wait();
+            keyRing = pm.GetKeyRing(poco1_1);
+            Assert.That(keyRing["ID"], Is.EqualTo(1234));
+        });
+        await Task.WhenAll(tasks);
     }
 
     [Test]
@@ -241,61 +280,55 @@ public class PocotaManagerTests
             services.AddTransient<Poco3_1, Poco3>();
             services.AddTransient<Poco3_2, Poco3>();
             services.AddTransient<Poco3_3, Poco3>();
-            services.AddKeyMapping<Poco1>(new[] { "ID" });
-            services.AddKeyMapping<Poco2>(new[] { "ID1", "ID2" });
-            services.AddKeyMapping<Poco3>(new[] { "ID1", "ID2", "ID3" });
+            services.AddKeyMapping<Poco1>(new Dictionary<string, Type>() { { "ID", typeof(int) } });
+            services.AddKeyMapping<Poco2>(new Dictionary<string, Type>() { { "ID1", typeof(int) }, { "ID2", typeof(string) } });
+            services.AddKeyMapping<Poco3>(new Dictionary<string, Type>() { { "ID1", typeof(int) }, { "ID2", typeof(string) }, { "ID3", typeof(string) } });
         })).Build();
 
-        PocotaManager pm = host.Services.GetRequiredService<PocotaManager>();
+        Manager pm = host.Services.GetRequiredService<Manager>();
 
         Poco1_1 poco1_1 = pm.GetRequiredService<Poco1_1>();
         KeyRing? keyRing = pm.GetKeyRing(poco1_1);
         Assert.That(keyRing, Is.Not.Null);
-        Assert.That(keyRing.Key, Is.Not.Null);
-        Assert.That(keyRing.Key.Length, Is.EqualTo(1));
+        Assert.That(keyRing.Count, Is.EqualTo(1));
         keyRing["ID"] = 123;
-        Assert.Catch<IndexOutOfRangeException>(() =>
+        Assert.Catch<KeyNotFoundException>(() =>
         {
             keyRing["ID1"] = 124;
         });
         keyRing = pm.GetKeyRing(poco1_1);
         Assert.That(keyRing, Is.Not.Null);
-        Assert.That(keyRing.Key, Is.Not.Null);
-        Assert.That(keyRing.Key.Length, Is.EqualTo(1));
+        Assert.That(keyRing.Count, Is.EqualTo(1));
         Assert.That(keyRing["ID"], Is.EqualTo(123));
         Poco2_2 poco2_2 = pm.GetRequiredService<Poco2_2>();
         keyRing = pm.GetKeyRing(poco2_2);
         Assert.That(keyRing, Is.Not.Null);
-        Assert.That(keyRing.Key, Is.Not.Null);
-        Assert.That(keyRing.Key.Length, Is.EqualTo(2));
+        Assert.That(keyRing.Count, Is.EqualTo(2));
         keyRing["ID1"] = 124;
         keyRing["ID2"] = "test";
-        Assert.Catch<IndexOutOfRangeException>(() =>
+        Assert.Catch<KeyNotFoundException>(() =>
         {
             keyRing["ID3"] = "out";
         });
         keyRing = pm.GetKeyRing(poco2_2);
         Assert.That(keyRing, Is.Not.Null);
-        Assert.That(keyRing.Key, Is.Not.Null);
-        Assert.That(keyRing.Key.Length, Is.EqualTo(2));
+        Assert.That(keyRing.Count, Is.EqualTo(2));
         Assert.That(keyRing["ID1"], Is.EqualTo(124));
         Assert.That(keyRing["ID2"], Is.EqualTo("test"));
         Poco3_3 poco3_3 = pm.GetRequiredService<Poco3_3>();
         keyRing = pm.GetKeyRing(poco3_3);
         Assert.That(keyRing, Is.Not.Null);
-        Assert.That(keyRing.Key, Is.Not.Null);
-        Assert.That(keyRing.Key.Length, Is.EqualTo(3));
+        Assert.That(keyRing.Count, Is.EqualTo(3));
         keyRing["ID1"] = 125;
         keyRing["ID2"] = "test1";
         keyRing["ID3"] = "test2";
-        Assert.Catch<IndexOutOfRangeException>(() =>
+        Assert.Catch<KeyNotFoundException>(() =>
         {
             keyRing["ID4"] = "out1";
         });
         keyRing = pm.GetKeyRing(poco3_3);
         Assert.That(keyRing, Is.Not.Null);
-        Assert.That(keyRing.Key, Is.Not.Null);
-        Assert.That(keyRing.Key.Length, Is.EqualTo(3));
+        Assert.That(keyRing.Count, Is.EqualTo(3));
         Assert.That(keyRing["ID1"], Is.EqualTo(125));
         Assert.That(keyRing["ID2"], Is.EqualTo("test1"));
         Assert.That(keyRing["ID3"], Is.EqualTo("test2"));

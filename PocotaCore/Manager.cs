@@ -4,12 +4,13 @@ using System.Runtime.CompilerServices;
 
 namespace Net.Leksi.Pocota.Core;
 
-public class PocotaManager : IServiceProvider, IServiceCollection
+public class Manager : IServiceProvider, IServiceCollection
 {
     private readonly Dictionary<Type, int> _registered = new();
     private readonly Dictionary<Type, Dictionary<string, KeyDefinition>> _keyMap = new();
     private readonly Dictionary<Type, Type> _exampleKeyMap = new();
-    private readonly ConditionalWeakTable<object, object[]> _attachedKeys = new();
+    private readonly ConditionalWeakTable<object, KeyRing> _attachedKeys = new();
+    private readonly ConditionalWeakTable<object, WeakReference<KeyRing>> _locks = new();
 
     internal IServiceProvider? ServiceProvider { get; set; } = null;
     internal IServiceCollection? ServiceDescriptors { get; set; } = null;
@@ -36,6 +37,10 @@ public class PocotaManager : IServiceProvider, IServiceCollection
             throw new ArgumentNullException(nameof(source));
         }
         KeyRing? keyRing = null;
+        if (_attachedKeys.TryGetValue(source, out keyRing))
+        {
+            return keyRing;
+        }
         Type? current = source.GetType();
         while (current is { } && !_keyMap.ContainsKey(current))
         {
@@ -43,17 +48,24 @@ public class PocotaManager : IServiceProvider, IServiceCollection
         }
         if (current is { } && _keyMap.ContainsKey(current))
         {
-            keyRing = new KeyRing(this);
-            keyRing.Source = source;
-            if (_attachedKeys.TryGetValue(source, out object[]? key))
+            lock (source)
             {
-                keyRing.Key = key;
-            }
-            else
-            {
-                keyRing.Key = new object[_keyMap[current].Count];
-                _attachedKeys.Add(source, keyRing.Key);
-                keyRing.IsNew = false;
+                if (_locks.TryGetValue(source, out WeakReference<KeyRing>? wr))
+                {
+                    if (wr.TryGetTarget(out KeyRing? _))
+                    {
+                        throw new KeyRingConcurrentException();
+                    }
+                    keyRing = new KeyRing(this, _keyMap[current]);
+                    wr.SetTarget(keyRing);
+                }
+                else
+                {
+                    keyRing = new KeyRing(this, _keyMap[current]);
+                    _locks.Add(source, new WeakReference<KeyRing>(keyRing));
+                }
+                keyRing.PrimaryKey = new object[_keyMap[current].Count];
+                keyRing.Source = source;
             }
         }
         return keyRing;
@@ -90,19 +102,38 @@ public class PocotaManager : IServiceProvider, IServiceCollection
         _exampleKeyMap[targetType] = example;
     }
 
-    internal int GetFieldIndex(Type type, string fieldName)
+    internal Dictionary<string, Type>? GetKeys(Type type)
     {
-        return _keyMap.ContainsKey(type) && _keyMap[type].ContainsKey(fieldName) ? _keyMap[type][fieldName].Index : -1;
+        Type? current = type;
+        while (current is { } && !_keyMap.ContainsKey(current))
+        {
+            current = current!.BaseType;
+        }
+        if (current is { } && _keyMap.ContainsKey(current))
+        {
+            return _keyMap[current].ToDictionary(v => v.Key, v => v.Value.Type);
+        }
+        return null;
+    }
+
+    internal void Attach(KeyRing keyRing)
+    {
+        lock (keyRing.Source!)
+        {
+            _locks.Remove(keyRing.Source!);
+            _attachedKeys.Add(keyRing.Source!, keyRing);
+        }
     }
 
     internal static void AddPocotaCore(IServiceCollection services, Action<IServiceCollection> configure)
     {
-        PocotaManager instance = new();
-        services.AddSingleton<PocotaManager>(serviceProvider =>
+        Manager instance = new();
+        services.AddSingleton<Manager>(serviceProvider =>
         {
             instance.ServiceProvider = serviceProvider;
             return instance;
         });
+        services.AddSingleton<TypesForest>();
         instance.ServiceDescriptors = services;
         configure?.Invoke(instance);
         instance.MapExamples();
@@ -140,7 +171,7 @@ public class PocotaManager : IServiceProvider, IServiceCollection
     {
         if (ServiceDescriptors is null)
         {
-            throw new InvalidOperationException($"{typeof(PocotaManager)} is already configured");
+            throw new InvalidOperationException($"{typeof(Manager)} is already configured");
         }
     }
 

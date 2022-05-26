@@ -21,7 +21,7 @@ public class TypesForest
 
     private static readonly PropertyNodeComparer _propertyNodeComparer = new();
 
-    private readonly PocotaManager _manager;
+    private readonly Manager _manager;
 
     private Dictionary<Type, TypeNode> _typeTrees { get; init; } = new();
 
@@ -30,7 +30,7 @@ public class TypesForest
     public TypesForest(IServiceProvider serviceProvider)
     {
         ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        _manager = ServiceProvider.GetRequiredService<PocotaManager>();
+        _manager = ServiceProvider.GetRequiredService<Manager>();
     }
     /// <summary>
     /// <para xml:lang="ru">
@@ -207,13 +207,25 @@ public class TypesForest
     private void CollectValueRequests(TypeNode typeNode, List<ValueRequest> requests, Stack<Type> stack)
     {
         StringBuilder path = new();
-        if(path.Length == 0)
+        requests.Add(new ValueRequest
         {
-            requests.Add(new ValueRequest
+            Path = Slash,
+            PropertyNode = new PropertyNode { TypeNode = typeNode }
+        });
+        if(_manager.GetKeys(typeNode.ActualType) is Dictionary<string, Type> keyDefinitions)
+        {
+            foreach(KeyValuePair<string, Type> entry in keyDefinitions)
             {
-                Path = Slash,
-                PropertyNode = new PropertyNode { TypeNode = typeNode }
-            });
+                int pathLength = path.Length;
+                path.Append(Slash).Append(entry.Key);
+                ValueRequest request = new ValueRequest
+                {
+                    Path = path.ToString(),
+                    KeyFieldType = entry.Value
+                };
+                requests.Add(request);
+                path.Length = pathLength;
+            }
         }
         foreach(PropertyNode propertyNode in typeNode.ChildNodes!)
         {
@@ -235,24 +247,36 @@ public class TypesForest
                     throw new Exception($"Loop detected: {stackView}");
                 }
                 List<ValueRequest> range = new();
-                if (!ReferenceEquals(requests, propertyNode.TypeNode.ValueRequests))
+                foreach (ValueRequest req in propertyNode.TypeNode.ValueRequests!)
                 {
-                    foreach (ValueRequest req in propertyNode.TypeNode.ValueRequests!)
+                    if (req.Path != Slash)
                     {
-                        if (req.Path != Slash)
+                        if (req.Kind is not ValueRequestKind.PrimaryKey && ReferenceEquals(requests, propertyNode.TypeNode.ValueRequests))
                         {
-                            int pathLength1 = path.Length;
-                            path.Append(req.Path);
-                            request = new ValueRequest
+                            if(range.Count > 0)
                             {
-                                Path = path.ToString(),
-                                PropertyNode = req.PropertyNode,
-                                PopsCount = req.PopsCount
-                            };
-                            range.Add(request);
-                            path.Length = pathLength1;
-
+                                range.Last().PopsCount = -1;
+                            }
+                            break;
                         }
+                        int pathLength1 = path.Length;
+                        path.Append(req.Path);
+                        request = new ValueRequest
+                        {
+                            Path = path.ToString(),
+                            PopsCount = req.PopsCount
+                        };
+                        if(req.Kind is ValueRequestKind.PrimaryKey)
+                        {
+                            request.KeyFieldType = req.KeyFieldType;
+                        }
+                        else
+                        {
+                            request.PropertyNode = req.PropertyNode;
+                        }
+                        range.Add(request);
+                        path.Length = pathLength1;
+
                     }
                 }
                 requests.AddRange(range);

@@ -29,8 +29,9 @@ public class ValueRequest
     /// Request information
     /// </para>
     /// </summary>
-    public PropertyNode PropertyNode { get; internal set; } = null!;
+    public PropertyNode? PropertyNode { get; internal set; } = null;
 
+    public Type? KeyFieldType { get; internal set; } = null;
     /// <summary>
     /// <para xml:lang="ru">
     /// Абсолютный путь от корневого узла дерева объекта в стандартной нотации 
@@ -41,10 +42,12 @@ public class ValueRequest
     /// </summary>
     public string Path { get; internal set; } = string.Empty;
 
+    public ValueRequestKind Kind => KeyFieldType is { } ? ValueRequestKind.PrimaryKey : (PropertyNode!.IsLeaf ? ValueRequestKind.Leaf: ValueRequestKind.Node);
+
 #if DEBUG
     public override string ToString()
     {
-        return $"{Path}, {(PropertyNode.IsLeaf ? string.Empty : "+" + PropertyNode.TypeNode.Type)}, {PopsCount}";
+        return $"{Path}, {(Kind switch { ValueRequestKind.PrimaryKey => "pk", ValueRequestKind.Leaf => "leaf", _ => "+" + PropertyNode!.TypeNode.Type })}, {PopsCount}";
     }
 #endif
 }

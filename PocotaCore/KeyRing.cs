@@ -1,40 +1,77 @@
-﻿namespace Net.Leksi.Pocota.Core;
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
-public class KeyRing
+namespace Net.Leksi.Pocota.Core;
+
+public class KeyRing: IReadOnlyDictionary<string, object>
 {
-    private readonly PocotaManager _manager;
-    internal object? Source { get; set; } = null;
+    private readonly Manager _manager;
+    private readonly Dictionary<string, KeyDefinition> _entry;
 
-    public object[] Key { get; internal set; } = null!;
-    public bool IsNew { get; internal set; } = true;
+    internal object[] PrimaryKey { get; set; } = null!;
 
-    public KeyRing(PocotaManager manager)
+    public object? Source { get; internal set; } = null;
+
+    public bool IsReadonly
+    {
+        get
+        {
+            return PrimaryKey is { } && PrimaryKey.All(v => v is { });
+        }
+    }
+
+    public IEnumerable<string> Keys => _entry.Keys;
+
+    public IEnumerable<object> Values => _entry.Values.Select(v => PrimaryKey[v.Index]);
+
+    public int Count => _entry.Count;
+
+    internal KeyRing(Manager manager, Dictionary<string, KeyDefinition> entry)
     {
         _manager = manager;
+        _entry = entry;
     }
 
     public object this[string fieldName]
     {
         get
         {
-            int index = _manager.GetFieldIndex(Source!.GetType(), fieldName);
-            if (index >= 0)
-            {
-                return Key[index];
-            }
-            throw new IndexOutOfRangeException();
+            return PrimaryKey[_entry[fieldName].Index];
         }
         set
         {
-            int index = _manager.GetFieldIndex(Source!.GetType(), fieldName);
-            if(index >= 0)
+            if(PrimaryKey[_entry[fieldName].Index] is null)
             {
-                Key[index] = value;
-            }
-            else
-            {
-                throw new IndexOutOfRangeException();
+                PrimaryKey[_entry[fieldName].Index] = value;
+                if (IsReadonly)
+                {
+                    _manager.Attach(this);
+                }
             }
         }
+    }
+
+    public bool ContainsKey(string key) => _entry.ContainsKey(key);
+
+    public bool TryGetValue(string key, [MaybeNullWhen(false)] out object value)
+    {
+        value = default;
+        KeyDefinition? keyDefinition;
+        if(_entry.TryGetValue(key, out keyDefinition))
+        {
+            value = PrimaryKey[keyDefinition.Index];
+            return true;
+        }
+        return false;
+    }
+
+    public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+    {
+        return _entry.Select(v => new KeyValuePair<string, object>(v.Key, PrimaryKey[v.Value.Index])).GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }
