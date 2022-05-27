@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Net.Leksi.Pocota.Core</AssemblyName>
+    <RootNamespace>Net.Leksi.Pocota.Core</RootNamespace>
+    <NoWin32Manifest>true</NoWin32Manifest>
+    <ApplicationIcon>VitruvianPocota32.ico</ApplicationIcon>
+    <Copyright>2022-05-27</Copyright>
+    <VersionPrefix>1.0.0-beta1</VersionPrefix>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <Description>
+      A core library for Pocota wramefork.
+    </Description>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Authors>Alexey leksiq Zakharov</Authors>
+    <RepositoryUrl>https://sourceforge.net/p/pocota/code</RepositoryUrl>
+    <PackageProjectUrl>https://pocota.sourceforge.io/</PackageProjectUrl>
+    <PackageTags>POCO;JSON;ASP.NET;RESTfull;Framework</PackageTags>
+    <OutputType>Library</OutputType>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageIcon>VitruvianPocota128.png</PackageIcon>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <Target Name="CopyPackage" AfterTargets="Pack">
+    <Move SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="..\..\nuget.local" />
+  </Target>
+
+  <ItemGroup>
+    <Content Include="VitruvianPocota32.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Misc\VitruvianPocota128.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+  </ItemGroup>
+
+</Project>

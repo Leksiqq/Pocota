@@ -14,24 +14,31 @@ namespace Net.Leksi.Pocota.Core;
 /// </summary>
 public class TypesForest
 {
-    
+
     private const string Slash = "/";
     private const string Dot = ".";
     private const string _nullableAttributeName = "NullableAttribute";
 
     private static readonly PropertyNodeComparer _propertyNodeComparer = new();
 
-    private readonly Manager _manager;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly Container _manager;
 
-    private Dictionary<Type, TypeNode> _typeTrees { get; init; } = new();
+    private readonly Dictionary<Type, TypeNode> _typeTrees = new();
 
-    public IServiceProvider ServiceProvider { get; init; }
-
-    public TypesForest(IServiceProvider serviceProvider)
-    {
-        ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        _manager = ServiceProvider.GetRequiredService<Manager>();
-    }
+    /// <summary>
+    /// <para xml:lang="ru">
+    /// Инициализирует экземпляр класса <see cref="TypesForest"/> с внедрением провайдера служб.
+    /// </para>
+    /// <para xml:lang="en">
+    /// Initializes an instance of the <see cref="TypesForest"/> class with a service provider injection.
+    /// </para>
+    /// </summary>
+    /// <param name="serviceProvider"></param>
+    /// <exception cref="ArgumentNullException"></exception>
+    public TypesForest(IServiceProvider serviceProvider) =>
+        (_serviceProvider, _manager) =
+            (serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider)), serviceProvider.GetRequiredService<Container>());
     /// <summary>
     /// <para xml:lang="ru">
     /// Возвращает корневой узел дерева, соответствующего указанному типу.
@@ -121,7 +128,7 @@ public class TypesForest
     public void Copy(Type sourceType, object source, object target)
     {
         TypeNode typeNode = GetTypeNode(sourceType);
-        if(typeNode.ChildNodes is { })
+        if (typeNode.ChildNodes is { })
         {
             foreach (PropertyNode propertyNode in typeNode.ChildNodes)
             {
@@ -137,7 +144,7 @@ public class TypesForest
                         object? targetValue = propertyNode.PropertyInfo?.GetValue(target);
                         if (targetValue is null)
                         {
-                            targetValue = ServiceProvider.GetRequiredService(propertyNode.TypeNode.Type);
+                            targetValue = _serviceProvider.GetRequiredService(propertyNode.TypeNode.Type);
                             propertyNode.PropertyInfo?.SetValue(target, targetValue);
                         }
                         Copy(propertyNode.TypeNode.Type, sourceValue, targetValue);
@@ -152,11 +159,90 @@ public class TypesForest
         }
     }
 
+    public string ToDeepString<T>(object source) where T : class => ToDeepString(source, typeof(T));
+    
+    public string ToDeepString(object source) => ToDeepString(source, source?.GetType() ?? typeof(object));
+
+    public string ToDeepString(object source, Type type)
+    {
+        if (source is null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
+        TypeNode typeNode = GetTypeNode(type);
+        StringBuilder result = new();
+        int waitForLevel = -1;
+        KeyRing? keyRing = null;
+        Stack<object> targets = new Stack<object>();
+        targets.Push(source);
+        foreach (ValueRequest request in typeNode.ValueRequests!)
+        {
+            if(request.Level == 0)
+            {
+                result.Append(request.Path).Append("=").Append("{").Append(typeNode.Type.ToString()).AppendLine("}");
+            }
+            else
+            {
+                if (waitForLevel == -1 || request.Level == waitForLevel)
+                {
+                    while (request.Level < targets.Count)
+                    {
+                        targets.Pop();
+                    }
+                    waitForLevel = -1;
+                    result.Append(request.Path).Append("=");
+                    if (request.Kind is ValueRequestKind.PrimaryKey)
+                    {
+                        if (keyRing == null)
+                        {
+                            keyRing = _manager.GetKeyRing(source);
+                        }
+                        if (keyRing!.IsAssigned)
+                        {
+                            result.Append(keyRing[request.Path.Substring(request.Path.LastIndexOf(Slash) + 1)]);
+                        }
+                        else
+                        {
+                            result.Append("<undefined>");
+                        }
+                    }
+                    else
+                    {
+                        if (keyRing is { })
+                        {
+                            keyRing = null;
+                        }
+                        object? value = request.PropertyNode!.PropertyInfo!.GetValue(targets.Peek());
+                        if (request.Kind is ValueRequestKind.Node)
+                        {
+                            if (value is { })
+                            {
+                                targets.Push(value!);
+                                result.Append("{").Append(request.PropertyNode.PropertyInfo.PropertyType.ToString()).Append("}");
+                            }
+                            else
+                            {
+                                result.Append("null");
+                                waitForLevel = request.Level;
+                            }
+                        }
+                        else
+                        {
+                            result.Append(value is null ? "null" : value);
+                        }
+                    }
+                    result.AppendLine();
+                }
+            }
+        }
+        return result.ToString();
+    }
+
     private TypeNode GetTypeNode(Type type, Stack<Type>? stack)
     {
         if (!_typeTrees.ContainsKey(type))
         {
-            if(stack is null)
+            if (stack is null)
             {
                 stack = new Stack<Type>();
             }
@@ -168,7 +254,7 @@ public class TypesForest
     private bool PlantTypeTree(Type type, Stack<Type> stack)
     {
         stack.Push(type);
-        if (!_manager.IsRegistered(type))
+        if (!_manager.ContainsServiceType(type) && !_manager.ContainsImplementationType(type))
         {
             throw new ArgumentException($"{type} is not registered.");
         }
@@ -197,7 +283,8 @@ public class TypesForest
         List<PropertyInfo> properties = new();
         CollectProperties(typeNode, properties);
 
-        typeNode.ActualType = ServiceProvider.GetRequiredService(typeNode.Type).GetType();
+        typeNode.ActualType = _manager.ContainsServiceType(typeNode.Type) ?
+            _manager.GetActualType(typeNode.Type)! : typeNode.Type;
         List<PropertyInfo> actualProperties = new();
         CollectActualProperties(typeNode, actualProperties);
 
@@ -206,40 +293,47 @@ public class TypesForest
 
     private void CollectValueRequests(TypeNode typeNode, List<ValueRequest> requests, Stack<Type> stack)
     {
+        int level = 0;
         StringBuilder path = new();
         requests.Add(new ValueRequest
         {
             Path = Slash,
-            PropertyNode = new PropertyNode { TypeNode = typeNode }
+            PropertyNode = new PropertyNode { TypeNode = typeNode },
+            Level = level
         });
-        if(_manager.GetKeys(typeNode.ActualType) is Dictionary<string, Type> keyDefinitions)
+        if (_manager.GetPrimaryKeyDefinition(typeNode.ActualType) is Dictionary<string, Type> keyDefinitions)
         {
-            foreach(KeyValuePair<string, Type> entry in keyDefinitions)
+            foreach (KeyValuePair<string, Type> entry in keyDefinitions)
             {
+                ++level;
                 int pathLength = path.Length;
                 path.Append(Slash).Append(entry.Key);
                 ValueRequest request = new ValueRequest
                 {
                     Path = path.ToString(),
-                    KeyFieldType = entry.Value
+                    KeyFieldType = entry.Value,
+                    Level = level
                 };
                 requests.Add(request);
                 path.Length = pathLength;
+                --level;
             }
         }
-        foreach(PropertyNode propertyNode in typeNode.ChildNodes!)
+        ++level;
+        foreach (PropertyNode propertyNode in typeNode.ChildNodes!)
         {
             int pathLength = path.Length;
             path.Append(Slash).Append(propertyNode.PropertyInfo!.Name);
             ValueRequest request = new ValueRequest
             {
                 Path = path.ToString(),
-                PropertyNode = propertyNode
+                PropertyNode = propertyNode,
+                Level = level
             };
             requests.Add(request);
             if (!propertyNode.IsLeaf)
             {
-                if(propertyNode.TypeNode.ValueRequests is null)
+                if (propertyNode.TypeNode.ValueRequests is null)
                 {
                     var stackReverse = stack.ToList();
                     stackReverse.Reverse();
@@ -253,10 +347,6 @@ public class TypesForest
                     {
                         if (req.Kind is not ValueRequestKind.PrimaryKey && ReferenceEquals(requests, propertyNode.TypeNode.ValueRequests))
                         {
-                            if(range.Count > 0)
-                            {
-                                range.Last().PopsCount = -1;
-                            }
                             break;
                         }
                         int pathLength1 = path.Length;
@@ -264,9 +354,9 @@ public class TypesForest
                         request = new ValueRequest
                         {
                             Path = path.ToString(),
-                            PopsCount = req.PopsCount
+                            Level = level + req.Level
                         };
-                        if(req.Kind is ValueRequestKind.PrimaryKey)
+                        if (req.Kind is ValueRequestKind.PrimaryKey)
                         {
                             request.KeyFieldType = req.KeyFieldType;
                         }
@@ -283,15 +373,14 @@ public class TypesForest
             }
             path.Length = pathLength;
         }
-        requests.Last().PopsCount--;
+        --level;
     }
 
-    private void CollectChildNodes(TypeNode typeNode, List<PropertyInfo> properties, 
+    private void CollectChildNodes(TypeNode typeNode, List<PropertyInfo> properties,
         List<PropertyInfo> actualProperties, Stack<Type> stack)
     {
         foreach (PropertyInfo propertyInfo in actualProperties)
         {
-            bool isKey = false;
             PropertyInfo? actualProperty = null;
             if (propertyInfo.Name.Contains(Dot))
             {
@@ -323,7 +412,7 @@ public class TypesForest
                         ? propertyInfo.Name.Substring(propertyInfo.Name.LastIndexOf(Dot) + 1)
                         : propertyInfo.Name,
                     PropertyInfo = actualProperty,
-                    TypeNode = _manager.IsRegistered(propertyInfo.PropertyType)
+                    TypeNode = _manager.ContainsServiceType(propertyInfo.PropertyType)
                         ? GetTypeNode(propertyInfo.PropertyType, stack)
                         : new TypeNode { Type = propertyInfo.PropertyType, ActualType = propertyInfo.PropertyType },
                     IsNullable = (propertyInfo.PropertyType.IsValueType && Nullable.GetUnderlyingType(propertyInfo.PropertyType) is Type)

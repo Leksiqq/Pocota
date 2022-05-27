@@ -52,11 +52,11 @@ namespace Net.Leksi.Pocota.Core
         /// <summary>
         /// <para xml:lang="ru">
         /// Определяет, является ли узел листом
-        /// Это верно для любых типов, не зарегистрированных в <see cref="DtoServiceProvider"/>
+        /// Это верно для любых типов, не зарегистрированных в контейнере Pocota
         /// </para>
         /// <para xml:lang="en">
         /// Determines if the node is a leaf
-        /// This is true for any types not registered with <see cref="DtoServiceProvider"/>
+        /// This is true for any types not registered in the Pocota container
         /// </para>
         /// </summary>
         public bool IsLeaf => TypeNode.ChildNodes is null;

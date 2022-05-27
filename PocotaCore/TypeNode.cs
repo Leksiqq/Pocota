@@ -1,4 +1,6 @@
-﻿namespace Net.Leksi.Pocota.Core;
+﻿using System.Text;
+
+namespace Net.Leksi.Pocota.Core;
 
 /// <summary>
 /// <para xml:lang="ru">

@@ -32,25 +32,25 @@ public class ManagerTests
             services.AddTransient<Poco2_1, Poco2>();
             services.AddTransient<Poco2_2, Poco2>();
             services.AddTransient<Poco2_3, Poco2>();
-            services.AddKeyMapping<Poco2, Poco1>();
-            services.AddKeyMapping<Poco1>(new Dictionary<string, Type> { { "ID", typeof(string) } });
+            services.AddPrimaryKey<Poco2, Poco1>();
+            services.AddPrimaryKey<Poco1>(new Dictionary<string, Type> { { "ID", typeof(string) } });
         })).Build();
-        Manager pm = host.Services.GetRequiredService<Manager>();
+        Container pm = host.Services.GetRequiredService<Container>();
         var ex = Assert.Catch<InvalidOperationException>(() =>
         {
             pm.AddTransient<Poco3_1, Poco3>();
         });
-        Assert.That(ex.Message, Is.EqualTo($"{typeof(Manager)} is already configured"));
+        Assert.That(ex.Message, Is.EqualTo($"{typeof(Container)} is already configured"));
         ex = Assert.Catch<InvalidOperationException>(() =>
         {
-            pm.AddKeyMapping<Poco3, Poco2>();
+            pm.AddPrimaryKey<Poco3, Poco2>();
         });
-        Assert.That(ex.Message, Is.EqualTo($"{typeof(Manager)} is already configured"));
+        Assert.That(ex.Message, Is.EqualTo($"{typeof(Container)} is already configured"));
         ex = Assert.Catch<InvalidOperationException>(() =>
         {
-            pm.AddKeyMapping<Poco1>(new Dictionary<string, Type> { { "ID", typeof(string) } });
+            pm.AddPrimaryKey<Poco1>(new Dictionary<string, Type> { { "ID", typeof(string) } });
         });
-        Assert.That(ex.Message, Is.EqualTo($"{typeof(Manager)} is already configured"));
+        Assert.That(ex.Message, Is.EqualTo($"{typeof(Container)} is already configured"));
     }
 
     [Test]
@@ -82,47 +82,47 @@ public class ManagerTests
         {
             var ex = Assert.Catch<ArgumentException>(() =>
             {
-                services.AddKeyMapping(typeof(int), typeof(Poco1));
+                services.AddPrimaryKey(typeof(int), typeof(Poco1));
             });
             Assert.That(ex.Message, Is.EqualTo($"targetType must be a class"));
             ex = Assert.Catch<ArgumentException>(() =>
             {
-                services.AddKeyMapping(typeof(int), new Dictionary<string, Type> { { "ID", typeof(string) } });
+                services.AddPrimaryKey(typeof(int), new Dictionary<string, Type> { { "ID", typeof(string) } });
             });
             Assert.That(ex.Message, Is.EqualTo($"targetType must be a class"));
             ex = Assert.Catch<ArgumentException>(() =>
             {
-                services.AddKeyMapping<Poco1>(typeof(int));
+                services.AddPrimaryKey<Poco1>(typeof(int));
             });
             Assert.That(ex.Message, Is.EqualTo($"example must be a class"));
             ex = Assert.Catch<ArgumentException>(() =>
             {
-                services.AddKeyMapping(typeof(Poco1), typeof(int));
+                services.AddPrimaryKey(typeof(Poco1), typeof(int));
             });
             Assert.That(ex.Message, Is.EqualTo($"example must be a class"));
             ex = Assert.Catch<ArgumentException>(() =>
             {
-                services.AddKeyMapping<Poco1_1>(typeof(Poco1));
+                services.AddPrimaryKey<Poco1_1>(typeof(Poco1));
             });
             Assert.That(ex.Message, Is.EqualTo($"targetType must be a class"));
             ex = Assert.Catch<ArgumentException>(() =>
             {
-                services.AddKeyMapping(typeof(Poco1_1), typeof(Poco1));
+                services.AddPrimaryKey(typeof(Poco1_1), typeof(Poco1));
             });
             Assert.That(ex.Message, Is.EqualTo($"targetType must be a class"));
             ex = Assert.Catch<ArgumentException>(() =>
             {
-                services.AddKeyMapping(typeof(Poco2), typeof(Poco1_1));
+                services.AddPrimaryKey(typeof(Poco2), typeof(Poco1_1));
             });
             Assert.That(ex.Message, Is.EqualTo($"example must be a class"));
             ex = Assert.Catch<ArgumentException>(() =>
             {
-                services.AddKeyMapping<Poco2, Poco1_1>();
+                services.AddPrimaryKey<Poco2, Poco1_1>();
             });
             Assert.That(ex.Message, Is.EqualTo($"example must be a class"));
             ex = Assert.Catch<ArgumentException>(() =>
             {
-                services.AddKeyMapping<Poco2>(typeof(Poco1_1));
+                services.AddPrimaryKey<Poco2>(typeof(Poco1_1));
             });
             Assert.That(ex.Message, Is.EqualTo($"example must be a class"));
         })).Build();
@@ -142,25 +142,25 @@ public class ManagerTests
             services.AddTransient<Poco3_1, Poco3>();
             services.AddTransient<Poco3_2, Poco3>();
             services.AddTransient<Poco3_3, Poco3>();
-            services.AddKeyMapping<Poco1>(new Dictionary<string, Type> { { "ID", typeof(string) } });
+            services.AddPrimaryKey<Poco1>(new Dictionary<string, Type> { { "ID", typeof(string) } });
             var ex = Assert.Catch<InvalidOperationException>(() =>
             {
-                services.AddKeyMapping<Poco1>(new Dictionary<string, Type> { { "ID", typeof(string) } });
+                services.AddPrimaryKey<Poco1>(new Dictionary<string, Type> { { "ID", typeof(string) } });
             });
             Assert.That(ex.Message, Is.EqualTo($"Key for {typeof(Poco1)} is already mapped"));
             ex = Assert.Catch<InvalidOperationException>(() =>
             {
-                services.AddKeyMapping<Poco1, Poco2>();
+                services.AddPrimaryKey<Poco1, Poco2>();
             });
             Assert.That(ex.Message, Is.EqualTo($"Key for {typeof(Poco1)} is already mapped"));
             ex = Assert.Catch<InvalidOperationException>(() =>
             {
-                services.AddKeyMapping<Poco1>(typeof(Poco2));
+                services.AddPrimaryKey<Poco1>(typeof(Poco2));
             });
             Assert.That(ex.Message, Is.EqualTo($"Key for {typeof(Poco1)} is already mapped"));
             ex = Assert.Catch<InvalidOperationException>(() =>
             {
-                services.AddKeyMapping(typeof(Poco1), typeof(Poco2));
+                services.AddPrimaryKey(typeof(Poco1), typeof(Poco2));
             });
             Assert.That(ex.Message, Is.EqualTo($"Key for {typeof(Poco1)} is already mapped"));
         })).Build();
@@ -182,8 +182,8 @@ public class ManagerTests
                 services.AddTransient<Poco3_1, Poco3>();
                 services.AddTransient<Poco3_2, Poco3>();
                 services.AddTransient<Poco3_3, Poco3>();
-                services.AddKeyMapping<Poco2, Poco3>();
-                services.AddKeyMapping<Poco3, Poco2>();
+                services.AddPrimaryKey<Poco2, Poco3>();
+                services.AddPrimaryKey<Poco3, Poco2>();
             })).Build();
         });
         Assert.That(ex.Message, Is.EqualTo($"Example loop detected: {typeof(Poco2)}"));
@@ -202,8 +202,8 @@ public class ManagerTests
                 services.AddTransient<Poco2_1, Poco2>();
                 services.AddTransient<Poco2_2, Poco2>();
                 services.AddTransient<Poco2_3, Poco2>();
-                services.AddKeyMapping<Poco1, Poco3>();
-                services.AddKeyMapping<Poco2, Poco3>();
+                services.AddPrimaryKey<Poco1, Poco3>();
+                services.AddPrimaryKey<Poco2, Poco3>();
             })).Build();
         });
         Assert.That(ex.Message, Is.EqualTo($"Keys not mapped for: {typeof(Poco1)}, {typeof(Poco2)}, {typeof(Poco3)}"));
@@ -222,7 +222,7 @@ public class ManagerTests
                 services.AddTransient<Poco2_1, Poco2>();
                 services.AddTransient<Poco2_2, Poco2>();
                 services.AddTransient<Poco2_3, Poco2>();
-                services.AddKeyMapping<Poco3>(new Dictionary<string, Type> { { "ID", typeof(string) } });
+                services.AddPrimaryKey<Poco3>(new Dictionary<string, Type> { { "ID", typeof(string) } });
             })).Build();
         });
         Assert.That(ex.Message, Is.EqualTo($"Keys are mapped for not registered types: {typeof(Poco3)}"));
@@ -234,11 +234,11 @@ public class ManagerTests
         IHost host = Host.CreateDefaultBuilder().ConfigureServices(services => services.AddPocotaCore(services =>
         {
             services.AddTransient<Poco1_1, Poco1>();
-            services.AddKeyMapping<Poco1>(new Dictionary<string, Type>() { { "ID", typeof(int) } });
+            services.AddPrimaryKey<Poco1>(new Dictionary<string, Type>() { { "ID", typeof(int) } });
         })).Build();
 
-        Manager pm = host.Services.GetRequiredService<Manager>();
-        Poco1_1 poco1_1 = pm.GetRequiredService<Poco1_1>();
+        Container pm = host.Services.GetRequiredService<Container>();
+        Poco1_1 poco1_1 = host.Services.GetRequiredService<Poco1_1>();
         Task[] tasks = new Task[2];
         ManualResetEventSlim mrs1 = new ManualResetEventSlim();
         mrs1.Reset();
@@ -280,14 +280,14 @@ public class ManagerTests
             services.AddTransient<Poco3_1, Poco3>();
             services.AddTransient<Poco3_2, Poco3>();
             services.AddTransient<Poco3_3, Poco3>();
-            services.AddKeyMapping<Poco1>(new Dictionary<string, Type>() { { "ID", typeof(int) } });
-            services.AddKeyMapping<Poco2>(new Dictionary<string, Type>() { { "ID1", typeof(int) }, { "ID2", typeof(string) } });
-            services.AddKeyMapping<Poco3>(new Dictionary<string, Type>() { { "ID1", typeof(int) }, { "ID2", typeof(string) }, { "ID3", typeof(string) } });
+            services.AddPrimaryKey<Poco1>(new Dictionary<string, Type>() { { "ID", typeof(int) } });
+            services.AddPrimaryKey<Poco2>(new Dictionary<string, Type>() { { "ID1", typeof(int) }, { "ID2", typeof(string) } });
+            services.AddPrimaryKey<Poco3>(new Dictionary<string, Type>() { { "ID1", typeof(int) }, { "ID2", typeof(string) }, { "ID3", typeof(string) } });
         })).Build();
 
-        Manager pm = host.Services.GetRequiredService<Manager>();
+        Container pm = host.Services.GetRequiredService<Container>();
 
-        Poco1_1 poco1_1 = pm.GetRequiredService<Poco1_1>();
+        Poco1_1 poco1_1 = host.Services.GetRequiredService<Poco1_1>();
         KeyRing? keyRing = pm.GetKeyRing(poco1_1);
         Assert.That(keyRing, Is.Not.Null);
         Assert.That(keyRing.Count, Is.EqualTo(1));
@@ -300,7 +300,7 @@ public class ManagerTests
         Assert.That(keyRing, Is.Not.Null);
         Assert.That(keyRing.Count, Is.EqualTo(1));
         Assert.That(keyRing["ID"], Is.EqualTo(123));
-        Poco2_2 poco2_2 = pm.GetRequiredService<Poco2_2>();
+        Poco2_2 poco2_2 = host.Services.GetRequiredService<Poco2_2>();
         keyRing = pm.GetKeyRing(poco2_2);
         Assert.That(keyRing, Is.Not.Null);
         Assert.That(keyRing.Count, Is.EqualTo(2));
@@ -315,7 +315,7 @@ public class ManagerTests
         Assert.That(keyRing.Count, Is.EqualTo(2));
         Assert.That(keyRing["ID1"], Is.EqualTo(124));
         Assert.That(keyRing["ID2"], Is.EqualTo("test"));
-        Poco3_3 poco3_3 = pm.GetRequiredService<Poco3_3>();
+        Poco3_3 poco3_3 = host.Services.GetRequiredService<Poco3_3>();
         keyRing = pm.GetKeyRing(poco3_3);
         Assert.That(keyRing, Is.Not.Null);
         Assert.That(keyRing.Count, Is.EqualTo(3));

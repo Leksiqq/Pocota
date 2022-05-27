@@ -25,21 +25,21 @@ public class TypesForestTests
                     services.AddTransient<IShipCallAdditionalInfo, ShipCall>();
                     services.AddTransient<IArrivalShipCall, ShipCall>();
                     services.AddTransient<IDepartureShipCall, ShipCall>();
-                    services.AddKeyMapping<ShipCall>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_ROUTE", typeof(int) } });
+                    services.AddPrimaryKey<ShipCall>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_ROUTE", typeof(int) } });
 
                     services.AddTransient<ILocation, Location>();
-                    services.AddKeyMapping<Location>(new Dictionary<string, Type> { { "ID_LOCATION", typeof(string) } });
+                    services.AddPrimaryKey<Location>(new Dictionary<string, Type> { { "ID_LOCATION", typeof(string) } });
 
                     services.AddTransient<IRoute, Route>();
                     services.AddTransient<IRouteShort, Route>();
-                    services.AddKeyMapping<Route>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_RHEAD", typeof(int) } });
+                    services.AddPrimaryKey<Route>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_RHEAD", typeof(int) } });
 
                     services.AddTransient<ILine, Line>();
-                    services.AddKeyMapping<Line>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) } });
+                    services.AddPrimaryKey<Line>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) } });
 
                     services.AddTransient<IVessel, Vessel>();
                     services.AddTransient<IVesselShort, Vessel>();
-                    services.AddKeyMapping<Vessel>(new Dictionary<string, Type> { { "ID_VESSEL", typeof(string) } });
+                    services.AddPrimaryKey<Vessel>(new Dictionary<string, Type> { { "ID_VESSEL", typeof(string) } });
 
                     services.AddTransient<ITravelForListing, Travel>();
                 });
@@ -66,17 +66,10 @@ public class TypesForestTests
 
         TypeNode typeTN = tp.GetTypeNode(type);
 
-        int level = 0;
         typeTN.ValueRequests.ForEach(v => 
         {
-            if(v.Kind is ValueRequestKind.Node)
-            {
-                level++;
-            }
-            level += v.PopsCount;
             Trace.WriteLine(v);
+            Assert.That(v.Path.Split(new[] {'/' }, StringSplitOptions.RemoveEmptyEntries).Length, Is.EqualTo(v.Level));
         });
-
-        Assert.That(level, Is.EqualTo(0));
     }
 }

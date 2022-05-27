@@ -4,18 +4,14 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>Net.Leksi.Pocota.Core</AssemblyName>
-    <RootNamespace>Net.Leksi.Pocota.Core</RootNamespace>
-    <NoWin32Manifest>true</NoWin32Manifest>
+    <AssemblyName>Net.Leksi.Pocota.PocoBuilder</AssemblyName>
+    <RootNamespace>Net.Leksi.Pocota</RootNamespace>
     <ApplicationIcon>VitruvianPocota32.ico</ApplicationIcon>
+    <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Include="VitruvianPocota32.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
   </ItemGroup>
 
 </Project>
