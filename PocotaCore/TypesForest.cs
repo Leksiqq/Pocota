@@ -95,10 +95,10 @@ public class TypesForest
 
     /// <summary>
     /// <para xml:lang="ru">
-    /// Копирует полное дерево объекта в целевой объект по шаблону применяемого интерфейса
+    /// Обновляет дерево целевого объекта деревом исходного объекта по шаблону применяемого интерфейса
     /// </para>
     /// <para xml:lang="en">
-    /// Copies the complete object tree to the target object according to the template of the applied interface
+    /// Updates the target object's tree with the source object's tree based on the template of the applied interface
     /// </para>
     /// </summary>
     /// <param name="sourceType">
@@ -125,7 +125,7 @@ public class TypesForest
     /// Target object
     /// </para>
     /// </param>
-    public void Copy(Type sourceType, object source, object target)
+    public void Inject(Type sourceType, object source, object target)
     {
         TypeNode typeNode = GetTypeNode(sourceType);
         if (typeNode.ChildNodes is { })
@@ -147,7 +147,7 @@ public class TypesForest
                             targetValue = _serviceProvider.GetRequiredService(propertyNode.TypeNode.Type);
                             propertyNode.PropertyInfo?.SetValue(target, targetValue);
                         }
-                        Copy(propertyNode.TypeNode.Type, sourceValue, targetValue);
+                        Inject(propertyNode.TypeNode.Type, sourceValue, targetValue);
                     }
                     else
                     {
@@ -159,82 +159,161 @@ public class TypesForest
         }
     }
 
-    public string ToDeepString<T>(object source) where T : class => ToDeepString(source, typeof(T));
-    
-    public string ToDeepString(object source) => ToDeepString(source, source?.GetType() ?? typeof(object));
-
-    public string ToDeepString(object source, Type type)
+    public bool WalkTree(object source, Type type, ValueNodeEventHandler onNode, bool withUpdate = false)
     {
         if (source is null)
         {
             throw new ArgumentNullException(nameof(source));
         }
         TypeNode typeNode = GetTypeNode(type);
-        StringBuilder result = new();
         int waitForLevel = -1;
         KeyRing? keyRing = null;
-        Stack<object> targets = new Stack<object>();
+        Dictionary<string, Type>? keyDefinition = null;
+        int keyPos = -1;
+        Stack<object?> targets = new();
+        Stack<Type> types = new();
         targets.Push(source);
-        foreach (ValueRequest request in typeNode.ValueRequests!)
+        types.Push(type);
+        foreach (ValueNode request in typeNode.ValueRequests!)
         {
-            if(request.Level == 0)
+            if (waitForLevel == -1 || request.Level == waitForLevel)
             {
-                result.Append(request.Path).Append("=").Append("{").Append(typeNode.Type.ToString()).AppendLine("}");
-            }
-            else
-            {
-                if (waitForLevel == -1 || request.Level == waitForLevel)
+                waitForLevel = -1;
+                ValueNodeEventArgs args = null!;
+                if (request.Level == 0)
+                {
+                    args = new()
+                    {
+                        Path = request.Path,
+                        Value = targets.Peek(),
+                        NominalType = type,
+                        ActualType = source.GetType(),
+                        Kind = request.Kind,
+                    };
+                    onNode?.Invoke(args);
+                }
+                else
                 {
                     while (request.Level < targets.Count)
                     {
                         targets.Pop();
+                        types.Pop();
                     }
-                    waitForLevel = -1;
-                    result.Append(request.Path).Append("=");
-                    if (request.Kind is ValueRequestKind.PrimaryKey)
+                    if (request.Kind is ValueNodeKind.PrimaryKey)
                     {
-                        if (keyRing == null)
+                        if (keyPos == -1)
                         {
-                            keyRing = _manager.GetKeyRing(source);
+                            keyRing = targets.Peek() is { } obj ? _manager.GetKeyRing(obj) : null;
+                            keyDefinition = _manager.GetPrimaryKeyDefinition(types.Peek());
+                            keyPos = 0;
                         }
-                        if (keyRing!.IsAssigned)
+                        keyPos++;
+                        string keyFieldName = request.Path.Substring(request.Path.LastIndexOf(Slash) + 1);
+                        args = new()
                         {
-                            result.Append(keyRing[request.Path.Substring(request.Path.LastIndexOf(Slash) + 1)]);
-                        }
-                        else
+                            Path = request.Path,
+                            Value = keyRing?[keyFieldName] ?? null,
+                            NominalType = keyDefinition![keyFieldName],
+                            ActualType = keyDefinition![keyFieldName],
+                            Kind = request.Kind,
+                            IsLastKeyField = keyPos == keyDefinition.Count,
+                        };
+                        onNode?.Invoke(args);
+                        if (withUpdate)
                         {
-                            result.Append("<undefined>");
+                            if(args.Value is null)
+                            {
+                                throw new InvalidOperationException($"At not nullable request \"{ args.Path }\" null can not be assigned.");
+                            }
+                            keyRing![keyFieldName] = args.Value;
                         }
                     }
                     else
                     {
-                        if (keyRing is { })
+                        if (keyPos >= 0)
                         {
                             keyRing = null;
+                            keyDefinition = null;
+                            keyPos = -1;
                         }
-                        object? value = request.PropertyNode!.PropertyInfo!.GetValue(targets.Peek());
-                        if (request.Kind is ValueRequestKind.Node)
+                        object? value = targets.Peek() is { } obj ? request.PropertyNode!.PropertyInfo!.GetValue(obj) : null;
+                        args = new()
                         {
-                            if (value is { })
+                            Path = request.Path,
+                            Value = value,
+                            NominalType = request.PropertyNode!.TypeNode.Type,
+                            ActualType = request.PropertyNode!.TypeNode.ActualType,
+                            IsNullable = request.PropertyNode!.IsNullable,
+                            Kind = request.Kind,
+                        };
+                        onNode?.Invoke(args);
+                        if(withUpdate)
+                        {
+                            if (args.Value is null && !request.PropertyNode!.IsNullable)
                             {
-                                targets.Push(value!);
-                                result.Append("{").Append(request.PropertyNode.PropertyInfo.PropertyType.ToString()).Append("}");
+                                throw new InvalidOperationException($"At not nullable request \"{args.Path}\" null can not be assigned.");
+                            }
+                            if(args.Value != value)
+                            {
+                                value = args.Value;
+                                request.PropertyNode!.PropertyInfo!.SetValue(targets.Peek(), value);
+                            }
+                        }
+                        if (request.Kind is ValueNodeKind.Node)
+                        {
+                            if (args.IsCommited)
+                            {
+                                waitForLevel = request.Level;
                             }
                             else
                             {
-                                result.Append("null");
-                                waitForLevel = request.Level;
+                                targets.Push(value);
+                                types.Push(request.PropertyNode.TypeNode.Type);
                             }
                         }
-                        else
-                        {
-                            result.Append(value is null ? "null" : value);
-                        }
                     }
-                    result.AppendLine();
+                }
+                if (args.IsInterrupted)
+                {
+                    return true;
                 }
             }
         }
+        return false;
+    }
+
+    public string TreeToString<T>(object source) where T : class => TreeToString(source, typeof(T));
+
+    public string TreeToString(object source) => TreeToString(source, source?.GetType() ?? typeof(object));
+
+    public string TreeToString(object source, Type type)
+    {
+        StringBuilder result = new();
+        WalkTree(source, type, args => 
+        {
+            result.Append(args.Path).Append("=");
+            if (args.Kind is ValueNodeKind.PrimaryKey)
+            {
+                result.Append(args.Value is null ? "<undefined>" : args.Value);
+            }
+            else if(args.Kind is ValueNodeKind.Node)
+            {
+                if(args.Value is { })
+                {
+                    result.Append("{").Append(args.NominalType.ToString()).Append("}");
+                }
+                else
+                {
+                    result.Append("null");
+                    args.IsCommited = true;
+                }
+            }
+            else
+            {
+                result.Append(args.Value is null ? "null" : args.Value);
+            }
+            result.AppendLine();
+        });
         return result.ToString();
     }
 
@@ -254,7 +333,7 @@ public class TypesForest
     private bool PlantTypeTree(Type type, Stack<Type> stack)
     {
         stack.Push(type);
-        if (!_manager.ContainsServiceType(type) && !_manager.ContainsImplementationType(type))
+        if (!_manager.ContainsServiceType(type))
         {
             throw new ArgumentException($"{type} is not registered.");
         }
@@ -269,7 +348,7 @@ public class TypesForest
                     _typeTrees[type] = new TypeNode { Type = type, ChildNodes = new List<PropertyNode>() };
                     ConfigureTypeNode(_typeTrees[type], stack);
 
-                    _typeTrees[type].ValueRequests = new List<ValueRequest>();
+                    _typeTrees[type].ValueRequests = new List<ValueNode>();
                     CollectValueRequests(_typeTrees[type], _typeTrees[type].ValueRequests!, stack);
                 }
             }
@@ -291,11 +370,11 @@ public class TypesForest
         CollectChildNodes(typeNode, properties, actualProperties, stack);
     }
 
-    private void CollectValueRequests(TypeNode typeNode, List<ValueRequest> requests, Stack<Type> stack)
+    private void CollectValueRequests(TypeNode typeNode, List<ValueNode> requests, Stack<Type> stack)
     {
         int level = 0;
         StringBuilder path = new();
-        requests.Add(new ValueRequest
+        requests.Add(new ValueNode
         {
             Path = Slash,
             PropertyNode = new PropertyNode { TypeNode = typeNode },
@@ -308,7 +387,7 @@ public class TypesForest
                 ++level;
                 int pathLength = path.Length;
                 path.Append(Slash).Append(entry.Key);
-                ValueRequest request = new ValueRequest
+                ValueNode request = new ValueNode
                 {
                     Path = path.ToString(),
                     KeyFieldType = entry.Value,
@@ -324,7 +403,7 @@ public class TypesForest
         {
             int pathLength = path.Length;
             path.Append(Slash).Append(propertyNode.PropertyInfo!.Name);
-            ValueRequest request = new ValueRequest
+            ValueNode request = new ValueNode
             {
                 Path = path.ToString(),
                 PropertyNode = propertyNode,
@@ -340,23 +419,23 @@ public class TypesForest
                     string stackView = string.Join(Slash, stackReverse);
                     throw new Exception($"Loop detected: {stackView}");
                 }
-                List<ValueRequest> range = new();
-                foreach (ValueRequest req in propertyNode.TypeNode.ValueRequests!)
+                List<ValueNode> range = new();
+                foreach (ValueNode req in propertyNode.TypeNode.ValueRequests!)
                 {
                     if (req.Path != Slash)
                     {
-                        if (req.Kind is not ValueRequestKind.PrimaryKey && ReferenceEquals(requests, propertyNode.TypeNode.ValueRequests))
+                        if (req.Kind is not ValueNodeKind.PrimaryKey && ReferenceEquals(requests, propertyNode.TypeNode.ValueRequests))
                         {
                             break;
                         }
                         int pathLength1 = path.Length;
                         path.Append(req.Path);
-                        request = new ValueRequest
+                        request = new ValueNode
                         {
                             Path = path.ToString(),
                             Level = level + req.Level
                         };
-                        if (req.Kind is ValueRequestKind.PrimaryKey)
+                        if (req.Kind is ValueNodeKind.PrimaryKey)
                         {
                             request.KeyFieldType = req.KeyFieldType;
                         }

@@ -8,7 +8,7 @@
 /// Defines the kind of value request.
 /// </para>
 /// </summary>
-public enum ValueRequestKind
+public enum ValueNodeKind
 {
     /// <summary>
     /// <para xml:lang="ru">

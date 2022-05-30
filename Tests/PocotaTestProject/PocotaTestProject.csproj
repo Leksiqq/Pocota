@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\PocoBuilder\PocoBuilderDebug.csproj" />
     <ProjectReference Include="..\..\PocotaCore\PocotaCoreDebug.csproj" />
   </ItemGroup>
 

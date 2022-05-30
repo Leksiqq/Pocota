@@ -13,40 +13,9 @@ public class ObjectCacheTest
     private int _genId = 0;
 
     [OneTimeSetUp]
-    public void OneTimeSetup()
+    public void OneTimeSetUp()
     {
-        Trace.Listeners.Add(new ConsoleTraceListener());
-        Trace.AutoFlush = true;
-        IHostBuilder hostBuilder = Host.CreateDefaultBuilder()
-            .ConfigureServices(serviceCollection =>
-            {
-                serviceCollection.AddPocotaCore(services =>
-                {
-                    services.AddTransient<IShipCall, ShipCall>();
-                    services.AddTransient<IShipCallForListing, ShipCall>();
-                    services.AddTransient<IShipCallAdditionalInfo, ShipCall>();
-                    services.AddTransient<IArrivalShipCall, ShipCall>();
-                    services.AddTransient<IDepartureShipCall, ShipCall>();
-                    services.AddPrimaryKey<ShipCall>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_ROUTE", typeof(int) } });
-
-                    services.AddTransient<ILocation, Location>();
-                    services.AddPrimaryKey<Location>(new Dictionary<string, Type> { { "ID_LOCATION", typeof(string) } });
-
-                    services.AddTransient<IRoute, Route>();
-                    services.AddTransient<IRouteShort, Route>();
-                    services.AddPrimaryKey<Route>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_RHEAD", typeof(int) } });
-
-                    services.AddTransient<ILine, Line>();
-                    services.AddPrimaryKey<Line>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) } });
-
-                    services.AddTransient<IVessel, Vessel>();
-                    services.AddTransient<IVesselShort, Vessel>();
-                    services.AddPrimaryKey<Vessel>(new Dictionary<string, Type> { { "ID_VESSEL", typeof(string) } });
-
-                    services.AddTransient<ITravelForListing, Travel>();
-                });
-            });
-        _host = hostBuilder.Build();
+        _host = Config.Configure();
     }
 
     [Test]
@@ -55,7 +24,7 @@ public class ObjectCacheTest
         IShipCall shipCall = BuildObject<IShipCall>();
         TypesForest tf = _host.Services.GetRequiredService<TypesForest>();
         Container man = _host.Services.GetRequiredService<Container>();
-        Trace.WriteLine(tf.ToDeepString(shipCall));
+        Trace.WriteLine(tf.TreeToString(shipCall));
         KeyRing key1 = man.GetKeyRing(shipCall)!;
         Assert.That(key1, Is.Not.Null);
         Assert.That(key1.IsAssigned);
@@ -77,10 +46,10 @@ public class ObjectCacheTest
             Assert.That(oc.Add(typeof(IShipCallAdditionalInfo), shipCallAI), Is.False);
             object? obj;
             Assert.That(oc.TryGet(typeof(IShipCallForListing), man.GetKeyRing(shipCallAI)!, out obj), Is.False);
-            Assert.That(oc.TryGet(typeof(IShipCall), man.GetKeyRing(shipCallAI)!, out obj));
+            Assert.That(oc.TryGet(typeof(IShipCall), shipCallAI, out obj));
             Assert.That(obj, Is.EqualTo(shipCall));
-            Trace.WriteLine(tf.ToDeepString(obj));
-            Trace.WriteLine(tf.ToDeepString<IShipCallForListing>(obj));
+            Trace.WriteLine(tf.TreeToString(obj));
+            Trace.WriteLine(tf.TreeToString<IShipCallForListing>(obj));
         }
         else
         {

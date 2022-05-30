@@ -47,6 +47,6 @@ public class TypeNode
     /// Number of key properties defined in the class
     /// </para>
     /// </summary>
-    public List<ValueRequest>? ValueRequests { get; internal set; } = null;
+    public List<ValueNode>? ValueRequests { get; internal set; } = null;
 
 }

@@ -14,4 +14,8 @@
     <Content Include="VitruvianPocota32.ico" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PocotaCore\PocotaCoreDebug.csproj" />
+  </ItemGroup>
+
 </Project>

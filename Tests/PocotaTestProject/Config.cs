@@ -1,21 +1,20 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Net.Leksi.Pocota;
 using Net.Leksi.Pocota.Core;
 using PocotaTestProject.Model;
 using System.Diagnostics;
 
 namespace PocotaTestProject;
 
-public class TypesForestTests
+public static class Config
 {
-    private IHost host;
-
-    [OneTimeSetUp]
-    public void OneTimeSetup()
+    public static IHost Configure()
     {
+        Trace.Listeners.Clear();
         Trace.Listeners.Add(new ConsoleTraceListener());
         Trace.AutoFlush = true;
-        IHostBuilder hostBuilder = Host.CreateDefaultBuilder()
+        IHostBuilder hostBuilder = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
             .ConfigureServices(serviceCollection =>
             {
                 serviceCollection.AddPocotaCore(services =>
@@ -43,33 +42,8 @@ public class TypesForestTests
 
                     services.AddTransient<ITravelForListing, Travel>();
                 });
+                serviceCollection.AddPocoBuilder();
             });
-        host = hostBuilder.Build();
-    }
-
-    [Test]
-    [TestCase(typeof(IShipCall))]
-    [TestCase(typeof(IShipCallForListing))]
-    [TestCase(typeof(IShipCallAdditionalInfo))]
-    [TestCase(typeof(IArrivalShipCall))]
-    [TestCase(typeof(IDepartureShipCall))]
-    [TestCase(typeof(ILocation))]
-    [TestCase(typeof(IRoute))]
-    [TestCase(typeof(IRouteShort))]
-    [TestCase(typeof(ILine))]
-    [TestCase(typeof(IVessel))]
-    [TestCase(typeof(IVesselShort))]
-    [TestCase(typeof(ITravelForListing))]
-    public void VisualTestValueRequests(Type type)
-    {
-        TypesForest tp = host.Services.GetRequiredService<TypesForest>();
-
-        TypeNode typeTN = tp.GetTypeNode(type);
-
-        typeTN.ValueRequests.ForEach(v => 
-        {
-            Trace.WriteLine(v);
-            Assert.That(v.Path.Split(new[] {'/' }, StringSplitOptions.RemoveEmptyEntries).Length, Is.EqualTo(v.Level));
-        });
+        return hostBuilder.Build();
     }
 }

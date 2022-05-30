@@ -84,14 +84,17 @@ public class ObjectCache
     /// Successful or not
     /// </para>
     /// </returns>
-    public bool TryGet(Type type, KeyRing keyRing, out object? result)
+    public bool TryGet(Type type, object source, out object? result)
     {
-        ThrowIfIsNull(keyRing);
         ThrowIfIsNull(type);
         ThrowIfNotRegistered(type);
         if (_objectsCache.ContainsKey(type))
         {
-            return _objectsCache[type].TryGetValue(keyRing.PrimaryKey, out result);
+            KeyRing? keyRing = _manager.GetKeyRing(source);
+            if(keyRing is { })
+            {
+                return _objectsCache[type].TryGetValue(keyRing.PrimaryKey, out result);
+            }
         }
         result = default;
         return false;
@@ -160,7 +163,7 @@ public class ObjectCache
         {
             if (_objectsCache[value.GetType()].ContainsKey(keyRing.PrimaryKey))
             {
-                _typesForest.Copy(type, value, _objectsCache[value.GetType()][keyRing.PrimaryKey]);
+                _typesForest.Inject(type, value, _objectsCache[value.GetType()][keyRing.PrimaryKey]);
                 _objectsCache[type][keyRing.PrimaryKey] = _objectsCache[value.GetType()][keyRing.PrimaryKey];
                 result = false;
             }

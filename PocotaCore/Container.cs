@@ -70,27 +70,6 @@ public class Container : IServiceCollection
     }
     /// <summary>
     /// <para xml:lang="ru">
-    /// Проверяет является ли тип реализацией зарегистрированного интерфейса
-    /// </para>
-    /// <para xml:lang="en">
-    /// Checks if the type is an implementation of a registered interface
-    /// </para>
-    /// </summary>
-    /// <param name="serviceType">
-    /// <para xml:lang="ru">
-    /// Проверяемый тип
-    /// </para>
-    /// <para xml:lang="en">
-    /// Tested type
-    /// </para>
-    /// </param>
-    /// <returns></returns>
-    public bool ContainsImplementationType(Type type)
-    {
-        return _registered.ContainsValue(type);
-    }
-    /// <summary>
-    /// <para xml:lang="ru">
     /// Возвращает настоящий тип зарегистрированного интерфейса
     /// </para>
     /// <para xml:lang="en">
@@ -176,7 +155,7 @@ public class Container : IServiceCollection
             {
                 if (_locks.TryGetValue(source, out WeakReference<KeyRing>? wr))
                 {
-                    if (wr.TryGetTarget(out KeyRing? _))
+                    if (wr.TryGetTarget(out KeyRing? kr))
                     {
                         throw new KeyRingConcurrentException();
                     }
@@ -209,12 +188,23 @@ public class Container : IServiceCollection
     {
         ThrowIfConfigured();
         ThrowIfNotTransient(item);
-        _registered[item.ServiceType] = item.ImplementationType is { } ? item.ImplementationType : 
-            (
-                item.ImplementationInstance is { } ? item.ImplementationInstance.GetType() : 
-                    (item.ImplementationFactory is { } ? item.ImplementationFactory.Method.ReturnType : item.ServiceType)
-            );
+        ServiceDescriptor implementationDescriptor = null!;
+        if (item.ImplementationType is { })
+        {
+            _registered[item.ServiceType] = item.ImplementationType;
+            implementationDescriptor = new ServiceDescriptor(_registered[item.ServiceType], item.ImplementationType, item.Lifetime);
+        }
+        else if(item.ImplementationFactory is { })
+        {
+            _registered[item.ServiceType] = item.ImplementationFactory.Method.ReturnType;
+            implementationDescriptor = new ServiceDescriptor(_registered[item.ServiceType], item.ImplementationFactory, item.Lifetime);
+        }
         ServiceDescriptors!.Add(item);
+        if (!ServiceDescriptors.Contains(implementationDescriptor))
+        {
+            _registered[_registered[item.ServiceType]] = _registered[item.ServiceType];
+           ServiceDescriptors!.Add(implementationDescriptor);
+        }
     }
     /// <summary>
     /// <para xml:lang="ru">

@@ -7,7 +7,7 @@
 /// Request to get the value of one property when loading or serializing an object
 /// </para>
 /// </summary>
-public class ValueRequest
+public class ValueNode
 {
     /// <summary>
     /// <para xml:lang="ru">
@@ -53,18 +53,18 @@ public class ValueRequest
 
     /// <summary>
     /// <para xml:lang="ru">
-    /// Разновидность запроса 
+    /// Разновидность узла 
     /// </para>
     /// <para xml:lang="en">
-    /// Request kind
+    /// Type of node
     /// </para>
     /// </summary>
-    public ValueRequestKind Kind => KeyFieldType is { } ? ValueRequestKind.PrimaryKey : (PropertyNode!.IsLeaf ? ValueRequestKind.Leaf: ValueRequestKind.Node);
+    public ValueNodeKind Kind => KeyFieldType is { } ? ValueNodeKind.PrimaryKey : (PropertyNode!.IsLeaf ? ValueNodeKind.Leaf: ValueNodeKind.Node);
 
 #if DEBUG
     public override string ToString()
     {
-        return $"{Path}, {(Kind switch { ValueRequestKind.PrimaryKey => "pk", ValueRequestKind.Leaf => "leaf", _ => "+" + PropertyNode!.TypeNode.Type })}, {Level}";
+        return $"{Path}, {(Kind switch { ValueNodeKind.PrimaryKey => "pk", ValueNodeKind.Leaf => "leaf", _ => "+" + PropertyNode!.TypeNode.Type })}, {Level}";
     }
 #endif
 }

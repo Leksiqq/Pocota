@@ -7,11 +7,12 @@ using System.Linq;
 
 namespace PocotaTestProject;
 
-public class ManagerTests
+public class ContainerTests
 {
     [OneTimeSetUp]
     public void OneTimeSetup()
     {
+        Trace.Listeners.Clear();
         Trace.Listeners.Add(new ConsoleTraceListener());
         Trace.AutoFlush = true;
     }
