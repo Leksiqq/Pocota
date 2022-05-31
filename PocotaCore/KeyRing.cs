@@ -139,4 +139,10 @@ public class KeyRing: IReadOnlyDictionary<string, object>
     {
         return GetEnumerator();
     }
+
+    public KeyRing SetField(string name, object value)
+    {
+        this[name] = value;
+        return this;
+    }
 }

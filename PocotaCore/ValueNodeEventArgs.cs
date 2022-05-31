@@ -77,20 +77,11 @@ public class ValueNodeEventArgs : EventArgs
     public bool IsCommited { get; set; } = false;
     /// <summary>
     /// <para xml:lang="ru">
-    /// Сигнализирует, что текущий лист дерева объекта является последним полем первичного ключа
-    /// </para>
-    /// <para xml:lang="en">
-    /// Signals that the current leaf of the object tree is the last field of the primary key
-    /// </para>
-    /// </summary>
-    public bool IsLastKeyField { get; internal set; } = false;
-    /// <summary>
-    /// <para xml:lang="ru">
     /// Сигнализирует, что текущий обход дерева объекта был прерван
     /// </para>
     /// <para xml:lang="en">
     /// Signals that the current object tree traversal has been interrupted
     /// </para>
     /// </summary>
-    public bool IsInterrupted { get; set; } = false;
+    public int Level { get; internal set; }
 }

@@ -9,4 +9,4 @@
 /// </para>
 /// </summary>
 /// <param name="args"></param>
-public delegate void ValueNodeEventHandler(ValueNodeEventArgs args);
+public delegate void ValueNodeEventHandler(ValueNodeEventArgs? args);

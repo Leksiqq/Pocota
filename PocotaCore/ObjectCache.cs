@@ -163,9 +163,12 @@ public class ObjectCache
         {
             if (_objectsCache[value.GetType()].ContainsKey(keyRing.PrimaryKey))
             {
-                _typesForest.Inject(type, value, _objectsCache[value.GetType()][keyRing.PrimaryKey]);
-                _objectsCache[type][keyRing.PrimaryKey] = _objectsCache[value.GetType()][keyRing.PrimaryKey];
-                result = false;
+                if(!object.ReferenceEquals(value, _objectsCache[value.GetType()][keyRing.PrimaryKey]))
+                {
+                    _typesForest.Inject(type, value, _objectsCache[value.GetType()][keyRing.PrimaryKey]);
+                    _objectsCache[type][keyRing.PrimaryKey] = _objectsCache[value.GetType()][keyRing.PrimaryKey];
+                    result = false;
+                }
             }
             else
             {

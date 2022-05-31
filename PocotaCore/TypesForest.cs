@@ -159,7 +159,8 @@ public class TypesForest
         }
     }
 
-    public bool WalkTree(object source, Type type, ValueNodeEventHandler onNode, bool withUpdate = false)
+    public void WalkTree(object source, Type type, ValueNodeEventHandler onProperty, ValueNodeEventHandler? afterPrimaryKey = null,
+        ValueNodeEventHandler? afterNode = null, bool withUpdate = false)
     {
         if (source is null)
         {
@@ -169,117 +170,105 @@ public class TypesForest
         int waitForLevel = -1;
         KeyRing? keyRing = null;
         Dictionary<string, Type>? keyDefinition = null;
-        int keyPos = -1;
-        Stack<object?> targets = new();
-        Stack<Type> types = new();
-        targets.Push(source);
-        types.Push(type);
+        Stack<ValueNodeEventArgs> targets = new();
+        int keyPosition = -1;
+        ValueNodeEventArgs args = null!;
+
         foreach (ValueNode request in typeNode.ValueRequests!)
         {
             if (waitForLevel == -1 || request.Level == waitForLevel)
             {
                 waitForLevel = -1;
-                ValueNodeEventArgs args = null!;
-                if (request.Level == 0)
+                while (request.Level < targets.Count)
                 {
+                    args = targets.Pop();
+                    afterNode?.Invoke(args);
+                }
+                if (request.Kind is ValueNodeKind.PrimaryKey)
+                {
+                    if (keyDefinition is null)
+                    {
+                        keyRing = targets.Peek() is { } obj ? _manager.GetKeyRing(obj) : null;
+                        keyDefinition = _manager.GetPrimaryKeyDefinition(targets.Peek().ActualType);
+                        keyPosition = 0;
+                    }
+                    ++keyPosition;
+                    string keyFieldName = request.Path.Substring(request.Path.LastIndexOf(Slash) + 1);
                     args = new()
                     {
                         Path = request.Path,
-                        Value = targets.Peek(),
-                        NominalType = type,
-                        ActualType = source.GetType(),
+                        Value = keyRing?[keyFieldName] ?? null,
+                        NominalType = keyDefinition![keyFieldName],
+                        ActualType = keyDefinition![keyFieldName],
                         Kind = request.Kind,
+                        Level = request.Level,
                     };
-                    onNode?.Invoke(args);
+                    onProperty?.Invoke(args);
+                    if (withUpdate)
+                    {
+                        if (args.Value is null)
+                        {
+                            throw new InvalidOperationException($"At not nullable request \"{args.Path}\" null can not be assigned.");
+                        }
+                        keyRing![keyFieldName] = args.Value;
+                    }
+                    if (afterPrimaryKey is { } && targets.Peek() is { } target && keyPosition == keyDefinition.Count)
+                    {
+                        afterPrimaryKey.Invoke(target);
+                    }
                 }
                 else
                 {
-                    while (request.Level < targets.Count)
+                    if (keyDefinition is { })
                     {
-                        targets.Pop();
-                        types.Pop();
+                        keyRing = null;
+                        keyDefinition = null;
+                        keyPosition = -1;
                     }
-                    if (request.Kind is ValueNodeKind.PrimaryKey)
+                    object? value = request.Level == 0 ? source : (targets.Peek().Value is { } obj ? request.PropertyNode!.PropertyInfo!.GetValue(obj) : null);
+                    args = new()
                     {
-                        if (keyPos == -1)
+                        Path = request.Path,
+                        Value = value,
+                        NominalType = request.PropertyNode!.TypeNode.Type,
+                        ActualType = request.PropertyNode!.TypeNode.ActualType,
+                        IsNullable = request.PropertyNode!.IsNullable,
+                        Kind = request.Kind,
+                        Level = request.Level,
+                    };
+                    onProperty?.Invoke(args);
+                    if (withUpdate)
+                    {
+                        if (args.Value is null && !request.PropertyNode!.IsNullable)
                         {
-                            keyRing = targets.Peek() is { } obj ? _manager.GetKeyRing(obj) : null;
-                            keyDefinition = _manager.GetPrimaryKeyDefinition(types.Peek());
-                            keyPos = 0;
+                            throw new InvalidOperationException($"At not nullable request \"{args.Path}\" null can not be assigned.");
                         }
-                        keyPos++;
-                        string keyFieldName = request.Path.Substring(request.Path.LastIndexOf(Slash) + 1);
-                        args = new()
+                        if (args.Value != value)
                         {
-                            Path = request.Path,
-                            Value = keyRing?[keyFieldName] ?? null,
-                            NominalType = keyDefinition![keyFieldName],
-                            ActualType = keyDefinition![keyFieldName],
-                            Kind = request.Kind,
-                            IsLastKeyField = keyPos == keyDefinition.Count,
-                        };
-                        onNode?.Invoke(args);
-                        if (withUpdate)
-                        {
-                            if(args.Value is null)
-                            {
-                                throw new InvalidOperationException($"At not nullable request \"{ args.Path }\" null can not be assigned.");
-                            }
-                            keyRing![keyFieldName] = args.Value;
+                            value = args.Value;
+                            request.PropertyNode!.PropertyInfo!.SetValue(targets.Peek(), value);
                         }
                     }
-                    else
+                    if (request.Kind is ValueNodeKind.Node)
                     {
-                        if (keyPos >= 0)
+                        if (args.IsCommited || args.Value is null)
                         {
-                            keyRing = null;
-                            keyDefinition = null;
-                            keyPos = -1;
+                            waitForLevel = request.Level;
+                            afterNode?.Invoke(args);
                         }
-                        object? value = targets.Peek() is { } obj ? request.PropertyNode!.PropertyInfo!.GetValue(obj) : null;
-                        args = new()
+                        else
                         {
-                            Path = request.Path,
-                            Value = value,
-                            NominalType = request.PropertyNode!.TypeNode.Type,
-                            ActualType = request.PropertyNode!.TypeNode.ActualType,
-                            IsNullable = request.PropertyNode!.IsNullable,
-                            Kind = request.Kind,
-                        };
-                        onNode?.Invoke(args);
-                        if(withUpdate)
-                        {
-                            if (args.Value is null && !request.PropertyNode!.IsNullable)
-                            {
-                                throw new InvalidOperationException($"At not nullable request \"{args.Path}\" null can not be assigned.");
-                            }
-                            if(args.Value != value)
-                            {
-                                value = args.Value;
-                                request.PropertyNode!.PropertyInfo!.SetValue(targets.Peek(), value);
-                            }
-                        }
-                        if (request.Kind is ValueNodeKind.Node)
-                        {
-                            if (args.IsCommited)
-                            {
-                                waitForLevel = request.Level;
-                            }
-                            else
-                            {
-                                targets.Push(value);
-                                types.Push(request.PropertyNode.TypeNode.Type);
-                            }
+                            targets.Push(args);
                         }
                     }
-                }
-                if (args.IsInterrupted)
-                {
-                    return true;
                 }
             }
         }
-        return false;
+        while (targets.Count > 0)
+        {
+            args = targets.Pop();
+            afterNode?.Invoke(args);
+        }
     }
 
     public string TreeToString<T>(object source) where T : class => TreeToString(source, typeof(T));
@@ -312,8 +301,17 @@ public class TypesForest
             {
                 result.Append(args.Value is null ? "null" : args.Value);
             }
+#if DEBUG
+            result.AppendLine($" level: {args.Level}");
+#else
             result.AppendLine();
-        });
+#endif
+        }
+#if DEBUG
+        , obj => result.AppendLine("after key")
+        , obj => result.AppendLine("after inst")
+#endif
+        );
         return result.ToString();
     }
 
