@@ -22,7 +22,7 @@ public class TypesForest
     private static readonly PropertyNodeComparer _propertyNodeComparer = new();
 
     private readonly IServiceProvider _serviceProvider;
-    private readonly Container _manager;
+    private readonly Container _container;
 
     private readonly Dictionary<Type, TypeNode> _typeTrees = new();
 
@@ -37,7 +37,7 @@ public class TypesForest
     /// <param name="serviceProvider"></param>
     /// <exception cref="ArgumentNullException"></exception>
     public TypesForest(IServiceProvider serviceProvider) =>
-        (_serviceProvider, _manager) =
+        (_serviceProvider, _container) =
             (serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider)), serviceProvider.GetRequiredService<Container>());
     /// <summary>
     /// <para xml:lang="ru">
@@ -188,8 +188,8 @@ public class TypesForest
                 {
                     if (keyDefinition is null)
                     {
-                        keyRing = targets.Peek() is { } obj ? _manager.GetKeyRing(obj) : null;
-                        keyDefinition = _manager.GetPrimaryKeyDefinition(targets.Peek().ActualType);
+                        keyRing = targets.Peek() is { } obj ? _container.GetKeyRing(obj.Value) : null;
+                        keyDefinition = _container.GetPrimaryKeyDefinition(targets.Peek().ActualType);
                         keyPosition = 0;
                     }
                     ++keyPosition;
@@ -246,7 +246,7 @@ public class TypesForest
                         if (args.Value != value)
                         {
                             value = args.Value;
-                            request.PropertyNode!.PropertyInfo!.SetValue(targets.Peek(), value);
+                            request.PropertyNode!.PropertyInfo!.SetValue(targets.Peek().Value, value);
                         }
                     }
                     if (request.Kind is ValueNodeKind.Node)
@@ -331,7 +331,7 @@ public class TypesForest
     private bool PlantTypeTree(Type type, Stack<Type> stack)
     {
         stack.Push(type);
-        if (!_manager.ContainsServiceType(type))
+        if (!_container.ContainsServiceType(type))
         {
             throw new ArgumentException($"{type} is not registered.");
         }
@@ -360,8 +360,8 @@ public class TypesForest
         List<PropertyInfo> properties = new();
         CollectProperties(typeNode, properties);
 
-        typeNode.ActualType = _manager.ContainsServiceType(typeNode.Type) ?
-            _manager.GetActualType(typeNode.Type)! : typeNode.Type;
+        typeNode.ActualType = _container.ContainsServiceType(typeNode.Type) ?
+            _container.GetActualType(typeNode.Type)! : typeNode.Type;
         List<PropertyInfo> actualProperties = new();
         CollectActualProperties(typeNode, actualProperties);
 
@@ -378,7 +378,7 @@ public class TypesForest
             PropertyNode = new PropertyNode { TypeNode = typeNode },
             Level = level
         });
-        if (_manager.GetPrimaryKeyDefinition(typeNode.ActualType) is Dictionary<string, Type> keyDefinitions)
+        if (_container.GetPrimaryKeyDefinition(typeNode.ActualType) is Dictionary<string, Type> keyDefinitions)
         {
             foreach (KeyValuePair<string, Type> entry in keyDefinitions)
             {
@@ -489,7 +489,7 @@ public class TypesForest
                         ? propertyInfo.Name.Substring(propertyInfo.Name.LastIndexOf(Dot) + 1)
                         : propertyInfo.Name,
                     PropertyInfo = actualProperty,
-                    TypeNode = _manager.ContainsServiceType(propertyInfo.PropertyType)
+                    TypeNode = _container.ContainsServiceType(propertyInfo.PropertyType)
                         ? GetTypeNode(propertyInfo.PropertyType, stack)
                         : new TypeNode { Type = propertyInfo.PropertyType, ActualType = propertyInfo.PropertyType },
                     IsNullable = (propertyInfo.PropertyType.IsValueType && Nullable.GetUnderlyingType(propertyInfo.PropertyType) is Type)

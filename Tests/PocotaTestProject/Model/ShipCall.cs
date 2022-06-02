@@ -24,7 +24,7 @@ public class ShipCall : IShipCall, IShipCallForListing, IDepartureShipCall, IArr
 
     public string AdditionalInfo { get; set; } = "N/A";
 
-    public ShipCall? prevCall { get; set; }
+    public ShipCall? PrevCall { get; set; }
 
     IRoute IShipCall.Route => Route;
 
@@ -40,5 +40,5 @@ public class ShipCall : IShipCall, IShipCallForListing, IDepartureShipCall, IArr
 
     ILocation IArrivalShipCall.Location => Location;
 
-    IShipCall? IShipCall.prevCall => prevCall;
+    IShipCall? IShipCall.PrevCall => PrevCall;
 }

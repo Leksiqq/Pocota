@@ -110,9 +110,9 @@ public class PocoBuilder
     public string GenerateHandlerSkeleton(Type type)
     {
         StringBuilder sb = new();
-        sb.Append(@"
-(ValueRequestEventArgs args) => {
-    switch(args.Path) {");
+        sb.Append(@$"
+({nameof(ValueNodeEventArgs)} args) => {{
+    switch(args.Path) {{");
         void eh(ValueNodeEventArgs args)
         {
             sb.Append(@$"
@@ -140,6 +140,7 @@ public class PocoBuilder
                 }
                 sb.Append(@"
             //args.IsCommited = true;");
+                args.Value = _serviceProvider.GetRequiredService(args.NominalType);
             }
             sb.Append(@"
             break;");

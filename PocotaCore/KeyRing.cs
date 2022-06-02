@@ -12,7 +12,7 @@ namespace Net.Leksi.Pocota.Core;
 /// </summary>
 public class KeyRing: IReadOnlyDictionary<string, object>
 {
-    private readonly Container _manager;
+    private readonly Container _container;
     private readonly Dictionary<string, KeyDefinition> _keyDefinition;
 
     internal object[] PrimaryKey { get; set; } = null!;
@@ -101,12 +101,12 @@ public class KeyRing: IReadOnlyDictionary<string, object>
                 PrimaryKey[_keyDefinition[fieldName].Index] = value;
                 if (IsAssigned)
                 {
-                    _manager.Attach(this);
+                    _container.Attach(this);
                 }
             }
         }
     }
-    internal KeyRing(Container manager, Dictionary<string, KeyDefinition> keyDefinition) => (_manager, _keyDefinition) = (manager, keyDefinition);
+    internal KeyRing(Container manager, Dictionary<string, KeyDefinition> keyDefinition) => (_container, _keyDefinition) = (manager, keyDefinition);
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
@@ -139,10 +139,29 @@ public class KeyRing: IReadOnlyDictionary<string, object>
     {
         return GetEnumerator();
     }
-
-    public KeyRing SetField(string name, object value)
+    /// <summary>
+    /// <para xml:lang="ru">
+    /// Потоковое присвоение значения полю.
+    /// </para>
+    /// <para xml:lang="en">
+    /// Flow assignment of a value to a field.
+    /// </para>
+    /// </summary>
+    public KeyRing SetField(string fieldName, object value)
     {
-        this[name] = value;
+        this[fieldName] = value;
         return this;
+    }
+    /// <summary>
+    /// <para xml:lang="ru">
+    /// Принудительный сброс первичного ключа.
+    /// </para>
+    /// <para xml:lang="en">
+    /// Forced reset of the primary key.
+    /// </para>
+    /// </summary>
+    public void Reset()
+    {
+        _container.Detach(this);
     }
 }

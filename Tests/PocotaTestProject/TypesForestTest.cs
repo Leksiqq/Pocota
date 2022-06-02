@@ -8,6 +8,13 @@ namespace PocotaTestProject;
 
 public class TypesForestTest
 {
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
+    {
+        Trace.Listeners.Clear();
+        Trace.Listeners.Add(new ConsoleTraceListener());
+        Trace.AutoFlush = true;
+    }
 
     [Test]
     [TestCase(typeof(IShipCall))]

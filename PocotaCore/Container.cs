@@ -426,6 +426,14 @@ public class Container : IServiceCollection
         }
     }
 
+    internal void Detach(KeyRing keyRing)
+    {
+        lock (keyRing.Source!)
+        {
+            _attachedKeys.Remove(keyRing.Source!);
+        }
+    }
+
     internal static void AddPocotaCore(IServiceCollection services, Action<IServiceCollection> configure)
     {
         Container instance = new();
