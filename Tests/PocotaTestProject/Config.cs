@@ -12,34 +12,33 @@ public static class Config
     public static IHost Configure()
     {
         IHostBuilder hostBuilder = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
-            .ConfigureServices(serviceCollection =>
+            .AddPocotaCore(services =>
             {
-                serviceCollection.AddPocotaCore(services =>
-                {
-                    services.AddTransient<IShipCall, ShipCall>();
-                    services.AddTransient<IShipCallForListing, ShipCall>();
-                    services.AddTransient<IShipCallAdditionalInfo, ShipCall>();
-                    services.AddTransient<IArrivalShipCall, ShipCall>();
-                    services.AddTransient<IDepartureShipCall, ShipCall>();
-                    services.AddPrimaryKey<ShipCall>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_ROUTE", typeof(int) } });
+                services.AddTransient<IShipCall, ShipCall>();
+                services.AddTransient<IShipCallForListing, ShipCall>();
+                services.AddTransient<IShipCallAdditionalInfo, ShipCall>();
+                services.AddTransient<IArrivalShipCall, ShipCall>();
+                services.AddTransient<IDepartureShipCall, ShipCall>();
+                services.AddPrimaryKey<ShipCall>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_ROUTE", typeof(int) } });
 
-                    services.AddTransient<ILocation, Location>();
-                    services.AddPrimaryKey<Location>(new Dictionary<string, Type> { { "ID_LOCATION", typeof(string) } });
+                services.AddTransient<ILocation, Location>();
+                services.AddPrimaryKey<Location>(new Dictionary<string, Type> { { "ID_LOCATION", typeof(string) } });
 
-                    services.AddTransient<IRoute, Route>();
-                    services.AddTransient<IRouteShort, Route>();
-                    services.AddPrimaryKey<Route>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_RHEAD", typeof(int) } });
+                services.AddTransient<IRoute, Route>();
+                services.AddTransient<IRouteShort, Route>();
+                services.AddPrimaryKey<Route>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_RHEAD", typeof(int) } });
 
-                    services.AddTransient<ILine, Line>();
-                    services.AddPrimaryKey<Line>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) } });
+                services.AddTransient<ILine, Line>();
+                services.AddPrimaryKey<Line>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) } });
 
-                    services.AddTransient<IVessel, Vessel>();
-                    services.AddTransient<IVesselShort, Vessel>();
-                    services.AddPrimaryKey<Vessel>(new Dictionary<string, Type> { { "ID_VESSEL", typeof(string) } });
+                services.AddTransient<IVessel, Vessel>();
+                services.AddTransient<IVesselShort, Vessel>();
+                services.AddPrimaryKey<Vessel>(new Dictionary<string, Type> { { "ID_VESSEL", typeof(string) } });
 
-                    services.AddTransient<ITravelForListing, Travel>();
-                });
-                serviceCollection.AddPocoBuilder();
+                services.AddTransient<ITravelForListing, Travel>();
+            }).ConfigureServices(services =>
+            {
+                services.AddTransient<PocoBuilder>();
             });
         return hostBuilder.Build();
     }
@@ -47,40 +46,39 @@ public static class Config
     public static IHost Configure1()
     {
         IHostBuilder hostBuilder = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
-            .ConfigureServices(serviceCollection =>
+            .AddPocotaCore(services =>
             {
-                serviceCollection.AddPocotaCore(services =>
-                {
-                    services.AddTransient<ShipCall>(op => GetShipCall(op.GetRequiredService<Container>()));
-                    services.AddTransient<IShipCall, ShipCall>(op => GetShipCall(op.GetRequiredService<Container>()));
-                    services.AddTransient<IShipCallForListing, ShipCall>(op => GetShipCall(op.GetRequiredService<Container>()));
-                    services.AddTransient<IShipCallAdditionalInfo, ShipCall>(op => GetShipCall(op.GetRequiredService<Container>()));
-                    services.AddTransient<IArrivalShipCall, ShipCall>(op => GetShipCall(op.GetRequiredService<Container>()));
-                    services.AddTransient<IDepartureShipCall, ShipCall>(op => GetShipCall(op.GetRequiredService<Container>()));
-                    services.AddPrimaryKey<ShipCall>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_ROUTE", typeof(int) } });
+                services.AddTransient<ShipCall>(op => GetShipCall(op.GetRequiredService<Container>()));
+                services.AddTransient<IShipCall, ShipCall>(op => GetShipCall(op.GetRequiredService<Container>()));
+                services.AddTransient<IShipCallForListing, ShipCall>(op => GetShipCall(op.GetRequiredService<Container>()));
+                services.AddTransient<IShipCallAdditionalInfo, ShipCall>(op => GetShipCall(op.GetRequiredService<Container>()));
+                services.AddTransient<IArrivalShipCall, ShipCall>(op => GetShipCall(op.GetRequiredService<Container>()));
+                services.AddTransient<IDepartureShipCall, ShipCall>(op => GetShipCall(op.GetRequiredService<Container>()));
+                services.AddPrimaryKey<ShipCall>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_ROUTE", typeof(int) } });
 
-                    services.AddTransient<Location>(op => GetLocation(op.GetRequiredService<Container>()));
-                    services.AddTransient<ILocation, Location>(op => GetLocation(op.GetRequiredService<Container>()));
-                    services.AddPrimaryKey<Location>(new Dictionary<string, Type> { { "ID_LOCATION", typeof(string) } });
+                services.AddTransient<Location>(op => GetLocation(op.GetRequiredService<Container>()));
+                services.AddTransient<ILocation, Location>(op => GetLocation(op.GetRequiredService<Container>()));
+                services.AddPrimaryKey<Location>(new Dictionary<string, Type> { { "ID_LOCATION", typeof(string) } });
 
-                    services.AddTransient<Route>(op => GetRoute(op.GetRequiredService<Container>()));
-                    services.AddTransient<IRoute, Route>(op => GetRoute(op.GetRequiredService<Container>()));
-                    services.AddTransient<IRouteShort, Route>(op => GetRoute(op.GetRequiredService<Container>()));
-                    services.AddPrimaryKey<Route>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_RHEAD", typeof(int) } });
+                services.AddTransient<Route>(op => GetRoute(op.GetRequiredService<Container>()));
+                services.AddTransient<IRoute, Route>(op => GetRoute(op.GetRequiredService<Container>()));
+                services.AddTransient<IRouteShort, Route>(op => GetRoute(op.GetRequiredService<Container>()));
+                services.AddPrimaryKey<Route>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) }, { "ID_RHEAD", typeof(int) } });
 
-                    services.AddTransient<Line>(op => GetLine(op.GetRequiredService<Container>()));
-                    services.AddTransient<ILine, Line>(op => GetLine(op.GetRequiredService<Container>()));
-                    services.AddPrimaryKey<Line>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) } });
+                services.AddTransient<Line>(op => GetLine(op.GetRequiredService<Container>()));
+                services.AddTransient<ILine, Line>(op => GetLine(op.GetRequiredService<Container>()));
+                services.AddPrimaryKey<Line>(new Dictionary<string, Type> { { "ID_LINE", typeof(string) } });
 
-                    services.AddTransient<Vessel>(op => GetVessel(op.GetRequiredService<Container>()));
-                    services.AddTransient<IVessel, Vessel>(op => GetVessel(op.GetRequiredService<Container>()));
-                    services.AddTransient<IVesselShort, Vessel>(op => GetVessel(op.GetRequiredService<Container>()));
-                    services.AddPrimaryKey<Vessel>(new Dictionary<string, Type> { { "ID_VESSEL", typeof(string) } });
+                services.AddTransient<Vessel>(op => GetVessel(op.GetRequiredService<Container>()));
+                services.AddTransient<IVessel, Vessel>(op => GetVessel(op.GetRequiredService<Container>()));
+                services.AddTransient<IVesselShort, Vessel>(op => GetVessel(op.GetRequiredService<Container>()));
+                services.AddPrimaryKey<Vessel>(new Dictionary<string, Type> { { "ID_VESSEL", typeof(string) } });
 
-                    services.AddTransient<Travel>(op => GetTravel(op.GetRequiredService<Container>()));
-                    services.AddTransient<ITravelForListing, Travel>(op => GetTravel(op.GetRequiredService<Container>()));
-                });
-                serviceCollection.AddPocoBuilder();
+                services.AddTransient<Travel>(op => GetTravel(op.GetRequiredService<Container>()));
+                services.AddTransient<ITravelForListing, Travel>(op => GetTravel(op.GetRequiredService<Container>()));
+            }).ConfigureServices(services =>
+            {
+                services.AddTransient<PocoBuilder>();
             });
         return hostBuilder.Build();
     }

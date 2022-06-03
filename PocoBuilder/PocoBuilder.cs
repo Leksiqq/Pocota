@@ -18,11 +18,13 @@ public class PocoBuilder
 
     private readonly IServiceProvider _serviceProvider;
     private readonly TypesForest _typesForest;
+    private readonly ObjectCache _objectCache;
 
     public PocoBuilder(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
         _typesForest = serviceProvider.GetRequiredService<TypesForest>();
+        _objectCache = _serviceProvider.GetRequiredService<ObjectCache>();
     }
 
     public T Build<T>(ValueNodeEventHandler onNode, T? target = null)
@@ -33,7 +35,6 @@ public class PocoBuilder
 
     public object Build(Type type, ValueNodeEventHandler onNode, object? target = null)
     {
-        ObjectCache objectCache = _serviceProvider.GetRequiredService<ObjectCache>();
         Dictionary<Type, object> probeObjects = new(); 
         TypeNode typeNode = _typesForest.GetTypeNode(type);
         if(target is null)
@@ -65,9 +66,9 @@ public class PocoBuilder
             },
             afterPrimaryKey: args =>
             {
-                if (objectCache.TryGet(args.NominalType, args.Value!, out object? cachedObject))
+                if (_objectCache.TryGet(args.NominalType, args.Value!, out object? cachedObject))
                 {
-                    probeObjects.TryAdd(args.NominalType, target!);
+                    probeObjects.TryAdd(args.NominalType, args.Value!);
                     args.Value = cachedObject;
                     args.IsCommited = true;
                 }
@@ -76,7 +77,7 @@ public class PocoBuilder
             {
                 if(args.Value is { })
                 {
-                    objectCache.Add(args.NominalType, args.Value);
+                    _objectCache.Add(args.NominalType, args.Value);
                 }
             },
             withUpdate: true

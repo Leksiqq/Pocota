@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 
 namespace Net.Leksi.Pocota.Core;
@@ -19,13 +20,22 @@ public class Container : IServiceCollection
     private readonly Dictionary<Type, Dictionary<string, KeyDefinition>> _keyMap = new();
     private readonly Dictionary<Type, Type> _exampleKeyMap = new();
     private readonly ConditionalWeakTable<object, KeyRing> _attachedKeys = new();
-    private readonly ConditionalWeakTable<object, WeakReference<KeyRing>> _locks = new();
+    private readonly ConcurrentDictionary<Type, Type?> _mappedTypesCache = new();
 
     internal IServiceProvider? ServiceProvider { get; set; } = null;
     internal IServiceCollection? ServiceDescriptors { get; set; } = null;
 
     private Container() { }
 
+    /// <summary>
+    /// <para xml:lang="ru">
+    /// Сообщает, были ли зарегистрированы первичные ключи.
+    /// </para>
+    /// <para xml:lang="en">
+    /// Tells if primary keys have been registered.
+    /// </para>
+    /// </summary>
+    public bool HasMappedPrimaryKeys => _keyMap.Count > 0;
     /// <summary>
     /// <para xml:lang="ru">
     /// Проверяет зарегистрирован ли интерфейс
@@ -125,14 +135,6 @@ public class Container : IServiceCollection
     /// Parameter <с>source</с> cannot be <c>null</c>
     /// </para>
     /// </exception>
-    /// <exception cref="KeyRingConcurrentException">
-    /// <para xml:lang="ru">
-    /// Выбрасывается при попытке неэксклюзивного доступа к первичному ключу во время присвоения его полей.
-    /// </para>
-    /// <para xml:lang="en">
-    /// Thrown when attempting non-exclusive access to the primary key while assigning its fields.
-    /// </para>
-    /// </exception>
     public KeyRing? GetKeyRing(object source)
     {
         if (source is null)
@@ -144,34 +146,7 @@ public class Container : IServiceCollection
         {
             return keyRing;
         }
-        Type? current = source.GetType();
-        while (current is { } && !_keyMap.ContainsKey(current))
-        {
-            current = current!.BaseType;
-        }
-        if (current is { } && _keyMap.ContainsKey(current))
-        {
-            lock (source)
-            {
-                if (_locks.TryGetValue(source, out WeakReference<KeyRing>? wr))
-                {
-                    if (wr.TryGetTarget(out KeyRing? kr))
-                    {
-                        throw new KeyRingConcurrentException();
-                    }
-                    keyRing = new KeyRing(this, _keyMap[current]);
-                    wr.SetTarget(keyRing);
-                }
-                else
-                {
-                    keyRing = new KeyRing(this, _keyMap[current]);
-                    _locks.Add(source, new WeakReference<KeyRing>(keyRing));
-                }
-                keyRing.PrimaryKey = new object[_keyMap[current].Count];
-                keyRing.Source = source;
-            }
-        }
-        return keyRing;
+        return CreateKeyRing(source);
     }
     /// <summary>
     /// <inheritdoc/>
@@ -232,14 +207,10 @@ public class Container : IServiceCollection
     /// </returns>
     public Dictionary<string, Type>? GetPrimaryKeyDefinition(Type type)
     {
-        Type? current = ContainsServiceType(type) ? GetActualType(type) : type;
-        while (current is { } && !_keyMap.ContainsKey(current))
+        Type? mapped = GetMappedType(type);
+        if (mapped is { })
         {
-            current = current!.BaseType;
-        }
-        if (current is { } && _keyMap.ContainsKey(current))
-        {
-            return _keyMap[current].ToDictionary(v => v.Key, v => v.Value.Type);
+            return _keyMap[mapped].ToDictionary(v => v.Key, v => v.Value.Type);
         }
         return null;
     }
@@ -394,6 +365,39 @@ public class Container : IServiceCollection
     }
     #endregion Unused
 
+    private Type? GetMappedType(Type actualType)
+    {
+        Type? mapped = null;
+        if (!_mappedTypesCache.TryGetValue(actualType, out mapped))
+        {
+            Type? current = actualType;
+            while (current is { } && !_keyMap.ContainsKey(current))
+            {
+                current = current!.BaseType;
+            }
+            mapped = current;
+            _mappedTypesCache.TryAdd(actualType, mapped);
+        }
+        return mapped;
+    }
+
+    internal KeyRing? CreateKeyRing(object source)
+    {
+        KeyRing? keyRing = null;
+        if(!_attachedKeys.TryGetValue(source, out keyRing))
+        {
+            Type? mapped = GetMappedType(source.GetType());
+            if (mapped is { })
+            {
+                keyRing = new KeyRing(this, _keyMap[mapped]);
+                keyRing.PrimaryKey = new object[_keyMap[mapped].Count];
+                keyRing.Source = source;
+                _attachedKeys.Add(source, keyRing);
+            }
+        }
+        return keyRing;
+    }
+
     internal void AddPrimaryKey(Type targetType, IDictionary<string, Type> fieldDefinitions)
     {
         ThrowIfConfigured();
@@ -415,23 +419,6 @@ public class Container : IServiceCollection
         ThrowIfNotClass(nameof(example), example);
         ThrowIfAlreadyMapped(targetType);
         _exampleKeyMap[targetType] = example;
-    }
-
-    internal void Attach(KeyRing keyRing)
-    {
-        lock (keyRing.Source!)
-        {
-            _locks.Remove(keyRing.Source!);
-            _attachedKeys.Add(keyRing.Source!, keyRing);
-        }
-    }
-
-    internal void Detach(KeyRing keyRing)
-    {
-        lock (keyRing.Source!)
-        {
-            _attachedKeys.Remove(keyRing.Source!);
-        }
     }
 
     internal static void AddPocotaCore(IServiceCollection services, Action<IServiceCollection> configure)

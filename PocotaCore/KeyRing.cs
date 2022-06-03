@@ -54,30 +54,6 @@ public class KeyRing: IReadOnlyDictionary<string, object>
     /// </summary>
     public int Count => _keyDefinition.Count;
     /// <summary>
-    /// <para xml:lang="ru">
-    /// Инициализирует экземпляр <see cref="KeyRing"/> менеджером первичных ключей и определением первичного ключа.
-    /// </para>
-    /// <para xml:lang="en">
-    /// Initializes the <see cref="KeyRing"/> instance with a primary key manager and a primary key definition.
-    /// </para>
-    /// </summary>
-    /// <param name="manager">
-    /// <para xml:lang="ru">
-    /// Менеджер первичных ключей.
-    /// </para>
-    /// <para xml:lang="en">
-    /// Primary key manager.
-    /// </para>
-    /// </param>
-    /// <param name="keyDefinition">
-    /// <para xml:lang="ru">
-    /// Определение первичного ключа.
-    /// </para>
-    /// <para xml:lang="en">
-    /// Define the primary key.
-    /// </para>
-    /// </param>
-    /// <summary>
     /// <inheritdoc/>
     /// <para xml:lang="ru">
     /// Доступ к полю первичного ключа. Запись можно произвести только один раз.
@@ -99,14 +75,34 @@ public class KeyRing: IReadOnlyDictionary<string, object>
             if (PrimaryKey[_keyDefinition[fieldName].Index] is null)
             {
                 PrimaryKey[_keyDefinition[fieldName].Index] = value;
-                if (IsAssigned)
-                {
-                    _container.Attach(this);
-                }
             }
         }
     }
-    internal KeyRing(Container manager, Dictionary<string, KeyDefinition> keyDefinition) => (_container, _keyDefinition) = (manager, keyDefinition);
+    /// <summary>
+    /// <para xml:lang="ru">
+    /// Инициализирует экземпляр <see cref="KeyRing"/> менеджером первичных ключей и определением первичного ключа.
+    /// </para>
+    /// <para xml:lang="en">
+    /// Initializes the <see cref="KeyRing"/> instance with a primary key manager and a primary key definition.
+    /// </para>
+    /// </summary>
+    /// <param name="container">
+    /// <para xml:lang="ru">
+    /// Контейнер Pocota.
+    /// </para>
+    /// <para xml:lang="en">
+    /// Pocota container.
+    /// </para>
+    /// </param>
+    /// <param name="keyDefinition">
+    /// <para xml:lang="ru">
+    /// Определение первичного ключа.
+    /// </para>
+    /// <para xml:lang="en">
+    /// Define the primary key.
+    /// </para>
+    /// </param>
+    internal KeyRing(Container container, Dictionary<string, KeyDefinition> keyDefinition) => (_container, _keyDefinition) = (container, keyDefinition);
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
@@ -154,14 +150,14 @@ public class KeyRing: IReadOnlyDictionary<string, object>
     }
     /// <summary>
     /// <para xml:lang="ru">
-    /// Принудительный сброс первичного ключа.
+    /// Сброс первичного ключа.
     /// </para>
     /// <para xml:lang="en">
-    /// Forced reset of the primary key.
+    /// Reset of the primary key.
     /// </para>
     /// </summary>
     public void Reset()
     {
-        _container.Detach(this);
+        Array.Clear(PrimaryKey);
     }
 }

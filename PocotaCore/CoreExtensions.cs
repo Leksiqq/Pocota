@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
 
 namespace Net.Leksi.Pocota.Core;
@@ -27,13 +30,7 @@ public static class CoreExtensions
     /// Defines primary keys for objects of model POCO classes.
     /// </para>
     /// </summary>
-    /// <param name="services">
-    /// <para xml:lang="ru">
-    /// Коллекция служб.
-    /// </para>
-    /// <para xml:lang="en">
-    /// Collection of services.
-    /// </para>
+    /// <param name="builder">
     /// </param>
     /// <param name="configure">
     /// <para xml:lang="ru">
@@ -46,7 +43,7 @@ public static class CoreExtensions
     /// <example>
     /// <code>
     /// IHostBuilder hostBuilder = Host.CreateDefaultBuilder()
-    ///.AddDtoCore(services =>
+    ///.AddPocotaCore(services =>
     ///    {
     ///        services.AddTransient&lt;IShipCall, ShipCall&gt;();
     ///        services.AddTransient&lt;IShipCallForListing, ShipCall&gt;();
@@ -77,6 +74,81 @@ public static class CoreExtensions
     ///        services.AddTransient&lt;ITravelForListing, Travel&gt;();
     ///    });
     ///host = hostBuilder.Build();
+    /// </code>
+    /// </example>
+    public static IHostBuilder AddPocotaCore(this IHostBuilder builder, Action<IServiceCollection> configure)
+    {
+        builder.UseServiceProviderFactory(new ServiceProviderFactory()).ConfigureServices((context, services) => 
+        {
+            Container.AddPocotaCore(services, configure);
+        });
+        return builder;
+    }
+    /// <summary>
+    /// <para xml:lang="ru">
+    /// Включения инфраструктуры ядра фреймворка Pocota.
+    /// Регистрирует интерфейсы для модельных POCO-классов. 
+    /// Определяет первичные ключи для объектов модельных POCO-классов. 
+    /// </para>
+    /// <para xml:lang="en">
+    /// Enable Pocota framework core infrastructure.
+    /// Registers interfaces for model POCO classes.
+    /// Defines primary keys for objects of model POCO classes.
+    /// </para>
+    /// </summary>
+    /// <param name="services">
+    /// <para xml:lang="ru">
+    /// Коллекция служб.
+    /// </para>
+    /// <para xml:lang="en">
+    /// Collection of services.
+    /// </para>
+    /// </param>
+    /// <param name="configure">
+    /// <para xml:lang="ru">
+    /// <see cref="Action{IServiceCollection}"/> для выполнения регистрации и определения первичных ключей.
+    /// </para>
+    /// <para xml:lang="en">
+    /// <see cref="Action{IServiceCollection}"/> to perform registration and define primary keys.
+    /// </para>
+    /// </param>
+    /// <example>
+    /// <code>
+    /// var builder = WebApplication.CreateBuilder(args);
+    /// builder.Services.AddPocotaCore(services =>
+    ///    {
+    ///        services.AddTransient&lt;IShipCall, ShipCall&gt;();
+    ///        services.AddTransient&lt;IShipCallForListing, ShipCall&gt;();
+    ///        services.AddTransient&lt;IShipCallAdditionalInfo, ShipCall&gt;();
+    ///        services.AddTransient&lt;IArrivalShipCall, ShipCall&gt;();
+    ///        services.AddTransient&lt;IDepartureShipCall, ShipCall&gt;();
+    ///        
+    ///        services.AddKeyMapping&lt;ShipCall&gt;(new Dictionary&lt;string, Type&gt; { { "ID_LINE", typeof(string) }, { "ID_ROUTE", typeof(int) } });
+    ///        
+    ///        services.AddTransient&lt;ILocation, Location&gt;();
+    ///        
+    ///        services.AddKeyMapping&lt;Location&gt;(new Dictionary&lt;string, Type&gt; { { "ID_LOCATION", typeof(string) } });
+    ///        
+    ///        services.AddTransient&lt;IRoute, Route&gt;();
+    ///        services.AddTransient&lt;IRouteShort, Route&gt;();
+    ///        
+    ///        services.AddKeyMapping&lt;Route&gt;(new Dictionary&lt;string, Type&gt; { { "ID_LINE", typeof(string) }, { "ID_RHEAD", typeof(int) } });
+    ///        
+    ///        services.AddTransient&lt;ILine, Line&gt;();
+    ///        
+    ///        services.AddKeyMapping&lt;Line&gt;(new Dictionary&lt;string, Type&gt; { { "ID_LINE", typeof(string) } });
+    ///        
+    ///        services.AddTransient&lt;IVessel, Vessel&gt;();
+    ///        services.AddTransient&lt;IVesselShort, Vessel&gt;();
+    ///        
+    ///        services.AddKeyMapping&lt;Vessel&gt;(new Dictionary&lt;string, Type&gt; { { "ID_VESSEL", typeof(string) } });
+    ///        
+    ///        services.AddTransient&lt;ITravelForListing, Travel&gt;();
+    ///    });
+    /// WebApplication app = builder.Build();
+    /// 
+    /// app.UsePocotaCore();
+    /// 
     /// </code>
     /// </example>
     public static IServiceCollection AddPocotaCore(this IServiceCollection services, Action<IServiceCollection> configure)
@@ -391,6 +463,22 @@ public static class CoreExtensions
         }
         return services;
     }
-
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="serviceProvider"></param>
+    /// <returns></returns>
+    public static IApplicationBuilder UsePocotaCore(this IApplicationBuilder app)
+    {
+        Container container = app.ApplicationServices.GetService<Container>();
+        if (container.HasMappedPrimaryKeys)
+        {
+            app.Use(async (HttpContext context, Func<Task> next) =>
+            {
+                context.RequestServices = new ServiceProviderProxy(context.RequestServices);
+                await next?.Invoke();
+            });
+        }
+            return app;
+    }
 }

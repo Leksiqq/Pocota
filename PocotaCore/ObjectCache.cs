@@ -17,7 +17,7 @@ public class ObjectCache
 
     private static readonly KeyEqualityComparer _keyComparer = new();
     private readonly TypesForest _typesForest;
-    private readonly Container _manager;
+    private readonly Container _container;
 
     private Dictionary<Type, Dictionary<object[], object>> _objectsCache = new();
 
@@ -41,7 +41,7 @@ public class ObjectCache
     /// </summary>
     /// <param name="typesForest"></param>
     public ObjectCache(IServiceProvider serviceProvider) =>
-        (_typesForest, _manager) = (serviceProvider.GetRequiredService<TypesForest>(), serviceProvider.GetRequiredService<Container>());
+        (_typesForest, _container) = (serviceProvider.GetRequiredService<TypesForest>(), serviceProvider.GetRequiredService<Container>());
 
 
     /// <summary>
@@ -90,7 +90,7 @@ public class ObjectCache
         ThrowIfNotRegistered(type);
         if (_objectsCache.ContainsKey(type))
         {
-            KeyRing? keyRing = _manager.GetKeyRing(source);
+            KeyRing? keyRing = _container.GetKeyRing(source);
             if(keyRing is { })
             {
                 return _objectsCache[type].TryGetValue(keyRing.PrimaryKey, out result);
@@ -141,7 +141,7 @@ public class ObjectCache
         {
             throw new InvalidCastException($"{nameof(value)} must be {type}");
         }
-        KeyRing? keyRing = _manager.GetKeyRing(value);
+        KeyRing? keyRing = _container.GetKeyRing(value);
         if (keyRing is null)
         {
             throw new ArgumentException($"{nameof(value)} must be of type with defined primary key");
@@ -194,7 +194,7 @@ public class ObjectCache
 
     private void ThrowIfNotRegistered(Type type)
     {
-        if (!_manager.ContainsServiceType(type))
+        if (!_container.ContainsServiceType(type))
         {
             throw new ArgumentException($"{nameof(type)} must be registered at Pocota container");
         }

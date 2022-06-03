@@ -230,47 +230,9 @@ public class ContainerTests
     }
 
     [Test]
-    public async Task TestThrowKeyRingConcurrent()
-    {
-        IHost host = Host.CreateDefaultBuilder().ConfigureServices(services => services.AddPocotaCore(services =>
-        {
-            services.AddTransient<Poco1_1, Poco1>();
-            services.AddPrimaryKey<Poco1>(new Dictionary<string, Type>() { { "ID", typeof(int) } });
-        })).Build();
-
-        Container pm = host.Services.GetRequiredService<Container>();
-        Poco1_1 poco1_1 = host.Services.GetRequiredService<Poco1_1>();
-        Task[] tasks = new Task[2];
-        ManualResetEventSlim mrs1 = new ManualResetEventSlim();
-        mrs1.Reset();
-        ManualResetEventSlim mrs2 = new ManualResetEventSlim();
-        mrs2.Reset();
-        tasks[0] = Task.Run(() => 
-        {
-            KeyRing? keyRing = pm.GetKeyRing(poco1_1);
-            mrs1.Set();
-            mrs2.Wait();
-            keyRing["ID"] = 1234;
-            mrs1.Set();
-        });
-        tasks[1] = Task.Run(() =>
-        {
-            KeyRing? keyRing;
-            mrs1.Wait();
-            mrs1.Reset();
-            Assert.Catch<KeyRingConcurrentException>(() => keyRing = pm.GetKeyRing(poco1_1));
-            mrs2.Set();
-            mrs1.Wait();
-            keyRing = pm.GetKeyRing(poco1_1);
-            Assert.That(keyRing["ID"], Is.EqualTo(1234));
-        });
-        await Task.WhenAll(tasks);
-    }
-
-    [Test]
     public void TestKeyRing()
     {
-        IHost host = Host.CreateDefaultBuilder().ConfigureServices(services => services.AddPocotaCore(services =>
+        IHost host = Host.CreateDefaultBuilder().AddPocotaCore(services =>
         {
             services.AddTransient<Poco1_1, Poco1>();
             services.AddTransient<Poco1_2, Poco1>();
@@ -284,7 +246,7 @@ public class ContainerTests
             services.AddPrimaryKey<Poco1>(new Dictionary<string, Type>() { { "ID", typeof(int) } });
             services.AddPrimaryKey<Poco2>(new Dictionary<string, Type>() { { "ID1", typeof(int) }, { "ID2", typeof(string) } });
             services.AddPrimaryKey<Poco3>(new Dictionary<string, Type>() { { "ID1", typeof(int) }, { "ID2", typeof(string) }, { "ID3", typeof(string) } });
-        })).Build();
+        }).Build();
 
         Container pm = host.Services.GetRequiredService<Container>();
 

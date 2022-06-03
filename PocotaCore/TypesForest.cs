@@ -173,6 +173,8 @@ public class TypesForest
         Stack<ValueNodeEventArgs> targets = new();
         int keyPosition = -1;
         ValueNodeEventArgs args = null!;
+        ValueNode? lastNodeRequest = null;
+        object? lastNode = null;
 
         foreach (ValueNode request in typeNode.ValueRequests!)
         {
@@ -215,6 +217,21 @@ public class TypesForest
                     if (afterPrimaryKey is { } && targets.Peek() is { } target && keyPosition == keyDefinition.Count)
                     {
                         afterPrimaryKey.Invoke(target);
+                        if (target.IsCommited)
+                        {
+                            waitForLevel = request.Level - 1;
+                            try
+                            {
+                                lastNodeRequest!.PropertyNode!.PropertyInfo!.SetValue(lastNode, target.Value);
+                            }
+                            catch 
+                            {
+                                Console.WriteLine(lastNodeRequest);
+                                Console.WriteLine(lastNode);
+                                Console.WriteLine(target.Value);
+                                throw;
+                            }
+                        }
                     }
                 }
                 else
@@ -251,6 +268,11 @@ public class TypesForest
                     }
                     if (request.Kind is ValueNodeKind.Node)
                     {
+                        if(request.Level > 0)
+                        {
+                            lastNodeRequest = request;
+                            lastNode = targets.Peek().Value;
+                        }
                         if (args.IsCommited || args.Value is null)
                         {
                             waitForLevel = request.Level;
