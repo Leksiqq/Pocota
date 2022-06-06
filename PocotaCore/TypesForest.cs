@@ -60,7 +60,18 @@ public class TypesForest
     /// <returns></returns>
     public TypeNode GetTypeNode(Type type)
     {
-        return GetTypeNode(type, null);
+        lock (type)
+        {
+            if (!_typeTrees.ContainsKey(type))
+            {
+                _typeTrees[type] = new TypeNode { Type = type, ChildNodes = new List<PropertyNode>() };
+                ConfigureTypeNode(_typeTrees[type]);
+                //_typeTrees[type].ValueRequests = new List<ValueNode>();
+                //CollectValueRequests1(_typeTrees[type], _typeTrees[type].ValueRequests!);
+                CollectValueRequests(_typeTrees[type]);
+            }
+        }
+        return _typeTrees[type];
     }
 
     /// <summary>
@@ -158,7 +169,17 @@ public class TypesForest
             }
         }
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="type"></param>
+    /// <param name="onProperty"></param>
+    /// <param name="afterPrimaryKey"></param>
+    /// <param name="afterNode"></param>
+    /// <param name="withUpdate"></param>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="InvalidOperationException"></exception>
     public void WalkTree(object source, Type type, ValueNodeEventHandler onProperty, ValueNodeEventHandler? afterPrimaryKey = null,
         ValueNodeEventHandler? afterNode = null, bool withUpdate = false)
     {
@@ -224,7 +245,7 @@ public class TypesForest
                             {
                                 lastNodeRequest!.PropertyNode!.PropertyInfo!.SetValue(lastNode, target.Value);
                             }
-                            catch 
+                            catch
                             {
                                 Console.WriteLine(lastNodeRequest);
                                 Console.WriteLine(lastNode);
@@ -268,7 +289,7 @@ public class TypesForest
                     }
                     if (request.Kind is ValueNodeKind.Node)
                     {
-                        if(request.Level > 0)
+                        if (request.Level > 0)
                         {
                             lastNodeRequest = request;
                             lastNode = targets.Peek().Value;
@@ -292,24 +313,38 @@ public class TypesForest
             afterNode?.Invoke(args);
         }
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="source"></param>
+    /// <returns></returns>
     public string TreeToString<T>(object source) where T : class => TreeToString(source, typeof(T));
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
     public string TreeToString(object source) => TreeToString(source, source?.GetType() ?? typeof(object));
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="type"></param>
+    /// <returns></returns>
     public string TreeToString(object source, Type type)
     {
         StringBuilder result = new();
-        WalkTree(source, type, args => 
+        WalkTree(source, type, args =>
         {
             result.Append(args.Path).Append("=");
             if (args.Kind is ValueNodeKind.PrimaryKey)
             {
                 result.Append(args.Value is null ? "<undefined>" : args.Value);
             }
-            else if(args.Kind is ValueNodeKind.Node)
+            else if (args.Kind is ValueNodeKind.Node)
             {
-                if(args.Value is { })
+                if (args.Value is { })
                 {
                     result.Append("{").Append(args.NominalType.ToString()).Append("}");
                 }
@@ -337,47 +372,14 @@ public class TypesForest
         return result.ToString();
     }
 
-    private TypeNode GetTypeNode(Type type, Stack<Type>? stack)
+    private class Holder
     {
-        if (!_typeTrees.ContainsKey(type))
-        {
-            if (stack is null)
-            {
-                stack = new Stack<Type>();
-            }
-            PlantTypeTree(type, stack);
-        }
-        return _typeTrees[type];
+        internal TypeNode TypeNode = null!;
+        internal int CurrentChildPosition = 0;
+        internal string Path = string.Empty;
     }
 
-    private bool PlantTypeTree(Type type, Stack<Type> stack)
-    {
-        stack.Push(type);
-        if (!_container.ContainsServiceType(type))
-        {
-            throw new ArgumentException($"{type} is not registered.");
-        }
-        bool result = !_typeTrees.ContainsKey(type);
-        if (result)
-        {
-            lock (type)
-            {
-                result = !_typeTrees.ContainsKey(type);
-                if (result)
-                {
-                    _typeTrees[type] = new TypeNode { Type = type, ChildNodes = new List<PropertyNode>() };
-                    ConfigureTypeNode(_typeTrees[type], stack);
-
-                    _typeTrees[type].ValueRequests = new List<ValueNode>();
-                    CollectValueRequests(_typeTrees[type], _typeTrees[type].ValueRequests!, stack);
-                }
-            }
-        }
-        stack.Pop();
-        return result;
-    }
-
-    private void ConfigureTypeNode(TypeNode typeNode, Stack<Type> stack)
+    private void ConfigureTypeNode(TypeNode typeNode)
     {
         List<PropertyInfo> properties = new();
         CollectProperties(typeNode, properties);
@@ -387,10 +389,80 @@ public class TypesForest
         List<PropertyInfo> actualProperties = new();
         CollectActualProperties(typeNode, actualProperties);
 
-        CollectChildNodes(typeNode, properties, actualProperties, stack);
+        CollectChildNodes(typeNode, properties, actualProperties);
     }
 
-    private void CollectValueRequests(TypeNode typeNode, List<ValueNode> requests, Stack<Type> stack)
+    private void CollectValueRequests(TypeNode typeNode)
+    {
+        Stack<Holder> stack = new();
+        Stack<PropertyInfo?> loopControl = new();
+        loopControl.Push(null);
+        stack.Push(new Holder { TypeNode = typeNode, CurrentChildPosition = 0 });
+        typeNode.ValueRequests = new List<ValueNode>();
+        typeNode.ValueRequests.Add(new ValueNode
+        {
+            Path = Slash,
+            PropertyNode = new PropertyNode { TypeNode = typeNode },
+            Level = 0
+        });
+        while (stack.Count > 0)
+        {
+            Holder holder = stack.Peek();
+            int level = stack.Count - 1;
+            if(holder.CurrentChildPosition == 0)
+            {
+                if (_container.GetPrimaryKeyDefinition(holder.TypeNode.ActualType) is Dictionary<string, Type> keyDefinitions)
+                {
+                    foreach (KeyValuePair<string, Type> entry in keyDefinitions)
+                    {
+                        typeNode.ValueRequests.Add(new ValueNode
+                        {
+                            Path = holder.Path + Slash + entry.Key,
+                            KeyFieldType = entry.Value,
+                            Level = level + 1
+                        });
+                    }
+                }
+            }
+            for(; holder.CurrentChildPosition < holder.TypeNode.ChildNodes!.Count && holder.TypeNode.ChildNodes![holder.CurrentChildPosition].IsLeaf; ++holder.CurrentChildPosition)
+            {
+                typeNode.ValueRequests.Add(new ValueNode
+                {
+                    Path = holder.Path + Slash + holder.TypeNode.ChildNodes![holder.CurrentChildPosition].Name,
+                    PropertyNode = holder.TypeNode.ChildNodes![holder.CurrentChildPosition],
+                    Level = level + 1
+                });
+            }
+            if(holder.CurrentChildPosition < holder.TypeNode.ChildNodes!.Count)
+            {
+                if (!loopControl.Contains(holder.TypeNode.ChildNodes![holder.CurrentChildPosition].PropertyInfo))
+                {
+                    loopControl.Push(holder.TypeNode.ChildNodes![holder.CurrentChildPosition].PropertyInfo);
+                    string path = holder.Path + Slash + holder.TypeNode.ChildNodes![holder.CurrentChildPosition].Name;
+                    typeNode.ValueRequests.Add(new ValueNode
+                    {
+                        Path = path,
+                        PropertyNode = holder.TypeNode.ChildNodes![holder.CurrentChildPosition],
+                        Level = level + 1
+                    });
+                    stack.Push(new Holder
+                    {
+                        TypeNode = holder.TypeNode.ChildNodes![holder.CurrentChildPosition].TypeNode,
+                        CurrentChildPosition = 0,
+                        Path = path
+                    });
+                }
+                ++holder.CurrentChildPosition;
+            }
+            else
+            {
+                stack.Pop();
+                loopControl.Pop();
+            }
+        }
+    }
+
+    private void CollectValueRequests1(TypeNode typeNode, List<ValueNode> requests)
     {
         int level = 0;
         StringBuilder path = new();
@@ -419,8 +491,10 @@ public class TypesForest
             }
         }
         ++level;
+        Stack<PropertyInfo?> loopControl = new();
         foreach (PropertyNode propertyNode in typeNode.ChildNodes!)
         {
+            loopControl.Push(propertyNode.PropertyInfo);
             int pathLength = path.Length;
             path.Append(Slash).Append(propertyNode.PropertyInfo!.Name);
             ValueNode request = new ValueNode
@@ -432,22 +506,12 @@ public class TypesForest
             requests.Add(request);
             if (!propertyNode.IsLeaf)
             {
-                if (propertyNode.TypeNode.ValueRequests is null)
-                {
-                    var stackReverse = stack.ToList();
-                    stackReverse.Reverse();
-                    string stackView = string.Join(Slash, stackReverse);
-                    throw new Exception($"Loop detected: {stackView}");
-                }
                 List<ValueNode> range = new();
                 foreach (ValueNode req in propertyNode.TypeNode.ValueRequests!)
                 {
-                    if (req.Path != Slash)
+                    if (req.Path != Slash && (req.PropertyNode is null || !loopControl.Contains(req.PropertyNode.PropertyInfo)))
                     {
-                        if (req.Kind is not ValueNodeKind.PrimaryKey && ReferenceEquals(requests, propertyNode.TypeNode.ValueRequests))
-                        {
-                            break;
-                        }
+                        loopControl.Push(req.PropertyNode?.PropertyInfo);
                         int pathLength1 = path.Length;
                         path.Append(req.Path);
                         request = new ValueNode
@@ -465,18 +529,19 @@ public class TypesForest
                         }
                         range.Add(request);
                         path.Length = pathLength1;
-
+                        loopControl.Pop();
                     }
                 }
                 requests.AddRange(range);
             }
             path.Length = pathLength;
+            loopControl.Pop();
         }
         --level;
     }
 
     private void CollectChildNodes(TypeNode typeNode, List<PropertyInfo> properties,
-        List<PropertyInfo> actualProperties, Stack<Type> stack)
+        List<PropertyInfo> actualProperties)
     {
         foreach (PropertyInfo propertyInfo in actualProperties)
         {
@@ -512,7 +577,7 @@ public class TypesForest
                         : propertyInfo.Name,
                     PropertyInfo = actualProperty,
                     TypeNode = _container.ContainsServiceType(propertyInfo.PropertyType)
-                        ? GetTypeNode(propertyInfo.PropertyType, stack)
+                        ? GetTypeNode(propertyInfo.PropertyType)
                         : new TypeNode { Type = propertyInfo.PropertyType, ActualType = propertyInfo.PropertyType },
                     IsNullable = (propertyInfo.PropertyType.IsValueType && Nullable.GetUnderlyingType(propertyInfo.PropertyType) is Type)
                         || propertyInfo.GetCustomAttributes().Any(a => a.GetType().Name.Contains(_nullableAttributeName))

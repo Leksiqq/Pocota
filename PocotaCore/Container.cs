@@ -214,6 +214,27 @@ public class Container : IServiceCollection
         }
         return null;
     }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    public KeyRing? CreateKeyRing(object source)
+    {
+        KeyRing? keyRing = null;
+        if (!_attachedKeys.TryGetValue(source, out keyRing))
+        {
+            Type? mapped = GetMappedType(source.GetType());
+            if (mapped is { })
+            {
+                keyRing = new KeyRing(this, _keyMap[mapped]);
+                keyRing.PrimaryKey = new object[_keyMap[mapped].Count];
+                keyRing.Source = source;
+                _attachedKeys.Add(source, keyRing);
+            }
+        }
+        return keyRing;
+    }
 
     #region Unused
     /// <summary>
@@ -365,39 +386,6 @@ public class Container : IServiceCollection
     }
     #endregion Unused
 
-    private Type? GetMappedType(Type actualType)
-    {
-        Type? mapped = null;
-        if (!_mappedTypesCache.TryGetValue(actualType, out mapped))
-        {
-            Type? current = actualType;
-            while (current is { } && !_keyMap.ContainsKey(current))
-            {
-                current = current!.BaseType;
-            }
-            mapped = current;
-            _mappedTypesCache.TryAdd(actualType, mapped);
-        }
-        return mapped;
-    }
-
-    internal KeyRing? CreateKeyRing(object source)
-    {
-        KeyRing? keyRing = null;
-        if(!_attachedKeys.TryGetValue(source, out keyRing))
-        {
-            Type? mapped = GetMappedType(source.GetType());
-            if (mapped is { })
-            {
-                keyRing = new KeyRing(this, _keyMap[mapped]);
-                keyRing.PrimaryKey = new object[_keyMap[mapped].Count];
-                keyRing.Source = source;
-                _attachedKeys.Add(source, keyRing);
-            }
-        }
-        return keyRing;
-    }
-
     internal void AddPrimaryKey(Type targetType, IDictionary<string, Type> fieldDefinitions)
     {
         ThrowIfConfigured();
@@ -438,6 +426,22 @@ public class Container : IServiceCollection
         instance.ServiceDescriptors = null;
 
 
+    }
+
+    private Type? GetMappedType(Type actualType)
+    {
+        Type? mapped = null;
+        if (!_mappedTypesCache.TryGetValue(actualType, out mapped))
+        {
+            Type? current = actualType;
+            while (current is { } && !_keyMap.ContainsKey(current))
+            {
+                current = current!.BaseType;
+            }
+            mapped = current;
+            _mappedTypesCache.TryAdd(actualType, mapped);
+        }
+        return mapped;
     }
 
     private static void ThrowIfNotTransient(ServiceDescriptor item)
