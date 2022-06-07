@@ -44,30 +44,30 @@ public class TypesForestTest
         });
     }
 
-    [Test]
-    [TestCase(typeof(IShipCall))]
-    [TestCase(typeof(IShipCallForListing))]
-    [TestCase(typeof(IShipCallAdditionalInfo))]
-    [TestCase(typeof(IArrivalShipCall))]
-    [TestCase(typeof(IDepartureShipCall))]
-    [TestCase(typeof(ILocation))]
-    [TestCase(typeof(IRoute))]
-    [TestCase(typeof(IRouteShort))]
-    [TestCase(typeof(ILine))]
-    [TestCase(typeof(IVessel))]
-    [TestCase(typeof(IVesselShort))]
-    [TestCase(typeof(ITravelForListing))]
-    [TestCase(typeof(ShipCall))]
-    public void VisualTestTreeToString(Type type)
-    {
-        IHost host = Config.Configure();
-        Config.ModelObjectFactory modelObjectFactory = host.Services.GetRequiredService<Config.ModelObjectFactory>();
-        object obj = modelObjectFactory.Create(type);
-        TypesForest tp = host.Services.GetRequiredService<TypesForest>();
+    //[Test]
+    //[TestCase(typeof(IShipCall))]
+    //[TestCase(typeof(IShipCallForListing))]
+    //[TestCase(typeof(IShipCallAdditionalInfo))]
+    //[TestCase(typeof(IArrivalShipCall))]
+    //[TestCase(typeof(IDepartureShipCall))]
+    //[TestCase(typeof(ILocation))]
+    //[TestCase(typeof(IRoute))]
+    //[TestCase(typeof(IRouteShort))]
+    //[TestCase(typeof(ILine))]
+    //[TestCase(typeof(IVessel))]
+    //[TestCase(typeof(IVesselShort))]
+    //[TestCase(typeof(ITravelForListing))]
+    //[TestCase(typeof(ShipCall))]
+    //public void VisualTestTreeToString(Type type)
+    //{
+    //    IHost host = Config.Configure();
+    //    Config.ModelObjectFactory modelObjectFactory = host.Services.GetRequiredService<Config.ModelObjectFactory>();
+    //    object obj = modelObjectFactory.Create(type);
+    //    TypesForest tp = host.Services.GetRequiredService<TypesForest>();
 
-        Trace.WriteLine(tp.TreeToString(obj, type));
+    //    Trace.WriteLine(tp.TreeToString(obj, type));
 
-    }
+    //}
 
     [Test]
     [TestCase(typeof(IShipCall))]
