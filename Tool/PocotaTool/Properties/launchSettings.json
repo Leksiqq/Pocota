@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PocotaTool": {
+      "commandName": "Project",
+      "commandLineArgs": "gen --contract-assembly W:\\C#\\PocotaEF\\Demo\\ContosoPizzaRemake\\Contract\\bin\\Debug\\net8.0\\Contract.dll --server-models W:\\C#\\PocotaEF\\Demo\\ContosoPizzaRemake\\Server\\Models"
+    }
+  }
+}
