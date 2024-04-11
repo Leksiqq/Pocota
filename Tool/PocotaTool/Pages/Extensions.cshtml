@@ -1,0 +1,26 @@
+﻿@page
+@using Net.Leksi.Pocota.Tool.Pages
+@using Net.Leksi.Pocota.Tool
+@model ExtensionsModel
+@{
+}
+@Html.Partial("Header", Model)
+public static class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
+{
+    public static IServiceCollection Add@{}@Model.ContractName@{}(
+        this IServiceCollection services, 
+        Type serviceImplementation,
+        Action@{}@Html.Raw($"<IServiceCollection>")? additionalConfig = null
+    )
+    {
+        services.AddScoped@{}@Html.Raw($"<{Model.ContractName}JsonConverterFactory>")@{}();
+        services.AddScoped@{}(typeof(@Model.ContractName@{}ServiceBase), serviceImplementation);
+@foreach(PropertyModel pm in Model.Properties)
+{
+    <text>        services.AddTransient@{}@Html.Raw($"<{pm.Name}JsonConverter>")@{}();
+</text>
+}
+        additionalConfig?.Invoke(services);
+        return services;
+    }
+}

@@ -1,0 +1,15 @@
+﻿@page
+@using Net.Leksi.Pocota.Tool.Pages
+@using Net.Leksi.Pocota.Tool
+@model ServiceBaseModel
+@{
+}
+@Html.Partial("Header", Model)
+public abstract class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
+{
+@foreach(MethodModel mm in @Model.Methods)
+{
+    <text>    public abstract @Html.Raw(mm.ReturnTypeName) @mm.Name@{}(@string.Join(", ", mm.Parameters.Select(p => $"{Html.Raw(p.TypeName)} {p.Name}")));
+</text>
+}
+}

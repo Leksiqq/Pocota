@@ -31,7 +31,7 @@ internal class Util
         }
         return Util.BuildTypeName(type);
     }
-    internal static string GetName(string fullName)
+    internal static string GetTypeName(string fullName)
     {
         if (fullName.LastIndexOf('.') is int index && index >= 0)
         {
@@ -47,7 +47,7 @@ internal class Util
         }
         return string.Empty;
     }
-    internal static string BuildAttribute(Attribute attribute)
+    internal static string BuildAttribute(Attribute attribute, HashSet<Type> usings)
     {
         StringBuilder sb = new();
 
@@ -99,7 +99,6 @@ internal class Util
         object defaultObject = Activator.CreateInstance(attribute.GetType())!;
         if (usedConstructor is { })
         {
-            Console.WriteLine(usedConstructor);
             List<object?> parameters = [];
             foreach (ParameterInfo par in usedConstructor.GetParameters())
             {
@@ -114,6 +113,10 @@ internal class Util
                 }
                 sb.Append(constructedProperties[par.Name!.ToLower()]);
                 parameters.Add(constructedProperties[par.Name!.ToLower()]);
+                if(constructedProperties[par.Name!.ToLower()] is object value)
+                {
+                    usings.Add(value.GetType());
+                }
             }
             defaultObject = usedConstructor.Invoke([.. parameters]);
         }
@@ -123,10 +126,6 @@ internal class Util
         }
         foreach (PropertyInfo pi in attribute.GetType().GetProperties())
         {
-            if(pi.Name != "TypeId" && !constructedProperties.ContainsKey(pi.Name.ToLower()) && pi.CanWrite)
-            {
-                Console.WriteLine($"{pi.Name}: {pi.GetValue(attribute)} ? {pi.GetValue(defaultObject)} {pi.GetValue(attribute) != pi.GetValue(defaultObject)}");
-            }
             if (pi.Name != "TypeId" && !constructedProperties.ContainsKey(pi.Name.ToLower()) && pi.CanWrite && pi.GetValue(attribute) != pi.GetValue(defaultObject))
             {
                 string value = RenderValue(pi, attribute);
@@ -140,6 +139,7 @@ internal class Util
                     sb.Append(',');
                 }
                 sb.Append(pi.Name).Append('=').Append(value);
+                usings.Add(pi.PropertyType);
             }
         }
         if (hasParens)
@@ -164,6 +164,13 @@ internal class Util
             if (pi.GetValue(target) is string s)
             {
                 return $"""{s}""";
+            }
+        }
+        else if (pi.PropertyType.IsEnum)
+        {
+            if (pi.GetValue(target) is object obj)
+            {
+                return $"{pi.PropertyType.Name}.{obj}";
             }
         }
         else if(pi.GetValue(target) is object obj)

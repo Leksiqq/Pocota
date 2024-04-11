@@ -1,0 +1,18 @@
+﻿@page
+@using Microsoft.EntityFrameworkCore
+@using Net.Leksi.Pocota.Tool
+@using Net.Leksi.Pocota.Tool.Pages
+@model ContextModel
+@{
+}
+@Html.Partial("Header", Model)
+public partial class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
+{
+    public @Model.ClassName@{}(@nameof(DbContextOptions)@Html.Raw($"<{@Model.ClassName}>") options) : base(options) { }
+
+@foreach(PropertyModel pm in Model.Properties)
+{
+    <text>    public @nameof(DbSet<object>)@Html.Raw($"<{pm.TypeName}>") @pm.Name => @nameof(DbContext.Set)@Html.Raw($"<{pm.TypeName}>")@{}();
+</text>
+}
+}

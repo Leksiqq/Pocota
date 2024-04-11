@@ -1,4 +1,5 @@
-﻿using Net.Leksi.Pocota.Tool;
+﻿using Net.Leksi.Pocota;
+using Net.Leksi.Pocota.Tool;
 
 List<KeyValuePair<string, string>> argsList = [];
 for(int i = 0; i < args.Length; ++i)
@@ -11,12 +12,6 @@ IConfiguration bootstrapConfig = new ConfigurationBuilder()
     .AddCommandLine(args)
     .AddInMemoryCollection(argsList!)
     .Build();
-
-if(args.Contains("-h") || args.Contains("--help"))
-{
-    Usage();
-    return;
-}
 
 if (args.Length == 0 || args[0].StartsWith("--") || args[0].StartsWith('/'))
 {

@@ -2,7 +2,7 @@
 
 namespace Net.Leksi.Pocota.Tool;
 
-internal class ClassModel: PageModel
+public class ClassModel: PageModel
 {
     private string _namespace = null!;
     internal string NamespaceValue
@@ -19,6 +19,7 @@ internal class ClassModel: PageModel
     internal HashSet<string> Usings { get; private init; } = [];
     internal HashSet<string> Inheritances { get; private init; } = [];
     internal List<PropertyModel> Properties { get; private init; } = [];
+    internal List<MethodModel> Methods { get; private init; } = [];
     internal List<string> Attributes { get; private init; } = [];
     internal void AddUsing(Type type)
     {
@@ -38,5 +39,9 @@ internal class ClassModel: PageModel
     {
         AddUsing(type);
         Inheritances.Add(Util.BuildTypeName(type));
+    }
+    internal void AddInheritance(string typeName)
+    {
+        Inheritances.Add(typeName);
     }
 }

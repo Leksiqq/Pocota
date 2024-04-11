@@ -1,0 +1,33 @@
+﻿@page
+@using Net.Leksi.Pocota.Tool.Pages
+@using Net.Leksi.Pocota.Tool
+@model JsonConverterModel
+@{
+}
+@Html.Partial("Header", Model)
+public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {string.Join(", ", Model.Inheritances)}") : string.Empty)
+{
+    private readonly IServiceProvider _services;
+    private readonly @Model.ContractName@{}Context _dbContext;
+    public @Model.ClassName@{}(IServiceProvider services)
+    {
+        _services = services;
+        _dbContext = _services.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}Context>")@{}();
+    }
+    public override @Model.EntityTypeName? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void Write(Utf8JsonWriter writer, @Model.EntityTypeName value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+@foreach(PropertyModel pm in Model.Properties)
+{
+    <text>        writer.WritePropertyName(@Html.Raw($"\"{pm.Name}\""));
+        JsonSerializer.Serialize(writer, value.@pm.Name, options);
+</text>
+}
+        writer.WriteEndObject();
+    }
+}

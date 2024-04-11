@@ -5,7 +5,7 @@
 @{
 }
 @Html.Partial("Header", Model)
-public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
+public partial class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
 {
 @foreach(PropertyModel pm in Model.Properties)
 {

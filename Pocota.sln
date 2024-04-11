@@ -13,15 +13,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PocotaTool", "Tool\PocotaTo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demo", "Demo", "{9F2BBAFD-4F8D-44A4-B952-EC33C9DB9125}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contract", "Demo\ContosoPizzaRemake\Contract\Contract.csproj", "{EAAFEF02-D912-49A5-908E-53BFEAD6FC0B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contract", "Demo\ContosoPizzaRemake\Contract\Contract.csproj", "{EAAFEF02-D912-49A5-908E-53BFEAD6FC0B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ContosoPizzaRemake", "ContosoPizzaRemake", "{C6EB8231-E535-46FD-9C56-7E0D5A1FD4DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Demo\ContosoPizzaRemake\Server\Server.csproj", "{4D461ADA-45D3-4903-8176-128C42DD56A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "Demo\ContosoPizzaRemake\Server\Server.csproj", "{4D461ADA-45D3-4903-8176-128C42DD56A8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{C4FBB88D-3786-49B3-9858-46E6DD874A55}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocotaContract", "Common\PocotaContract\PocotaContract.csproj", "{2FAE1524-9FE6-4C6C-B144-69C65CDE0187}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PocotaContract", "Common\PocotaContract\PocotaContract.csproj", "{2FAE1524-9FE6-4C6C-B144-69C65CDE0187}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

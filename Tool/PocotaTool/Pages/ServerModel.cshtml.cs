@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace Net.Leksi.Pocota.Tool.Pages
+namespace Net.Leksi.Pocota.Tool.Pages;
+
+public class ServerModelModel : ClassModel
 {
-    internal class ServerModelModel : ClassModel
+    public void OnGet([FromServices]SourceGenerator generator)
     {
-        public void OnGet([FromServices]SourceGenerator generator)
-        {
-            generator.GenerateServerModel(this);
-        }
+        SourceGenerator.PopulateServerModelModel(this);
     }
 }

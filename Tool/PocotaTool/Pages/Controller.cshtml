@@ -1,0 +1,54 @@
+﻿@page
+@using Net.Leksi.Pocota.Tool.Pages
+@using Net.Leksi.Pocota.Tool
+@model ControllerModel
+@{
+}
+@Html.Partial("Header", Model)
+public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
+{
+    private JsonSerializerOptions? _serializerOptions;
+    private readonly object _lock = new();
+@foreach(MethodModel mm in @Model.Methods)
+{
+    <text>    @foreach (string attr in mm.Attributes)
+    {
+        <text>    @Html.Raw(attr)
+</text>
+    }
+    public async @nameof(Task) @mm.Name@{}(@string.Join(", ", mm.Parameters.Select(p => $"string {p.Name}")))
+    {
+        @Model.ServiceClassName _storageService = HttpContext.RequestServices.GetRequiredService@{}@Html.Raw($"<{Model.ServiceClassName}>")@{}();
+        JsonSerializerOptions _serializerOptions = GetJsonSerializerOptions(HttpContext.RequestServices);
+    @foreach(ParameterModel pm in mm.Parameters)
+    {
+        <text>        @Html.Raw(pm.TypeName) _@pm.Name = JsonSerializer.Deserialize@{}@Html.Raw($"<{pm.TypeName}>")@{}(@pm.Name, _serializerOptions)!;
+</text>
+    }
+        await JsonSerializer.SerializeAsync(
+            HttpContext.Response.Body, 
+            @(!mm.IsEnumeration ? "await " : string.Empty)_storageService.@mm.Name@{}Async@{}(@string.Join(", ", mm.Parameters.Select(p => $"_{p.Name}"))), 
+            _serializerOptions
+        );
+    }
+</text>
+}
+    private JsonSerializerOptions GetJsonSerializerOptions(IServiceProvider services)
+    {
+        if(_serializerOptions is null)
+        {
+            lock(_lock){
+                if(_serializerOptions is null)
+                {
+                    _serializerOptions = new(){
+                          ReferenceHandler = ReferenceHandler.Preserve,
+                    };
+                    _serializerOptions.Converters.Add(
+                        services.GetRequiredService@{}@Html.Raw($"<{Model.JsonConverterFactoryClassName}>")@{}()
+                    );
+                }
+            }
+        }
+        return _serializerOptions;
+    }
+}
