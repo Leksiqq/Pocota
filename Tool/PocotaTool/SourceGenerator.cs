@@ -1,17 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Net.Leksi.E6dWebApp;
 using Net.Leksi.Pocota.Contract;
+using Net.Leksi.Pocota.Server;
 using Net.Leksi.Pocota.Tool;
 using Net.Leksi.Pocota.Tool.Pages;
-using System;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static Net.Leksi.Pocota.Tool.Constants;
 
 namespace Net.Leksi.Pocota;
@@ -20,7 +17,7 @@ public class SourceGenerator : Runner, ICommand
     private readonly IServiceProvider _services;
     private readonly ILogger<SourceGenerator>? _logger;
     private readonly IConfiguration _configuration;
-    private readonly string[] _serverFolders = ["contexts", "controllers", "services", "server-models", "server-converters", "server-extensions"];
+    private readonly string[] _serverFolders = ["contexts", "controllers", "services", "server-converters", "server-extensions"];
     private readonly string[] _clientFolders = ["connectors", "client-models", "client-converters", "client-extensions"];
     private readonly string _clientLanguage = s_cSharp;
     private readonly string _fileExtension = s_cs;
@@ -138,52 +135,6 @@ public class SourceGenerator : Runner, ICommand
             }
         }
     }
-    internal static void PopulateServerModelModel(ServerModelModel model)
-    {
-        PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
-        string typeName = BuildResutTypeName(options.EntityType!);
-        model.Contract = Util.BuildTypeFullName(options.ContractType!);
-        model.ClassName = Util.GetTypeName(typeName);
-        model.NamespaceValue = Util.GetNamespace(typeName);
-        HashSet<Type> entityTypes = [];
-        foreach (EntityAttribute attribute in options.ContractType!.GetCustomAttributes<EntityAttribute>())
-        {
-            entityTypes.Add(attribute.EntityType);
-        }
-        HashSet<Type> usingsAtAttributes = [];
-        foreach(Attribute attribute in options.EntityType!.GetCustomAttributes())
-        {
-            if (!attribute.GetType().Name.StartsWith("Nullable"))
-            {
-                model.AddUsing(attribute.GetType());
-                model.Attributes.Add(Util.BuildAttribute(attribute, usingsAtAttributes));
-            }
-        }
-        NullabilityInfoContext nullabilityInfoContext = new();
-        foreach (PropertyInfo pi in options.EntityType!.GetProperties())
-        {
-            PropertyModel pm = new()
-            {
-                Name = pi.Name,
-                TypeName = BuildTypeName(pi.PropertyType, model, entityTypes),
-                IsNullable = nullabilityInfoContext.Create(pi).ReadState is NullabilityState.Nullable,
-            };
-            model.AddUsing(pi.PropertyType);
-            foreach (Attribute attribute in pi.GetCustomAttributes())
-            {
-                if (!attribute.GetType().Name.StartsWith("Nullable"))
-                { 
-                    model.AddUsing(attribute.GetType());
-                    pm.Attributes.Add(Util.BuildAttribute(attribute, usingsAtAttributes));
-                }
-            }
-            model.Properties.Add(pm);
-        }
-        foreach(Type type in usingsAtAttributes)
-        {
-            model.AddUsing(type);
-        }
-    }
     internal static void PopulateContextModel(ContextModel model)
     {
         PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
@@ -199,8 +150,8 @@ public class SourceGenerator : Runner, ICommand
             PropertyModel pm = new()
             {
                 Name = !string.IsNullOrEmpty(attribute.NameOfSet) ? attribute.NameOfSet 
-                    : $"SetOf{Util.GetTypeName(BuildResutTypeName(attribute.EntityType))}",
-                TypeName = Util.GetTypeName(BuildResutTypeName(attribute.EntityType)),
+                    : $"SetOf{attribute.EntityType.Name}",
+                TypeName = attribute.EntityType.Name,
             };
             model.Properties.Add(pm);
         }
@@ -211,14 +162,10 @@ public class SourceGenerator : Runner, ICommand
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
         model.ClassName = Util.GetTypeName(options.ClassName!);
         model.NamespaceValue = Util.GetNamespace(options.ClassName!);
-        HashSet<Type> entityTypes = [];
-        foreach (EntityAttribute attribute in options.ContractType!.GetCustomAttributes<EntityAttribute>())
-        {
-            entityTypes.Add(attribute.EntityType);
-        }
         foreach(MethodInfo mi in options.ContractType!.GetMethods())
         {
-            string returnTypeName = BuildTypeName(mi.ReturnType, model, entityTypes);
+            model.AddUsing(mi.ReturnType);
+            string returnTypeName = Util.BuildTypeName(mi.ReturnType);
             if (mi.ReturnType.IsGenericType)
             {
                 model.AddUsing(typeof(IAsyncEnumerable<>));
@@ -236,10 +183,11 @@ public class SourceGenerator : Runner, ICommand
             };
             foreach(ParameterInfo pi in mi.GetParameters())
             {
+                model.AddUsing(pi.ParameterType);
                 ParameterModel pm = new()
                 {
                     Name = pi.Name!,
-                    TypeName = BuildTypeName(pi.ParameterType, model, entityTypes),
+                    TypeName = pi.ParameterType.Name,
                 };
                 mm.Parameters.Add(pm);
             }
@@ -262,26 +210,23 @@ public class SourceGenerator : Runner, ICommand
         model.AddUsing(typeof(RouteAttribute));
         model.AddUsing(typeof(HttpGetAttribute));
         model.AddUsing(typeof(HttpPostAttribute));
-        HashSet<Type> entityTypes = [];
-        foreach (EntityAttribute attribute in options.ContractType!.GetCustomAttributes<EntityAttribute>())
-        {
-            entityTypes.Add(attribute.EntityType);
-        }
         foreach (MethodInfo mi in options.ContractType!.GetMethods())
         {
+            model.AddUsing(mi.ReturnType);
             MethodModel mm = new()
             {
                 Name = mi.Name,
-                ReturnTypeName = BuildTypeName(mi.ReturnType, model, entityTypes),
+                ReturnTypeName = mi.ReturnType.Name,
                 IsEnumeration = mi.ReturnType.IsGenericType,
             };
             mm.Attributes.Add($"[HttpGet(\"{mi.Name}{(mi.GetParameters().Length > 0 ? $"/{string.Join('/', mi.GetParameters().Select(p => $"{{{p.Name}}}"))}" : string.Empty)}\")]");
             foreach (ParameterInfo pi in mi.GetParameters())
             {
+                model.AddUsing(pi.ParameterType);
                 ParameterModel pm = new()
                 {
                     Name = pi.Name!,
-                    TypeName = BuildTypeName(pi.ParameterType, model, entityTypes),
+                    TypeName = pi.ParameterType.Name,
                 };
                 mm.Parameters.Add(pm);
             }
@@ -304,7 +249,7 @@ public class SourceGenerator : Runner, ICommand
         foreach (EntityAttribute attribute in options.ContractType!.GetCustomAttributes<EntityAttribute>())
         {
             model.AddUsing(attribute.EntityType);
-            model.Entities.Add(Util.GetTypeName(BuildResutTypeName(attribute.EntityType)));
+            model.Entities.Add(Util.BuildTypeName(attribute.EntityType));
         }
     }
     internal static void PopulateJsonConverterModel(JsonConverterModel model)
@@ -316,23 +261,22 @@ public class SourceGenerator : Runner, ICommand
         model.AddUsing(typeof(JsonConverter<>));
         model.AddUsing(typeof(JsonSerializer));
         model.AddUsing(typeof(IServiceProvider));
+        model.AddUsing(typeof(PocotaContext));
         model.AddUsing(options.ContractType!);
-        model.EntityTypeName = Util.GetTypeName(BuildResutTypeName(options.EntityType!));
+        model.EntityTypeName = Util.BuildTypeName(options.EntityType!);
         model.ContractName = options.ContractType!.GetCustomAttribute<PocotaContractAttribute>()!.ContractName!;
-        HashSet<Type> entityTypes = [];
-        foreach (EntityAttribute attribute in options.ContractType!.GetCustomAttributes<EntityAttribute>())
-        {
-            model.AddUsing(attribute.EntityType);
-            entityTypes.Add(attribute.EntityType);
-        }
-        model.AddInheritance(BuildTypeName(typeof(JsonConverter<>).MakeGenericType([options.EntityType!]), model, entityTypes));
+        model.AddInheritance(typeof(JsonConverter<>).MakeGenericType([options.EntityType!]));
         foreach (PropertyInfo pi in options.EntityType!.GetProperties())
         {
-            PropertyModel pm = new()
+            if(pi.GetCustomAttribute<JsonIgnoreAttribute>() is null)
             {
-                Name = pi.Name,
-            };
-            model.Properties.Add(pm);
+                model.AddUsing(pi.PropertyType);
+                PropertyModel pm = new()
+                {
+                    Name = pi.Name,
+                };
+                model.Properties.Add(pm);
+            }
         }
     }
     internal static void PopulateExtensionsModel(ExtensionsModel model)
@@ -343,12 +287,13 @@ public class SourceGenerator : Runner, ICommand
         model.NamespaceValue = Util.GetNamespace(options.ClassName!);
         model.ContractName = options.ContractType!.GetCustomAttribute<PocotaContractAttribute>()!.ContractName!;
         model.AddUsing(typeof(IServiceCollection));
+        model.AddUsing(typeof(PocotaContext));
         foreach (EntityAttribute attribute in options.ContractType!.GetCustomAttributes<EntityAttribute>())
         {
             model.AddUsing(attribute.EntityType);
             PropertyModel pm = new()
             {
-                Name = Util.GetTypeName(BuildResutTypeName(attribute.EntityType)),
+                Name = Util.BuildTypeName(attribute.EntityType),
             };
             model.Properties.Add(pm);
         }
@@ -415,14 +360,6 @@ public class SourceGenerator : Runner, ICommand
         }
         foreach (EntityAttribute entityAttribute in contractType.GetCustomAttributes<EntityAttribute>())
         {
-            if (_configuration["server-models"] is string serverModelsFolder && !string.IsNullOrEmpty(serverModelsFolder))
-            {
-                if (!Directory.Exists(serverModelsFolder))
-                {
-                    Directory.CreateDirectory(serverModelsFolder);
-                }
-                await GenerateServerModelAsync(connector, contractType, entityAttribute.EntityType, serverModelsFolder);
-            }
             if (_configuration["client-models"] is string clientModelsFolder && !string.IsNullOrEmpty(clientModelsFolder))
             {
                 if (!Directory.Exists(clientModelsFolder))
@@ -449,7 +386,7 @@ public class SourceGenerator : Runner, ICommand
         await GenerateServerConverterFactoryAsync(connector, contractType, targetFolder, $"{name}JsonConverterFactory");
         foreach (EntityAttribute attribute in contractType.GetCustomAttributes<EntityAttribute>())
         {
-            string entityName = Util.GetTypeName(BuildResutTypeName(attribute.EntityType));
+            string entityName = Util.BuildTypeName(attribute.EntityType);
             await GenerateServerEntityConverterAsync(connector, contractType, attribute.EntityType, targetFolder, $"{entityName}JsonConverter");
         }
     }
@@ -521,18 +458,6 @@ public class SourceGenerator : Runner, ICommand
         await ProcessPageAsync(connector, options, "/Context", BuildFilePath(targetFolder, name));
         _logger?.LogInformation("Done.");
     }
-    private async Task GenerateServerModelAsync(IConnector connector, Type contractType, Type entityType, string targetFolder)
-    {
-        string name = BuildResutTypeName(entityType);
-        _logger?.LogInformation("Generating server's entity model {name} at {folder}.", name, targetFolder);
-        PageOptions options = new()
-        {
-            ContractType = contractType,
-            EntityType = entityType,
-        };
-        await ProcessPageAsync(connector, options, "/ServerModel", BuildFilePath(targetFolder, name));
-        _logger?.LogInformation("Done.");
-    }
     private async Task GenerateServiceBaseAsync(IConnector connector, Type contractType, string targetFolder, string name)
     {
         _logger?.LogInformation("Generating service base {name} at {folder}.", name, targetFolder);
@@ -564,57 +489,16 @@ public class SourceGenerator : Runner, ICommand
         using FileStream output = new(path, FileMode.Create);
         await input.CopyToAsync(output);
     }
-    private static string BuildResutTypeName(Type type, string? replaceName = null)
-    {
-        return $"{(string.IsNullOrEmpty(type.Namespace) ? string.Empty : $"{type.Namespace}.")}{(string.IsNullOrEmpty(replaceName) ? type.Name[1..] : replaceName)}";
-    }
     private string BuildFilePath(string targetFolder, string name)
     {
         string typeName = Util.GetTypeName(name);
         return $"{Path.Combine(targetFolder, typeName)}{_fileExtension}";
     }
-    private static string BuildTypeName(Type type, ClassModel model, HashSet<Type> entityTypes)
+    private static string BuildResutTypeName(Type type, string? replaceName = null)
     {
-        string result;
-        if (entityTypes.Contains(type))
-        {
-            result = Util.GetTypeName(BuildResutTypeName(type));
-        }
-        else if (type.IsGenericType)
-        {
-            result = BuildGenericResultTypeName(type, model, entityTypes);
-        }
-        else
-        {
-            result = Util.BuildTypeName(type);
-        }
-        return result;
+        return $"{(string.IsNullOrEmpty(type.Namespace) ? string.Empty : $"{type.Namespace}.")}{(string.IsNullOrEmpty(replaceName) ? type.Name[1..] : replaceName)}";
     }
-    private static string BuildGenericResultTypeName(Type type, ClassModel model, HashSet<Type> entityTypes)
-    {
-        Type[] args = type.GetGenericArguments();
-        StringBuilder sb = new(Util.BuildTypeName(type));
-        int ltIndex = sb.ToString().IndexOf('<');
-        sb.Remove(ltIndex + 1, sb.Length - ltIndex - 1);
-        for (int i = 0; i < args.Length; ++i)
-        {
-            model.AddUsing(args[i]);
-            if (i > 0)
-            {
-                sb.Append('.');
-            }
-            if (entityTypes.Contains(args[i]))
-            {
-                sb.Append(Util.GetTypeName(BuildResutTypeName(args[i])));
-            }
-            else
-            {
-                sb.Append(Util.BuildTypeName(args[i]));
-            }
-        }
-        sb.Append('>');
-        return sb.ToString();
-    }
+        
     private static string PascalCase(string folder)
     {
         StringBuilder sb = new();

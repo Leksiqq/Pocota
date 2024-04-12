@@ -35,7 +35,7 @@ else
 }
 
 IHost host = builder.Build();
-await host.StartAsync();
+await host.RunAsync();
 
 void Usage()
 {

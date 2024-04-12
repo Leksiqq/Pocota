@@ -9,13 +9,9 @@ public class EntityAttribute: Attribute
     public EntityAttribute(Type entityType)
     {
         _entityType = entityType;
-        if (!_entityType.IsInterface)
+        if (!_entityType.IsClass)
         {
-            throw new ArgumentException($"{_entityType} is not an interface.");
-        }
-        if (!_entityType.Name.StartsWith('I'))
-        {
-            throw new ArgumentException($"{_entityType} name is not starts with 'I'.");
+            throw new ArgumentException($"{_entityType} is not a class.");
         }
     }
 }

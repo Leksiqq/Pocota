@@ -4,16 +4,16 @@ using Net.Leksi.Pocota.Contract;
 namespace ContosoPizza;
 
 [PocotaContract("Pizza")]
-[Entity(typeof(IPizza))]
-[Entity(typeof(ISauce))]
-[Entity(typeof(ITopping))]
+[Entity(typeof(Pizza))]
+[Entity(typeof(Sauce))]
+[Entity(typeof(Topping))]
 public interface IContract
 {
-    IEnumerable<IPizza> GetAllPizzas();
-    IEnumerable<IPizza> FindPizzas(PizzaFilter filter);
-    IPizza GetPizza(IPizza pizza);
-    IEnumerable<ISauce> GetAllSauces();
-    ISauce GetSauce(ISauce sauce);
-    IEnumerable<ITopping> GetAllToppings();
-    ITopping GetTopping(ITopping topping);
+    IEnumerable<Pizza> GetAllPizzas();
+    IEnumerable<Pizza> FindPizzas(PizzaFilter filter);
+    Pizza GetPizza(Pizza pizza);
+    IEnumerable<Sauce> GetAllSauces();
+    Sauce GetSauce(Sauce sauce);
+    IEnumerable<Topping> GetAllToppings();
+    Topping GetTopping(Topping topping);
 }

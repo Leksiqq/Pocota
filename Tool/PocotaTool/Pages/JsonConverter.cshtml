@@ -9,10 +9,13 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
 {
     private readonly IServiceProvider _services;
     private readonly @Model.ContractName@{}Context _dbContext;
+    private readonly PocotaContext _context;
     public @Model.ClassName@{}(IServiceProvider services)
     {
         _services = services;
         _dbContext = _services.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}Context>")@{}();
+        _context = _services.GetRequiredService@{}@Html.Raw($"<PocotaContext>")@{}();
+
     }
     public override @Model.EntityTypeName? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -21,11 +24,19 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
 
     public override void Write(Utf8JsonWriter writer, @Model.EntityTypeName value, JsonSerializerOptions options)
     {
+        PocotaEntity pocotaEntity = _context.Entity(value);
         writer.WriteStartObject();
-@foreach(PropertyModel pm in Model.Properties)
+        writer.WritePropertyName(pocotaEntity.IsSerialized ? "$ref" : "$id");
+        pocotaEntity.SetSerialized();
+        writer.WriteNumberValue(pocotaEntity.PocotaId);
+@for(int i = 0; i < Model.Properties.Count; ++i)
 {
-    <text>        writer.WritePropertyName(@Html.Raw($"\"{pm.Name}\""));
-        JsonSerializer.Serialize(writer, value.@pm.Name, options);
+    <text>        if(!pocotaEntity.IsPropertySent(@i))
+        {
+            pocotaEntity.MarkPropertySent(@i);
+            writer.WritePropertyName(@Html.Raw($"\"{Model.Properties[i].Name}\""));
+            JsonSerializer.Serialize(writer, value.@Model.Properties[i].Name, options);
+        }
 </text>
 }
         writer.WriteEndObject();

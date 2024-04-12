@@ -1,12 +1,13 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaController                            //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-11T18:57:55.                                 //
+// at 2024-04-12T13:40:57.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
 using ContosoPizza.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -24,6 +25,7 @@ public class PizzaController: ControllerBase
     {
         PizzaServiceBase _storageService = HttpContext.RequestServices.GetRequiredService<PizzaServiceBase>();
         JsonSerializerOptions _serializerOptions = GetJsonSerializerOptions(HttpContext.RequestServices);
+        HttpContext.Response.ContentType = "application/json";
         await JsonSerializer.SerializeAsync(
             HttpContext.Response.Body, 
             _storageService.GetAllPizzasAsync(), 
@@ -35,6 +37,7 @@ public class PizzaController: ControllerBase
     {
         PizzaServiceBase _storageService = HttpContext.RequestServices.GetRequiredService<PizzaServiceBase>();
         JsonSerializerOptions _serializerOptions = GetJsonSerializerOptions(HttpContext.RequestServices);
+        HttpContext.Response.ContentType = "application/json";
         PizzaFilter _filter = JsonSerializer.Deserialize<PizzaFilter>(filter, _serializerOptions)!;
         await JsonSerializer.SerializeAsync(
             HttpContext.Response.Body, 
@@ -47,6 +50,7 @@ public class PizzaController: ControllerBase
     {
         PizzaServiceBase _storageService = HttpContext.RequestServices.GetRequiredService<PizzaServiceBase>();
         JsonSerializerOptions _serializerOptions = GetJsonSerializerOptions(HttpContext.RequestServices);
+        HttpContext.Response.ContentType = "application/json";
         Pizza _pizza = JsonSerializer.Deserialize<Pizza>(pizza, _serializerOptions)!;
         await JsonSerializer.SerializeAsync(
             HttpContext.Response.Body, 
@@ -59,6 +63,7 @@ public class PizzaController: ControllerBase
     {
         PizzaServiceBase _storageService = HttpContext.RequestServices.GetRequiredService<PizzaServiceBase>();
         JsonSerializerOptions _serializerOptions = GetJsonSerializerOptions(HttpContext.RequestServices);
+        HttpContext.Response.ContentType = "application/json";
         await JsonSerializer.SerializeAsync(
             HttpContext.Response.Body, 
             _storageService.GetAllSaucesAsync(), 
@@ -70,6 +75,7 @@ public class PizzaController: ControllerBase
     {
         PizzaServiceBase _storageService = HttpContext.RequestServices.GetRequiredService<PizzaServiceBase>();
         JsonSerializerOptions _serializerOptions = GetJsonSerializerOptions(HttpContext.RequestServices);
+        HttpContext.Response.ContentType = "application/json";
         Sauce _sauce = JsonSerializer.Deserialize<Sauce>(sauce, _serializerOptions)!;
         await JsonSerializer.SerializeAsync(
             HttpContext.Response.Body, 
@@ -82,6 +88,7 @@ public class PizzaController: ControllerBase
     {
         PizzaServiceBase _storageService = HttpContext.RequestServices.GetRequiredService<PizzaServiceBase>();
         JsonSerializerOptions _serializerOptions = GetJsonSerializerOptions(HttpContext.RequestServices);
+        HttpContext.Response.ContentType = "application/json";
         await JsonSerializer.SerializeAsync(
             HttpContext.Response.Body, 
             _storageService.GetAllToppingsAsync(), 
@@ -93,6 +100,7 @@ public class PizzaController: ControllerBase
     {
         PizzaServiceBase _storageService = HttpContext.RequestServices.GetRequiredService<PizzaServiceBase>();
         JsonSerializerOptions _serializerOptions = GetJsonSerializerOptions(HttpContext.RequestServices);
+        HttpContext.Response.ContentType = "application/json";
         Topping _topping = JsonSerializer.Deserialize<Topping>(topping, _serializerOptions)!;
         await JsonSerializer.SerializeAsync(
             HttpContext.Response.Body, 
@@ -108,7 +116,7 @@ public class PizzaController: ControllerBase
                 if(_serializerOptions is null)
                 {
                     _serializerOptions = new(){
-                          ReferenceHandler = ReferenceHandler.Preserve,
+                          //ReferenceHandler = ReferenceHandler.Preserve,
                     };
                     _serializerOptions.Converters.Add(
                         services.GetRequiredService<PizzaJsonConverterFactory>()
