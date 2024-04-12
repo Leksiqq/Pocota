@@ -34,6 +34,9 @@ public class PizzaJsonConverter: JsonConverter<Pizza>
 
     public override void Write(Utf8JsonWriter writer, Pizza value, JsonSerializerOptions options)
     {
+        Console.WriteLine(_dbContext.Entry(value).Properties.Count());
+        var prop = _dbContext.Entry(value).Properties.Where(p => p.Metadata.Name == "Sauce").FirstOrDefault();
+        //Console.WriteLine($"{prop.Metadata.Name}, o: {prop?.OriginalValue}, c: {prop?.CurrentValue}");
         PocotaEntity pocotaEntity = _context.Entity(value);
         writer.WriteStartObject();
         writer.WritePropertyName(pocotaEntity.IsSerialized ? "$ref" : "$id");
