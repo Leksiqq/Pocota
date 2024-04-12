@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Net.Leksi.Pocota.Contract;
+﻿namespace Net.Leksi.Pocota.Contract;
 
 [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
 public class PocotaContractAttribute(string? contractName = null): Attribute

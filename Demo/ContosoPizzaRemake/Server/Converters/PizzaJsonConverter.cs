@@ -6,6 +6,7 @@
 /////////////////////////////////////////////////////////////
 
 using ContosoPizza;
+using Microsoft.EntityFrameworkCore;
 using Net.Leksi.Pocota.Server;
 using System;
 using System.Collections.Generic;
@@ -34,8 +35,25 @@ public class PizzaJsonConverter: JsonConverter<Pizza>
 
     public override void Write(Utf8JsonWriter writer, Pizza value, JsonSerializerOptions options)
     {
-        Console.WriteLine(_dbContext.Entry(value).Properties.Count());
-        var prop = _dbContext.Entry(value).Properties.Where(p => p.Metadata.Name == "Sauce").FirstOrDefault();
+        Console.WriteLine(
+            string.Join(
+                ',',
+                _dbContext.Entry(value).Properties
+                    .Select(p => 
+                        $"({p.Metadata.Name}, {p.Metadata.GetIndex()}: {p.Metadata.IsForeignKey()})"
+                    )
+            )
+        );
+        Console.WriteLine(
+            string.Join(
+                ',',
+                _dbContext.Entry(value).Navigations
+                    .Select(p =>
+                        $"({p.Metadata.Name}, {p.Metadata.GetIndex()}: {p.IsLoaded})"
+                    )
+            )
+        );
+
         //Console.WriteLine($"{prop.Metadata.Name}, o: {prop?.OriginalValue}, c: {prop?.CurrentValue}");
         PocotaEntity pocotaEntity = _context.Entity(value);
         writer.WriteStartObject();

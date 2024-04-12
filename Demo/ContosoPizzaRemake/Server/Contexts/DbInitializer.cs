@@ -28,7 +28,7 @@ namespace ContosoPizza
                 new Pizza
                     {
                         Name = "Meat Lovers",
-                        Sauce = tomatoSauce,
+                        //Sauce = tomatoSauce,
                         Toppings = new List<Topping>
                             {
                                 pepperoniTopping,
