@@ -41,9 +41,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
             lock(_lock){
                 if(_serializerOptions is null)
                 {
-                    _serializerOptions = new(){
-                          ReferenceHandler = ReferenceHandler.Preserve,
-                    };
+                    _serializerOptions = new();
                     _serializerOptions.Converters.Add(
                         services.GetRequiredService@{}@Html.Raw($"<{Model.JsonConverterFactoryClassName}>")@{}()
                     );

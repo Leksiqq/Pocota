@@ -6,13 +6,13 @@
 @{
 }
 @Html.Partial("Header", Model)
-public partial class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
+public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
 {
-    public @Model.ClassName@{}(@nameof(DbContextOptions)@Html.Raw($"<{@Model.ClassName}>") options) : base(options) { }
+    public @Model.ClassName@{}(DbContextOptions@{}@Html.Raw($"<{@Model.ClassName}>") options) : base(options) { }
 
 @foreach(PropertyModel pm in Model.Properties)
 {
-    <text>    public @nameof(DbSet<object>)@Html.Raw($"<{pm.TypeName}>") @pm.Name => @nameof(DbContext.Set)@Html.Raw($"<{pm.TypeName}>")@{}();
+    <text>    public DbSet@{}@Html.Raw($"<{pm.TypeName}>") @pm.Name => Set@{}@Html.Raw($"<{pm.TypeName}>")@{}();
 </text>
 }
 }

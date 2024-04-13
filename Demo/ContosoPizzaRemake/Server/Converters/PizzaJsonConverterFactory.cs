@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaJsonConverterFactory                  //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-12T13:40:57.                                 //
+// at 2024-04-13T13:50:47.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -14,7 +14,7 @@ using System.Text.Json.Serialization;
 namespace ContosoPizza;
 
 
-public class PizzaJsonConverterFactory(IServiceProvider services): JsonConverterFactory
+internal class PizzaJsonConverterFactory(IServiceProvider services): JsonConverterFactory
 {
     private static readonly Dictionary<Type, Type> _entityJsonConverterTypes = new()
     {

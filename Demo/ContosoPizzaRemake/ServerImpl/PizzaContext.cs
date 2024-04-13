@@ -1,7 +1,7 @@
 ﻿using ContosoPizza;
 using Microsoft.EntityFrameworkCore;
 
-namespace ServerImpl;
+namespace ContosoPizza;
 
 public class PizzaContextImpl : PizzaContext
 {

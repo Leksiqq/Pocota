@@ -1,0 +1,18 @@
+﻿@page
+@using Net.Leksi.Pocota.Tool.Pages
+@using Net.Leksi.Pocota.Tool
+@using Net.Leksi.Pocota.Server
+@model AccessModel
+@{
+}
+@Html.Partial("Header", Model)
+public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {string.Join(", ", Model.Inheritances)}") : string.Empty)
+{
+    private readonly IServiceProvider _services;
+    private readonly @nameof(PocotaContext) _context;
+    public @Model.ClassName@{}(IServiceProvider services)
+    {
+        _services = services;
+        _context = _services.GetRequiredService@{}@Html.Raw($"<{nameof(PocotaContext)}>")@{}();
+    }
+}

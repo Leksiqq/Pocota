@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.ToppingJsonConverter                //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-12T13:40:57.                                 //
+// at 2024-04-13T13:50:47.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -15,7 +15,7 @@ using System.Text.Json.Serialization;
 namespace ContosoPizza.Models;
 
 
-public class ToppingJsonConverter: JsonConverter<Topping>
+internal class ToppingJsonConverter: JsonConverter<Topping>
 {
     private readonly IServiceProvider _services;
     private readonly PizzaContext _dbContext;
@@ -34,34 +34,46 @@ public class ToppingJsonConverter: JsonConverter<Topping>
 
     public override void Write(Utf8JsonWriter writer, Topping value, JsonSerializerOptions options)
     {
-        PocotaEntity pocotaEntity = _context.Entity(value);
+        ToppingPocota pocotaEntity = _context.Entity<ToppingPocota>(value);
         writer.WriteStartObject();
         writer.WritePropertyName(pocotaEntity.IsSerialized ? "$ref" : "$id");
-        pocotaEntity.SetSerialized();
+        pocotaEntity.IsSerialized = true;
         writer.WriteNumberValue(pocotaEntity.PocotaId);
-        if(!pocotaEntity.IsPropertySent(0))
+        if(!pocotaEntity.Id.IsSent)
         {
-            pocotaEntity.MarkPropertySent(0);
+            pocotaEntity.Id.IsSent = true;
             writer.WritePropertyName("Id");
+            writer.WriteStartArray();
+            writer.WriteNumberValue((int)pocotaEntity.Id.Access);
             JsonSerializer.Serialize(writer, value.Id, options);
+            writer.WriteEndArray();
         }
-        if(!pocotaEntity.IsPropertySent(1))
+        if(!pocotaEntity.Name.IsSent)
         {
-            pocotaEntity.MarkPropertySent(1);
+            pocotaEntity.Name.IsSent = true;
             writer.WritePropertyName("Name");
+            writer.WriteStartArray();
+            writer.WriteNumberValue((int)pocotaEntity.Name.Access);
             JsonSerializer.Serialize(writer, value.Name, options);
+            writer.WriteEndArray();
         }
-        if(!pocotaEntity.IsPropertySent(2))
+        if(!pocotaEntity.Calories.IsSent)
         {
-            pocotaEntity.MarkPropertySent(2);
+            pocotaEntity.Calories.IsSent = true;
             writer.WritePropertyName("Calories");
+            writer.WriteStartArray();
+            writer.WriteNumberValue((int)pocotaEntity.Calories.Access);
             JsonSerializer.Serialize(writer, value.Calories, options);
+            writer.WriteEndArray();
         }
-        if(!pocotaEntity.IsPropertySent(3))
+        if(!pocotaEntity.Pizzas.IsSent)
         {
-            pocotaEntity.MarkPropertySent(3);
+            pocotaEntity.Pizzas.IsSent = true;
             writer.WritePropertyName("Pizzas");
+            writer.WriteStartArray();
+            writer.WriteNumberValue((int)pocotaEntity.Pizzas.Access);
             JsonSerializer.Serialize(writer, value.Pizzas, options);
+            writer.WriteEndArray();
         }
         writer.WriteEndObject();
     }

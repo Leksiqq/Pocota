@@ -4,9 +4,7 @@ public enum PropertyAccess
 {
     NotSet = 0,
     Key = 1,
-    VisibleKey = 2,
-    ManualKey = 3,
-    Denied = 4,
-    Readonly = 5,
-    Full = 6,
+    Denied = 2,
+    Readonly = 3,
+    Full = 4,
 }

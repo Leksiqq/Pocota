@@ -5,7 +5,7 @@
 @{
 }
 @Html.Partial("Header", Model)
-public class @Model.ClassName@{}(IServiceProvider services)@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
+internal class @Model.ClassName@{}(IServiceProvider services)@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
 {
     private static readonly Dictionary@{}@Html.Raw($"<Type, Type>") _entityJsonConverterTypes = new()
     {

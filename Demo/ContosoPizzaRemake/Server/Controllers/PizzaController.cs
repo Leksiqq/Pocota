@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaController                            //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-12T13:40:57.                                 //
+// at 2024-04-13T13:50:47.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -115,9 +115,7 @@ public class PizzaController: ControllerBase
             lock(_lock){
                 if(_serializerOptions is null)
                 {
-                    _serializerOptions = new(){
-                          //ReferenceHandler = ReferenceHandler.Preserve,
-                    };
+                    _serializerOptions = new();
                     _serializerOptions.Converters.Add(
                         services.GetRequiredService<PizzaJsonConverterFactory>()
                     );

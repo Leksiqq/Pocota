@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Xml.Linq;
 using static Net.Leksi.Pocota.Tool.Constants;
 
 namespace Net.Leksi.Pocota;
@@ -17,7 +18,7 @@ public class SourceGenerator : Runner, ICommand
     private readonly IServiceProvider _services;
     private readonly ILogger<SourceGenerator>? _logger;
     private readonly IConfiguration _configuration;
-    private readonly string[] _serverFolders = ["contexts", "controllers", "services", "server-converters", "server-extensions"];
+    private readonly string[] _serverFolders = ["contexts", "controllers", "services", "server-converters", "server-extensions", "access", "pocota"];
     private readonly string[] _clientFolders = ["connectors", "client-models", "client-converters", "client-extensions"];
     private readonly string _clientLanguage = s_cSharp;
     private readonly string _fileExtension = s_cs;
@@ -298,7 +299,34 @@ public class SourceGenerator : Runner, ICommand
             model.Properties.Add(pm);
         }
     }
-
+    internal static void PopulateAccessModel(AccessModel model)
+    {
+        PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
+        model.Contract = Util.BuildTypeFullName(options.ContractType!);
+        model.ClassName = Util.GetTypeName(options.ClassName!);
+        model.NamespaceValue = Util.GetNamespace(options.ClassName!);
+        model.AddUsing(typeof(PocotaContext));
+    }
+    internal static void PopulatePocotaModel(PocotaModel model)
+    {
+        PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
+        model.Contract = Util.BuildTypeFullName(options.ContractType!);
+        model.ClassName = Util.GetTypeName(options.ClassName!);
+        model.NamespaceValue = Util.GetNamespace(options.ClassName!);
+        model.AddInheritance(typeof(PocotaEntity));
+        foreach (PropertyInfo pi in options.EntityType!.GetProperties())
+        {
+            if (pi.GetCustomAttribute<JsonIgnoreAttribute>() is null)
+            {
+                model.AddUsing(pi.PropertyType);
+                PropertyModel pm = new()
+                {
+                    Name = pi.Name,
+                };
+                model.Properties.Add(pm);
+            }
+        }
+    }
     protected override void ConfigureBuilder(WebApplicationBuilder builder)
     {
         builder.Services.AddRazorPages();
@@ -333,6 +361,22 @@ public class SourceGenerator : Runner, ICommand
                 Directory.CreateDirectory(serverConvertersFolder);
             }
             await GenerateServerConvertersAsync(connector, contractType, serverConvertersFolder, name);
+        }
+        if (_configuration["access"] is string accessFolder && !string.IsNullOrEmpty(accessFolder))
+        {
+            if (!Directory.Exists(accessFolder))
+            {
+                Directory.CreateDirectory(accessFolder);
+            }
+            await GenerateAccessAsync(connector, contractType, accessFolder, name);
+        }
+        if (_configuration["pocota"] is string pocotaFolder && !string.IsNullOrEmpty(pocotaFolder))
+        {
+            if (!Directory.Exists(pocotaFolder))
+            {
+                Directory.CreateDirectory(pocotaFolder);
+            }
+            await GeneratePocotaAsync(connector, contractType, pocotaFolder, name);
         }
         if (_configuration["controllers"] is string controllersFolder && !string.IsNullOrEmpty(controllersFolder))
         {
@@ -370,6 +414,51 @@ public class SourceGenerator : Runner, ICommand
             }
         }
     }
+
+    private async Task GeneratePocotaAsync(IConnector connector, Type contractType, string targetFolder, string name)
+    {
+        foreach (EntityAttribute attribute in contractType.GetCustomAttributes<EntityAttribute>())
+        {
+            string entityName = Util.BuildTypeName(attribute.EntityType);
+            await GenerateModelPocotaAsync(connector, contractType, attribute.EntityType, targetFolder, $"{entityName}Pocota");
+        }
+    }
+
+    private async Task GenerateModelPocotaAsync(IConnector connector, Type contractType, Type entityType, string targetFolder, string name)
+    {
+        _logger?.LogInformation("Generating model's pocota {name} at {folder}.", name, targetFolder);
+        PageOptions options = new()
+        {
+            ContractType = contractType,
+            EntityType = entityType,
+            ClassName = BuildResutTypeName(entityType, name),
+        };
+        await ProcessPageAsync(connector, options, "/Pocota", BuildFilePath(targetFolder, name));
+        _logger?.LogInformation("Done.");
+    }
+
+    private async Task GenerateAccessAsync(IConnector connector, Type contractType, string targetFolder, string name)
+    {
+        foreach (EntityAttribute attribute in contractType.GetCustomAttributes<EntityAttribute>())
+        {
+            string entityName = Util.BuildTypeName(attribute.EntityType);
+            await GenerateModelAccessAsync(connector, contractType, attribute.EntityType, targetFolder, $"{entityName}AccessBase");
+        }
+    }
+
+    private async Task GenerateModelAccessAsync(IConnector connector, Type contractType, Type entityType, string targetFolder, string name)
+    {
+        _logger?.LogInformation("Generating model's access {name} at {folder}.", name, targetFolder);
+        PageOptions options = new()
+        {
+            ContractType = contractType,
+            EntityType = entityType,
+            ClassName = BuildResutTypeName(entityType, name),
+        };
+        await ProcessPageAsync(connector, options, "/Access", BuildFilePath(targetFolder, name));
+        _logger?.LogInformation("Done.");
+    }
+
     private async Task GenerateServerExtensionsAsync(IConnector connector, Type contractType, string targetFolder, string name)
     {
         _logger?.LogInformation("Generating server's extensions {name} at {folder}.", name, targetFolder);

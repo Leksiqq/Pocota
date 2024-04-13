@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaExtensions                            //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-12T13:40:57.                                 //
+// at 2024-04-13T13:50:47.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -24,8 +24,11 @@ public static class PizzaExtensions
         services.AddScoped<PizzaJsonConverterFactory>();
         services.AddScoped(typeof(PizzaServiceBase), serviceImplementation);
         services.AddTransient<PizzaJsonConverter>();
+        services.AddTransient<PizzaPocota>();
         services.AddTransient<SauceJsonConverter>();
+        services.AddTransient<SaucePocota>();
         services.AddTransient<ToppingJsonConverter>();
+        services.AddTransient<ToppingPocota>();
         additionalConfig?.Invoke(services);
         return services;
     }
