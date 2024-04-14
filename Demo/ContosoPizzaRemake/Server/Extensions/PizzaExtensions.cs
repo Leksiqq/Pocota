@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaExtensions                            //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-13T13:50:47.                                 //
+// at 2024-04-14T15:28:51.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -20,6 +20,7 @@ public static class PizzaExtensions
         Action<IServiceCollection>? additionalConfig = null
     )
     {
+        services.AddHttpContextAccessor();
         services.AddScoped<PocotaContext>();
         services.AddScoped<PizzaJsonConverterFactory>();
         services.AddScoped(typeof(PizzaServiceBase), serviceImplementation);

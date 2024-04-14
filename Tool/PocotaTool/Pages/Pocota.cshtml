@@ -9,15 +9,52 @@
 public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {string.Join(", ", Model.Inheritances)}") : string.Empty)
 {
     private readonly IServiceProvider _services;
+    private readonly @Model.ContractName@{}Context _dbContext;
     private readonly PocotaContext _context;
+@foreach(PropertyModel pm in Model.Properties)
+{
+    <text>    private @nameof(EntityProperty) _@pm.Name = null!;
+</text>
+}
     public @Model.ClassName@{}(IServiceProvider services)
     {
         _services = services;
+        _dbContext = _services.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}Context>")@{}();
         _context = _services.GetRequiredService@{}@Html.Raw($"<PocotaContext>")@{}();
     }
 @foreach(PropertyModel pm in Model.Properties)
 {
-    <text>    public @nameof(EntityProperty) @pm.Name { get; private init; } = new();
+    <text>    public @nameof(EntityProperty) @pm.Name => _@pm.Name;
 </text>
 }
+    protected override void InitProperties()
+    {
+        EntityEntry entityEntry = _dbContext.Entry(Entity!);
+        foreach (PropertyEntry property in entityEntry.Properties)
+        {
+            switch(property.Metadata.Name)
+            {
+@foreach(PropertyModel pm in Model.Properties)
+{
+    <text>                case "@pm.Name":
+                    _@pm.Name ??= new EntityProperty(property);
+                    break;
+</text>
+}
+            }
+        }
+        foreach (NavigationEntry navigation in entityEntry.Navigations)
+        {
+            switch(navigation.Metadata.Name)
+            {
+@foreach(PropertyModel pm in Model.Properties)
+{
+    <text>                case "@pm.Name":
+                    _@pm.Name ??= new EntityProperty(navigation);
+                    break;
+</text>
+}
+            }
+        }
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Net.Leksi.E6dWebApp;
 using Net.Leksi.Pocota.Contract;
 using Net.Leksi.Pocota.Server;
@@ -264,6 +265,8 @@ public class SourceGenerator : Runner, ICommand
         model.AddUsing(typeof(IServiceProvider));
         model.AddUsing(typeof(PocotaContext));
         model.AddUsing(options.ContractType!);
+        model.AddUsing(typeof(IHttpContextAccessor));
+        model.AddUsing(typeof(PocotaHeader));
         model.EntityTypeName = Util.BuildTypeName(options.EntityType!);
         model.ContractName = options.ContractType!.GetCustomAttribute<PocotaContractAttribute>()!.ContractName!;
         model.AddInheritance(typeof(JsonConverter<>).MakeGenericType([options.EntityType!]));
@@ -313,7 +316,9 @@ public class SourceGenerator : Runner, ICommand
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
         model.ClassName = Util.GetTypeName(options.ClassName!);
         model.NamespaceValue = Util.GetNamespace(options.ClassName!);
+        model.ContractName = options.ContractType!.GetCustomAttribute<PocotaContractAttribute>()!.ContractName!;
         model.AddInheritance(typeof(PocotaEntity));
+        model.AddUsing(typeof(EntityEntry));
         foreach (PropertyInfo pi in options.EntityType!.GetProperties())
         {
             if (pi.GetCustomAttribute<JsonIgnoreAttribute>() is null)

@@ -17,6 +17,7 @@ public class PocotaContext
         {
             value = _services.GetRequiredService<T>();
             value.PocotaId = Interlocked.Increment(ref _idGen);
+            value.Entity = entity;
             _entityCache.Add(entity, value);
         }
         return (T)value;

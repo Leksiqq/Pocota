@@ -1,8 +1,9 @@
 ﻿namespace Net.Leksi.Pocota.Server;
 
-public class PocotaEntity
+public abstract class PocotaEntity
 {
     private bool _isSerialized = false;
+    private object? _entity;
     public ulong PocotaId { get; internal set; }
     public bool IsSerialized 
     { 
@@ -19,4 +20,20 @@ public class PocotaEntity
             }
         }
     }
+    public object? Entity
+    {
+        get => _entity;
+        set
+        {
+            if (_entity is null && value is { })
+            {
+                _entity = value;
+            }
+            else
+            {
+                throw new InvalidOperationException();
+            }
+        }
+    }
+    protected abstract void InitProperties();
 }

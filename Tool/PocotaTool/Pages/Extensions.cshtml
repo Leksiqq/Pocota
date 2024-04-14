@@ -14,6 +14,7 @@ public static class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string
         Action@{}@Html.Raw($"<IServiceCollection>")? additionalConfig = null
     )
     {
+        services.AddHttpContextAccessor();
         services.AddScoped@{}@Html.Raw($"<{nameof(PocotaContext)}>")@{}();
         services.AddScoped@{}@Html.Raw($"<{Model.ContractName}JsonConverterFactory>")@{}();
         services.AddScoped@{}(typeof(@Model.ContractName@{}ServiceBase), serviceImplementation);
