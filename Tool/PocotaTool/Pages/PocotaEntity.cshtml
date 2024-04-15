@@ -2,14 +2,14 @@
 @using Net.Leksi.Pocota.Tool.Pages
 @using Net.Leksi.Pocota.Tool
 @using Net.Leksi.Pocota.Server
-@model PocotaModel
+@model PocotaEntityModel
 @{
 }
 @Html.Partial("Header", Model)
 public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {string.Join(", ", Model.Inheritances)}") : string.Empty)
 {
     private readonly IServiceProvider _services;
-    private readonly @Model.ContractName@{}Context _dbContext;
+    private readonly @Model.ContractName@{}DbContext _dbContext;
     private readonly PocotaContext _context;
 @foreach(PropertyModel pm in Model.Properties)
 {
@@ -19,7 +19,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
     public @Model.ClassName@{}(IServiceProvider services)
     {
         _services = services;
-        _dbContext = _services.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}Context>")@{}();
+        _dbContext = _services.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}DbContext>")@{}();
         _context = _services.GetRequiredService@{}@Html.Raw($"<PocotaContext>")@{}();
     }
 @foreach(PropertyModel pm in Model.Properties)
@@ -37,10 +37,13 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
 @foreach(PropertyModel pm in Model.Properties)
 {
     <text>                case "@pm.Name":
-                    _@pm.Name ??= new EntityProperty(property);
+                    _@pm.Name ??= new @nameof(EntityPropertyProperty)@{}(this, property);
                     break;
 </text>
 }
+                default:
+                    AddKeyValue(property.Metadata.Name, property.CurrentValue);
+                    break;
             }
         }
         foreach (NavigationEntry navigation in entityEntry.Navigations)
@@ -50,7 +53,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
 @foreach(PropertyModel pm in Model.Properties)
 {
     <text>                case "@pm.Name":
-                    _@pm.Name ??= new EntityProperty(navigation);
+                    _@pm.Name ??= new @nameof(EntityPropertyNavigation)@{}(this, navigation);
                     break;
 </text>
 }

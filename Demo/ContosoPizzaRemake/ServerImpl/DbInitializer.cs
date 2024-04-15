@@ -4,7 +4,7 @@ namespace ContosoPizza
 {
     public static class DbInitializer
     {
-        public static void Initialize(PizzaContext context)
+        public static void Initialize(PizzaDbContext context)
         {
 
             if (context.SetOfPizza.Any()
@@ -20,8 +20,8 @@ namespace ContosoPizza
             var chickenTopping = new Topping { Name = "Chicken", Calories = 50 };
             var pineappleTopping = new Topping { Name = "Pineapple", Calories = 75 };
 
-            var tomatoSauce = new Sauce { Name = "Tomato", IsVegan = true };
-            var alfredoSauce = new Sauce { Name = "Alfredo", IsVegan = false };
+            var tomatoSauce = new Sauce { Id1 = 2,  Name = "Tomato", IsVegan = true };
+            var alfredoSauce = new Sauce { Id1 = 2, Name = "Alfredo", IsVegan = false };
 
             var pizzas = new Pizza[]
             {

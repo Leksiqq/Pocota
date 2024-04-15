@@ -14,24 +14,25 @@ namespace ServerImpl.Migrations
                 name: "SetOfSauce",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    IsVegan = table.Column<bool>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id1 = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    IsVegan = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SetOfSauce", x => x.Id);
+                    table.PrimaryKey("PK_SetOfSauce", x => new { x.Id, x.Id1 });
                 });
 
             migrationBuilder.CreateTable(
                 name: "SetOfTopping",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Calories = table.Column<decimal>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Calories = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -42,27 +43,28 @@ namespace ServerImpl.Migrations
                 name: "SetOfPizza",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    SauceId = table.Column<int>(type: "INTEGER", nullable: true)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    SauceId = table.Column<int>(type: "int", nullable: true),
+                    SauceId1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SetOfPizza", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SetOfPizza_SetOfSauce_SauceId",
-                        column: x => x.SauceId,
+                        name: "FK_SetOfPizza_SetOfSauce_SauceId_SauceId1",
+                        columns: x => new { x.SauceId, x.SauceId1 },
                         principalTable: "SetOfSauce",
-                        principalColumn: "Id");
+                        principalColumns: new[] { "Id", "Id1" });
                 });
 
             migrationBuilder.CreateTable(
                 name: "PizzaTopping",
                 columns: table => new
                 {
-                    PizzasId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ToppingsId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PizzasId = table.Column<int>(type: "int", nullable: false),
+                    ToppingsId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -87,9 +89,9 @@ namespace ServerImpl.Migrations
                 column: "ToppingsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SetOfPizza_SauceId",
+                name: "IX_SetOfPizza_SauceId_SauceId1",
                 table: "SetOfPizza",
-                column: "SauceId");
+                columns: new[] { "SauceId", "SauceId1" });
         }
 
         /// <inheritdoc />

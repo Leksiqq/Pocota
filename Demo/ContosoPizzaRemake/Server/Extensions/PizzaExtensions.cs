@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaExtensions                            //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-14T15:28:51.                                 //
+// at 2024-04-15T18:39:17.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -25,12 +25,55 @@ public static class PizzaExtensions
         services.AddScoped<PizzaJsonConverterFactory>();
         services.AddScoped(typeof(PizzaServiceBase), serviceImplementation);
         services.AddTransient<PizzaJsonConverter>();
-        services.AddTransient<PizzaPocota>();
+        services.AddTransient<PizzaPocotaEntity>();
         services.AddTransient<SauceJsonConverter>();
-        services.AddTransient<SaucePocota>();
+        services.AddTransient<SaucePocotaEntity>();
         services.AddTransient<ToppingJsonConverter>();
-        services.AddTransient<ToppingPocota>();
+        services.AddTransient<ToppingPocotaEntity>();
+
         additionalConfig?.Invoke(services);
+
+        ServiceDescriptor probe;
+
+        probe = new ServiceDescriptor(typeof(IAccessCalculator), typeof(Pizza), typeof(PizzaAccessBase), ServiceLifetime.Scoped);
+        if(!services.Contains(probe, AccessCalculatorServicesEqualityComparer.Instance))
+        {
+            services.AddKeyedScoped<IAccessCalculator>(typeof(Pizza), (s, k) => new PizzaAccessBase(s));
+        }
+        else
+        {
+            ServiceDescriptor sd = services.Where(s => AccessCalculatorServicesEqualityComparer.Instance.Equals(probe, s)).First();
+            if (sd.Lifetime is not ServiceLifetime.Scoped)
+            {
+                throw new InvalidOperationException($"{nameof(IAccessCalculator)} service expected to be scoped, got: {sd}.");
+            }
+        }
+        probe = new ServiceDescriptor(typeof(IAccessCalculator), typeof(Sauce), typeof(SauceAccessBase), ServiceLifetime.Scoped);
+        if(!services.Contains(probe, AccessCalculatorServicesEqualityComparer.Instance))
+        {
+            services.AddKeyedScoped<IAccessCalculator>(typeof(Sauce), (s, k) => new SauceAccessBase(s));
+        }
+        else
+        {
+            ServiceDescriptor sd = services.Where(s => AccessCalculatorServicesEqualityComparer.Instance.Equals(probe, s)).First();
+            if (sd.Lifetime is not ServiceLifetime.Scoped)
+            {
+                throw new InvalidOperationException($"{nameof(IAccessCalculator)} service expected to be scoped, got: {sd}.");
+            }
+        }
+        probe = new ServiceDescriptor(typeof(IAccessCalculator), typeof(Topping), typeof(ToppingAccessBase), ServiceLifetime.Scoped);
+        if(!services.Contains(probe, AccessCalculatorServicesEqualityComparer.Instance))
+        {
+            services.AddKeyedScoped<IAccessCalculator>(typeof(Topping), (s, k) => new ToppingAccessBase(s));
+        }
+        else
+        {
+            ServiceDescriptor sd = services.Where(s => AccessCalculatorServicesEqualityComparer.Instance.Equals(probe, s)).First();
+            if (sd.Lifetime is not ServiceLifetime.Scoped)
+            {
+                throw new InvalidOperationException($"{nameof(IAccessCalculator)} service expected to be scoped, got: {sd}.");
+            }
+        }
         return services;
     }
 }

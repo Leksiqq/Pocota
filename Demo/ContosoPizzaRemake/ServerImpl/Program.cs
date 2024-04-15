@@ -1,4 +1,6 @@
 using ContosoPizza;
+using ContosoPizza.Models;
+using Net.Leksi.Pocota.Server;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +10,9 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddPizza(typeof(PizzaService), serv =>
 {
-    serv.AddSqlite<PizzaContext>("Data Source=ContosoPizza.db");
+    serv.AddSqlServer<PizzaDbContext>("Server=.\\sqlexpress;Database=ContosoPizza;Trusted_Connection=True;Encrypt=no;");
+    //serv.AddSqlite<PizzaDbContext>("Data Source=ContosoPizza.db");
+    serv.AddKeyedScoped<IAccessCalculator>(typeof(Pizza), (s, k) => new PizzaAccess(s));
 });
 
 

@@ -19,7 +19,7 @@ public class SourceGenerator : Runner, ICommand
     private readonly IServiceProvider _services;
     private readonly ILogger<SourceGenerator>? _logger;
     private readonly IConfiguration _configuration;
-    private readonly string[] _serverFolders = ["contexts", "controllers", "services", "server-converters", "server-extensions", "access", "pocota"];
+    private readonly string[] _serverFolders = ["db-contexts", "controllers", "services", "server-converters", "server-extensions", "access", "pocota-entities"];
     private readonly string[] _clientFolders = ["connectors", "client-models", "client-converters", "client-extensions"];
     private readonly string _clientLanguage = s_cSharp;
     private readonly string _fileExtension = s_cs;
@@ -137,7 +137,7 @@ public class SourceGenerator : Runner, ICommand
             }
         }
     }
-    internal static void PopulateContextModel(ContextModel model)
+    internal static void PopulateContextModel(DbContextModel model)
     {
         PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
@@ -176,7 +176,7 @@ public class SourceGenerator : Runner, ICommand
             else
             {
                 model.AddUsing(typeof(ValueTask<>));
-                returnTypeName = $"{nameof(ValueTask<object>)}<{returnTypeName}>";
+                returnTypeName = $"{nameof(ValueTask<object>)}<{returnTypeName}?>";
             }
             MethodModel mm = new()
             {
@@ -212,13 +212,14 @@ public class SourceGenerator : Runner, ICommand
         model.AddUsing(typeof(RouteAttribute));
         model.AddUsing(typeof(HttpGetAttribute));
         model.AddUsing(typeof(HttpPostAttribute));
+        model.AddUsing(typeof(PocotaContext));
         foreach (MethodInfo mi in options.ContractType!.GetMethods())
         {
             model.AddUsing(mi.ReturnType);
             MethodModel mm = new()
             {
                 Name = mi.Name,
-                ReturnTypeName = mi.ReturnType.Name,
+                ReturnTypeName = mi.ReturnType.IsGenericType ? mi.ReturnType.GetGenericArguments()[0].Name : mi.ReturnType.Name,
                 IsEnumeration = mi.ReturnType.IsGenericType,
             };
             mm.Attributes.Add($"[HttpGet(\"{mi.Name}{(mi.GetParameters().Length > 0 ? $"/{string.Join('/', mi.GetParameters().Select(p => $"{{{p.Name}}}"))}" : string.Empty)}\")]");
@@ -292,6 +293,7 @@ public class SourceGenerator : Runner, ICommand
         model.ContractName = options.ContractType!.GetCustomAttribute<PocotaContractAttribute>()!.ContractName!;
         model.AddUsing(typeof(IServiceCollection));
         model.AddUsing(typeof(PocotaContext));
+        model.AddUsing(typeof(ServiceDescriptor));
         foreach (EntityAttribute attribute in options.ContractType!.GetCustomAttributes<EntityAttribute>())
         {
             model.AddUsing(attribute.EntityType);
@@ -308,9 +310,35 @@ public class SourceGenerator : Runner, ICommand
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
         model.ClassName = Util.GetTypeName(options.ClassName!);
         model.NamespaceValue = Util.GetNamespace(options.ClassName!);
+        model.EntityTypeName = Util.BuildTypeName(options.EntityType!);
+        model.ContractName = options.ContractType!.GetCustomAttribute<PocotaContractAttribute>()!.ContractName!;
         model.AddUsing(typeof(PocotaContext));
+        model.AddUsing(typeof(ReferenceEntry));
+        model.AddUsing(typeof(CollectionEntry));
+        model.AddUsing(typeof(EntityEntry));
+        model.AddInheritance(typeof(IAccessCalculator));
+        foreach (PropertyInfo pi in options.EntityType!.GetProperties())
+        {
+            if(!pi.PropertyType.IsPrimitive && !pi.PropertyType.IsValueType && pi.PropertyType != typeof(string))
+            {
+                model.AddUsing(pi.PropertyType);
+                PropertyModel pm = new()
+                {
+                    Name = pi.Name,
+                    TypeName = pi.PropertyType.Name,
+                    IsCollection = pi.PropertyType.IsGenericType && pi.PropertyType.GetGenericTypeDefinition() == typeof(ICollection<>)
+                };
+                if (pm.IsCollection)
+                {
+                    Type itemType = pi.PropertyType.GetGenericArguments()[0];
+                    model.AddUsing(itemType);
+                    pm.ItemTypeName = Util.BuildTypeName(itemType);
+                }
+                model.Properties.Add(pm);
+            }
+        }
     }
-    internal static void PopulatePocotaModel(PocotaModel model)
+    internal static void PopulatePocotaEntityModel(PocotaEntityModel model)
     {
         PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
@@ -343,13 +371,13 @@ public class SourceGenerator : Runner, ICommand
     }
     private async Task ProcessContractAsync(IConnector connector, Type contractType, string name)
     {
-        if (_configuration["contexts"] is string contextsFolder && !string.IsNullOrEmpty(contextsFolder))
+        if (_configuration["db-contexts"] is string dbContextsFolder && !string.IsNullOrEmpty(dbContextsFolder))
         {
-            if (!Directory.Exists(contextsFolder))
+            if (!Directory.Exists(dbContextsFolder))
             {
-                Directory.CreateDirectory(contextsFolder);
+                Directory.CreateDirectory(dbContextsFolder);
             }
-            await GenerateContextAsync(connector, contractType, contextsFolder, $"{name}Context");
+            await GenerateDbContextAsync(connector, contractType, dbContextsFolder, $"{name}DbContext");
         }
         if (_configuration["server-extensions"] is string serverExtensionsFolder && !string.IsNullOrEmpty(serverExtensionsFolder))
         {
@@ -375,13 +403,13 @@ public class SourceGenerator : Runner, ICommand
             }
             await GenerateAccessAsync(connector, contractType, accessFolder, name);
         }
-        if (_configuration["pocota"] is string pocotaFolder && !string.IsNullOrEmpty(pocotaFolder))
+        if (_configuration["pocota-entities"] is string pocotaEntitiesFolder && !string.IsNullOrEmpty(pocotaEntitiesFolder))
         {
-            if (!Directory.Exists(pocotaFolder))
+            if (!Directory.Exists(pocotaEntitiesFolder))
             {
-                Directory.CreateDirectory(pocotaFolder);
+                Directory.CreateDirectory(pocotaEntitiesFolder);
             }
-            await GeneratePocotaAsync(connector, contractType, pocotaFolder, name);
+            await GeneratePocotaEntityAsync(connector, contractType, pocotaEntitiesFolder);
         }
         if (_configuration["controllers"] is string controllersFolder && !string.IsNullOrEmpty(controllersFolder))
         {
@@ -420,16 +448,16 @@ public class SourceGenerator : Runner, ICommand
         }
     }
 
-    private async Task GeneratePocotaAsync(IConnector connector, Type contractType, string targetFolder, string name)
+    private async Task GeneratePocotaEntityAsync(IConnector connector, Type contractType, string targetFolder)
     {
         foreach (EntityAttribute attribute in contractType.GetCustomAttributes<EntityAttribute>())
         {
             string entityName = Util.BuildTypeName(attribute.EntityType);
-            await GenerateModelPocotaAsync(connector, contractType, attribute.EntityType, targetFolder, $"{entityName}Pocota");
+            await GenerateModelPocotaEntityAsync(connector, contractType, attribute.EntityType, targetFolder, $"{entityName}PocotaEntity");
         }
     }
 
-    private async Task GenerateModelPocotaAsync(IConnector connector, Type contractType, Type entityType, string targetFolder, string name)
+    private async Task GenerateModelPocotaEntityAsync(IConnector connector, Type contractType, Type entityType, string targetFolder, string name)
     {
         _logger?.LogInformation("Generating model's pocota {name} at {folder}.", name, targetFolder);
         PageOptions options = new()
@@ -438,7 +466,7 @@ public class SourceGenerator : Runner, ICommand
             EntityType = entityType,
             ClassName = BuildResutTypeName(entityType, name),
         };
-        await ProcessPageAsync(connector, options, "/Pocota", BuildFilePath(targetFolder, name));
+        await ProcessPageAsync(connector, options, "/PocotaEntity", BuildFilePath(targetFolder, name));
         _logger?.LogInformation("Done.");
     }
 
@@ -541,7 +569,7 @@ public class SourceGenerator : Runner, ICommand
         _logger?.LogInformation("Done.");
         await Task.CompletedTask;
     }
-    private async Task GenerateContextAsync(IConnector connector, Type contractType, string targetFolder, string name)
+    private async Task GenerateDbContextAsync(IConnector connector, Type contractType, string targetFolder, string name)
     {
         _logger?.LogInformation("Generating context {name} at {folder}.", name, targetFolder);
         PageOptions options = new()
@@ -549,7 +577,7 @@ public class SourceGenerator : Runner, ICommand
             ContractType = contractType,
             ClassName = BuildResutTypeName(contractType, name),
         };
-        await ProcessPageAsync(connector, options, "/Context", BuildFilePath(targetFolder, name));
+        await ProcessPageAsync(connector, options, "/DbContext", BuildFilePath(targetFolder, name));
         _logger?.LogInformation("Done.");
     }
     private async Task GenerateServiceBaseAsync(IConnector connector, Type contractType, string targetFolder, string name)

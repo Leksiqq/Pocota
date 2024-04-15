@@ -10,9 +10,72 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
 {
     private readonly IServiceProvider _services;
     private readonly @nameof(PocotaContext) _context;
+    private readonly @Model.ContractName@{}DbContext _dbContext;
     public @Model.ClassName@{}(IServiceProvider services)
     {
         _services = services;
         _context = _services.GetRequiredService@{}@Html.Raw($"<{nameof(PocotaContext)}>")@{}();
+        _dbContext = _services.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}DbContext>")@{}();
     }
+    public void Calculate(object entity)
+    {
+        @Model.EntityTypeName@{}PocotaEntity pocotaEntity = _context.Entity@{}@Html.Raw($"<{Model.EntityTypeName}PocotaEntity>")@{}(entity);
+        if(!pocotaEntity.IsAccessCalculated && entity is @Model.EntityTypeName value)
+        {
+            pocotaEntity.IsAccessCalculated = true;
+            DoCalculate(value, pocotaEntity);
+            EntityEntry entityEntry = _dbContext.Entry(entity);
+            foreach (ReferenceEntry entry in entityEntry.References)
+            {
+                if (entry.IsLoaded)
+                {
+                    switch (entry.Metadata.Name)
+                    {
+@foreach (PropertyModel prop in Model.Properties.Where(p => !p.IsCollection))
+{
+    <text>                        case "@prop.Name":
+                            if(value@{}.@prop.Name is {})
+                            {
+                                @nameof(IAccessCalculator) accessCalculator = _services.GetRequiredKeyedService@{
+                                     }@Html.Raw($"<{nameof(IAccessCalculator)}>")@{}(typeof(@prop.TypeName));
+                                accessCalculator.Calculate(value@{}.@prop.Name);
+                            }
+                            break;
+</text>
+}
+                        default:
+                            break;
+                    }
+                }
+            }
+            foreach (CollectionEntry entry in entityEntry.Collections)
+            {
+                if (entry.IsLoaded)
+                {
+                    switch (entry.Metadata.Name)
+                    {
+@foreach (PropertyModel prop in Model.Properties.Where(p => p.IsCollection))
+{
+    <text>                        case "@prop.Name":
+                            if(value@{}.@prop.Name is {} && value@{}.@prop.Name@{}.Count > 0)
+                            {
+                                @nameof(IAccessCalculator) accessCalculator = _services.GetRequiredKeyedService@{
+                                     }@Html.Raw($"<{nameof(IAccessCalculator)}>")@{}(typeof(@prop.ItemTypeName));
+                                foreach(@prop.ItemTypeName item in value@{}.@prop.Name)
+                                {
+                                    accessCalculator.Calculate(item);
+                                }
+                            }
+                            break;
+</text>
+}
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    protected virtual void DoCalculate(@Model.EntityTypeName entity, @Model.EntityTypeName@{}PocotaEntity pocotaEntity) { }
 }

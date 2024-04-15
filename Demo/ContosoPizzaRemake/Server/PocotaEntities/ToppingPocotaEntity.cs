@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
-// ContosoPizza.Models.ToppingPocota                       //
+// ContosoPizza.Models.ToppingPocotaEntity                 //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-14T15:28:52.                                 //
+// at 2024-04-15T18:39:17.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -13,19 +13,19 @@ using System.Collections.Generic;
 namespace ContosoPizza.Models;
 
 
-public class ToppingPocota: PocotaEntity
+public class ToppingPocotaEntity: PocotaEntity
 {
     private readonly IServiceProvider _services;
-    private readonly PizzaContext _dbContext;
+    private readonly PizzaDbContext _dbContext;
     private readonly PocotaContext _context;
     private EntityProperty _Id = null!;
     private EntityProperty _Name = null!;
     private EntityProperty _Calories = null!;
     private EntityProperty _Pizzas = null!;
-    public ToppingPocota(IServiceProvider services)
+    public ToppingPocotaEntity(IServiceProvider services)
     {
         _services = services;
-        _dbContext = _services.GetRequiredService<PizzaContext>();
+        _dbContext = _services.GetRequiredService<PizzaDbContext>();
         _context = _services.GetRequiredService<PocotaContext>();
     }
     public EntityProperty Id => _Id;
@@ -40,16 +40,19 @@ public class ToppingPocota: PocotaEntity
             switch(property.Metadata.Name)
             {
                 case "Id":
-                    _Id ??= new EntityProperty(property);
+                    _Id ??= new EntityPropertyProperty(this, property);
                     break;
                 case "Name":
-                    _Name ??= new EntityProperty(property);
+                    _Name ??= new EntityPropertyProperty(this, property);
                     break;
                 case "Calories":
-                    _Calories ??= new EntityProperty(property);
+                    _Calories ??= new EntityPropertyProperty(this, property);
                     break;
                 case "Pizzas":
-                    _Pizzas ??= new EntityProperty(property);
+                    _Pizzas ??= new EntityPropertyProperty(this, property);
+                    break;
+                default:
+                    AddKeyValue(property.Metadata.Name, property.CurrentValue);
                     break;
             }
         }
@@ -58,16 +61,16 @@ public class ToppingPocota: PocotaEntity
             switch(navigation.Metadata.Name)
             {
                 case "Id":
-                    _Id ??= new EntityProperty(navigation);
+                    _Id ??= new EntityPropertyNavigation(this, navigation);
                     break;
                 case "Name":
-                    _Name ??= new EntityProperty(navigation);
+                    _Name ??= new EntityPropertyNavigation(this, navigation);
                     break;
                 case "Calories":
-                    _Calories ??= new EntityProperty(navigation);
+                    _Calories ??= new EntityPropertyNavigation(this, navigation);
                     break;
                 case "Pizzas":
-                    _Pizzas ??= new EntityProperty(navigation);
+                    _Pizzas ??= new EntityPropertyNavigation(this, navigation);
                     break;
             }
         }

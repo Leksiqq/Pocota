@@ -8,7 +8,7 @@ public static class Extensions
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var context = services.GetRequiredService<PizzaContext>();
+                var context = services.GetRequiredService<PizzaDbContext>();
                 context.Database.EnsureCreated();
                 DbInitializer.Initialize(context);
             }

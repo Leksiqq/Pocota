@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.SauceJsonConverter                  //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-14T15:28:52.                                 //
+// at 2024-04-15T18:39:17.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -19,12 +19,10 @@ namespace ContosoPizza.Models;
 internal class SauceJsonConverter: JsonConverter<Sauce>
 {
     private readonly IServiceProvider _services;
-    private readonly PizzaContext _dbContext;
     private readonly PocotaContext _context;
     public SauceJsonConverter(IServiceProvider services)
     {
         _services = services;
-        _dbContext = _services.GetRequiredService<PizzaContext>();
         _context = _services.GetRequiredService<PocotaContext>();
 
     }
@@ -37,7 +35,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
     {
         bool withFieldsAccess = _services.GetRequiredService<IHttpContextAccessor>().HttpContext!
             .Request.Headers.ContainsKey(PocotaHeader.WithFieldsAccess);
-        SaucePocota pocotaEntity = _context.Entity<SaucePocota>(value);
+        SaucePocotaEntity pocotaEntity = _context.Entity<SaucePocotaEntity>(value);
         writer.WriteStartObject();
         writer.WritePropertyName(pocotaEntity.IsSerialized ? "$ref" : "$id");
         pocotaEntity.IsSerialized = true;
@@ -51,7 +49,52 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
                 writer.WriteStartArray();
                 writer.WriteNumberValue((int)pocotaEntity.Id.Access);
             }
-            JsonSerializer.Serialize(writer, value.Id, options);
+            if(
+                pocotaEntity.Id.Access is PropertyAccess.Hidden
+            )
+            {
+                writer.WriteNullValue();
+            }
+            else if(
+                pocotaEntity.Id.Access is PropertyAccess.NotSet
+            )
+            {
+                JsonSerializer.Serialize(writer, pocotaEntity.Id.NotSetStub, options);
+            }
+            else
+            {
+                JsonSerializer.Serialize(writer, value.Id, options);
+            }
+            if(withFieldsAccess)
+            {
+                writer.WriteEndArray();
+            }
+        }
+        if(!pocotaEntity.Id1.IsSent)
+        {
+            pocotaEntity.Id1.IsSent = true;
+            writer.WritePropertyName("Id1");
+            if(withFieldsAccess)
+            {
+                writer.WriteStartArray();
+                writer.WriteNumberValue((int)pocotaEntity.Id1.Access);
+            }
+            if(
+                pocotaEntity.Id1.Access is PropertyAccess.Hidden
+            )
+            {
+                writer.WriteNullValue();
+            }
+            else if(
+                pocotaEntity.Id1.Access is PropertyAccess.NotSet
+            )
+            {
+                JsonSerializer.Serialize(writer, pocotaEntity.Id1.NotSetStub, options);
+            }
+            else
+            {
+                JsonSerializer.Serialize(writer, value.Id1, options);
+            }
             if(withFieldsAccess)
             {
                 writer.WriteEndArray();
@@ -66,7 +109,22 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
                 writer.WriteStartArray();
                 writer.WriteNumberValue((int)pocotaEntity.Name.Access);
             }
-            JsonSerializer.Serialize(writer, value.Name, options);
+            if(
+                pocotaEntity.Name.Access is PropertyAccess.Hidden
+            )
+            {
+                writer.WriteNullValue();
+            }
+            else if(
+                pocotaEntity.Name.Access is PropertyAccess.NotSet
+            )
+            {
+                JsonSerializer.Serialize(writer, pocotaEntity.Name.NotSetStub, options);
+            }
+            else
+            {
+                JsonSerializer.Serialize(writer, value.Name, options);
+            }
             if(withFieldsAccess)
             {
                 writer.WriteEndArray();
@@ -81,7 +139,22 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
                 writer.WriteStartArray();
                 writer.WriteNumberValue((int)pocotaEntity.IsVegan.Access);
             }
-            JsonSerializer.Serialize(writer, value.IsVegan, options);
+            if(
+                pocotaEntity.IsVegan.Access is PropertyAccess.Hidden
+            )
+            {
+                writer.WriteNullValue();
+            }
+            else if(
+                pocotaEntity.IsVegan.Access is PropertyAccess.NotSet
+            )
+            {
+                JsonSerializer.Serialize(writer, pocotaEntity.IsVegan.NotSetStub, options);
+            }
+            else
+            {
+                JsonSerializer.Serialize(writer, value.IsVegan, options);
+            }
             if(withFieldsAccess)
             {
                 writer.WriteEndArray();

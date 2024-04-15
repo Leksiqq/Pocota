@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
-// ContosoPizza.PizzaContextBase                           //
+// ContosoPizza.PizzaDbContext                             //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-13T12:19:10.                                 //
+// at 2024-04-15T18:39:17.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -11,9 +11,9 @@ using Microsoft.EntityFrameworkCore;
 namespace ContosoPizza;
 
 
-public class PizzaContextBase: DbContext
+public class PizzaDbContext: DbContext
 {
-    public PizzaContextBase(DbContextOptions<PizzaContextBase> options) : base(options) { }
+    public PizzaDbContext(DbContextOptions<PizzaDbContext> options) : base(options) { }
 
     public DbSet<Pizza> SetOfPizza => Set<Pizza>();
     public DbSet<Sauce> SetOfSauce => Set<Sauce>();

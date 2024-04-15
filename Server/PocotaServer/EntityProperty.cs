@@ -4,18 +4,22 @@ namespace Net.Leksi.Pocota.Server;
 
 public class EntityProperty
 {
-    private PropertyAccess _propertyAccess = PropertyAccess.Full;
-    private bool _propertyAccessSet = false;
     private bool _isSent = false;
-    public PropertyAccess Access 
+    protected PropertyAccess _propertyAccess = PropertyAccess.Full;
+    private readonly PocotaEntity _entity;
+    public virtual object? NotSetStub { get => null; }
+    public virtual PropertyAccess Access 
     { 
         get => _propertyAccess; 
         set
         {
-            if (!_propertyAccessSet)
+            if(
+                value is not PropertyAccess.NotSet 
+                && (value is not PropertyAccess.Key || _entity.InitializingProperties)
+                && value < _propertyAccess
+            )
             {
                 _propertyAccess = value;
-                _propertyAccessSet = true;
             }
             else
             {
@@ -37,5 +41,9 @@ public class EntityProperty
                 _isSent = true;
             }
         }
+    }
+    public EntityProperty(PocotaEntity entity)
+    {
+        _entity = entity;
     }
 }

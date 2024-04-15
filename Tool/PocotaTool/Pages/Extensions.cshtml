@@ -21,10 +21,31 @@ public static class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string
 @foreach(PropertyModel pm in Model.Properties)
 {
     <text>        services.AddTransient@{}@Html.Raw($"<{pm.Name}JsonConverter>")@{}();
-        services.AddTransient@{}@Html.Raw($"<{pm.Name}Pocota>")@{}();
+        services.AddTransient@{}@Html.Raw($"<{pm.Name}PocotaEntity>")@{}();
 </text>
 }
+
         additionalConfig?.Invoke(services);
+
+        ServiceDescriptor probe;
+
+@foreach(PropertyModel pm in Model.Properties)
+{
+    <text>        probe = new ServiceDescriptor(typeof(@nameof(IAccessCalculator)), typeof(@pm.Name), typeof(@pm.Name@{}AccessBase), ServiceLifetime.Scoped);
+        if(!services.Contains(probe, AccessCalculatorServicesEqualityComparer.Instance))
+        {
+            services.AddKeyedScoped@{}@Html.Raw($"<{nameof(IAccessCalculator)}>")@{}(typeof(@pm.Name), (s, k) => new @pm.Name@{}AccessBase(s));
+        }
+        else
+        {
+            ServiceDescriptor sd = services.Where(s => AccessCalculatorServicesEqualityComparer.Instance.Equals(probe, s)).First();
+            if (sd.Lifetime is not ServiceLifetime.Scoped)
+            {
+                throw new InvalidOperationException($"{nameof(@nameof(IAccessCalculator))} service expected to be scoped, got: {sd}.");
+            }
+        }
+</text>
+}
         return services;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+
 namespace Net.Leksi.Pocota.Server;
 
 public class PocotaContext
@@ -21,5 +22,19 @@ public class PocotaContext
             _entityCache.Add(entity, value);
         }
         return (T)value;
+    }
+    public static async IAsyncEnumerable<TEntity> ProcessEntitiesAsync<TEntity>(IAccessCalculator accessCalculator, IAsyncEnumerable<TEntity> entities)
+    { 
+        await foreach(TEntity entity in entities)
+        {
+            accessCalculator.Calculate(entity!);
+            yield return entity;
+        }
+    }
+
+    public static TEntity ProcessEntity<TEntity>(IAccessCalculator accessCalculator, TEntity entity)
+    {
+        accessCalculator.Calculate(entity!);
+        return entity;
     }
 }
