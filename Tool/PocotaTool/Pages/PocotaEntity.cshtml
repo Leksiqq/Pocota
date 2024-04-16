@@ -41,9 +41,6 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
                     break;
 </text>
 }
-                default:
-                    AddKeyValue(property.Metadata.Name, property.CurrentValue);
-                    break;
             }
         }
         foreach (NavigationEntry navigation in entityEntry.Navigations)

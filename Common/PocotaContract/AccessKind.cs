@@ -1,6 +1,6 @@
 ﻿namespace Net.Leksi.Pocota.Contract;
 
-public enum PropertyAccess
+public enum AccessKind
 {
     NotSet = 0,
     Key = 1,

@@ -28,38 +28,44 @@ internal class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {st
         @Model.EntityTypeName@{}PocotaEntity pocotaEntity = _context.Entity@{}@Html.Raw($"<{Model.EntityTypeName}PocotaEntity>")@{}(value);
         writer.WriteStartObject();
         writer.WritePropertyName(pocotaEntity.IsSerialized ? "$ref" : "$id");
-        pocotaEntity.IsSerialized = true;
+        if (withFieldsAccess)
+        {
+            writer.WriteStartArray();
+            writer.WriteNumberValue((int)pocotaEntity.Access);
+        }
         writer.WriteNumberValue(pocotaEntity.PocotaId);
+        if (withFieldsAccess)
+        {
+            writer.WriteEndArray();
+        }
+        pocotaEntity.IsSerialized = true;
 @foreach (PropertyModel prop in Model.Properties)
 {
     <text>        if(!pocotaEntity.@prop.Name@{}.IsSent)
         {
-            pocotaEntity.@prop.Name@{}.IsSent = true;
-            writer.WritePropertyName(@Html.Raw($"\"{prop.Name}\""));
-            if(withFieldsAccess)
+            if(pocotaEntity.@prop.Name@{}.Access is not @nameof(AccessKind).@nameof(AccessKind.NotSet))
             {
-                writer.WriteStartArray();
-                writer.WriteNumberValue((int)pocotaEntity.@prop.Name@{}.Access);
-            }
-            if(
-                pocotaEntity.@prop.Name@{}.Access is @nameof(PropertyAccess).@nameof(PropertyAccess.Hidden)
-            )
-            {
-                writer.WriteNullValue();
-            }
-            else if(
-                pocotaEntity.@prop.Name@{}.Access is @nameof(PropertyAccess).@nameof(PropertyAccess.NotSet)
-            )
-            {
-                JsonSerializer.Serialize(writer, pocotaEntity.@prop.Name@{}.NotSetStub, options);
-            }
-            else
-            {
-                JsonSerializer.Serialize(writer, value@{}.@prop.Name, options);
-            }
-            if(withFieldsAccess)
-            {
-                writer.WriteEndArray();
+                pocotaEntity.@prop.Name@{}.IsSent = true;
+                writer.WritePropertyName(@Html.Raw($"\"{prop.Name}\""));
+                if(withFieldsAccess)
+                {
+                    writer.WriteStartArray();
+                    writer.WriteNumberValue((int)pocotaEntity.@prop.Name@{}.Access);
+                }
+                if(
+                    pocotaEntity.@prop.Name@{}.Access is @nameof(AccessKind).@nameof(AccessKind.Hidden)
+                )
+                {
+                    writer.WriteNullValue();
+                }
+                else
+                {
+                    JsonSerializer.Serialize(writer, value@{}.@prop.Name, options);
+                }
+                if(withFieldsAccess)
+                {
+                    writer.WriteEndArray();
+                }
             }
         }
 </text>

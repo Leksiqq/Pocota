@@ -10,7 +10,7 @@ public class EntityPropertyProperty: EntityProperty
         _entry = propertyEntry;
         if (_entry.Metadata.IsPrimaryKey())
         {
-            _propertyAccess = Contract.PropertyAccess.Key;
+            _propertyAccess = Contract.AccessKind.Key;
         }
     }
 }

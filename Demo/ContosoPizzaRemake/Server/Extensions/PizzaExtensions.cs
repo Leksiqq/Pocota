@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaExtensions                            //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-15T18:39:17.                                 //
+// at 2024-04-16T16:51:07.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -72,6 +72,15 @@ public static class PizzaExtensions
             if (sd.Lifetime is not ServiceLifetime.Scoped)
             {
                 throw new InvalidOperationException($"{nameof(IAccessCalculator)} service expected to be scoped, got: {sd}.");
+            }
+        }
+       foreach (var service in services)
+        {
+            if (typeof(PizzaDbContext).IsAssignableFrom(service.ServiceType))
+            {
+                ServiceDescriptor sd = new(typeof(PizzaDbContext), service.ServiceType, service.Lifetime);
+                services.Add(sd);
+                break;
             }
         }
         return services;

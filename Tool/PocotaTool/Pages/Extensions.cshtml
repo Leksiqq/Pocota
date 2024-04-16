@@ -46,6 +46,15 @@ public static class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string
         }
 </text>
 }
+       foreach (var service in services)
+        {
+            if (typeof(@Model.ContractName@{}DbContext).IsAssignableFrom(service.ServiceType))
+            {
+                ServiceDescriptor sd = new(typeof(@Model.ContractName@{}DbContext), service.ServiceType, service.Lifetime);
+                services.Add(sd);
+                break;
+            }
+        }
         return services;
     }
 }

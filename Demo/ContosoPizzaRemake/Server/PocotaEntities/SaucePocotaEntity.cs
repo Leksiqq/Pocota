@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.SaucePocotaEntity                   //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-15T18:39:17.                                 //
+// at 2024-04-16T16:51:08.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -49,9 +49,6 @@ public class SaucePocotaEntity: PocotaEntity
                     break;
                 case "IsVegan":
                     _IsVegan ??= new EntityPropertyProperty(this, property);
-                    break;
-                default:
-                    AddKeyValue(property.Metadata.Name, property.CurrentValue);
                     break;
             }
         }

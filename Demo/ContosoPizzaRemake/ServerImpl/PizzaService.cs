@@ -18,7 +18,10 @@ public class PizzaService : PizzaServiceBase
 
     public override IAsyncEnumerable<Pizza> GetAllPizzasAsync()
     {
-        return _dbContext.SetOfPizza/*.Include(p => p.Sauce)*/.Include(p => p.Toppings).AsAsyncEnumerable();
+        return _dbContext.SetOfPizza
+            //.Include(p => p.Sauce)
+            .Include(p => p.Toppings)!
+            .AsAsyncEnumerable();
     }
 
     public override IAsyncEnumerable<Sauce> GetAllSaucesAsync()

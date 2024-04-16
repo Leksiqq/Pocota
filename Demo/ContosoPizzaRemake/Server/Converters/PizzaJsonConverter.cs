@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.PizzaJsonConverter                  //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-15T18:39:17.                                 //
+// at 2024-04-16T16:51:07.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -39,126 +39,123 @@ internal class PizzaJsonConverter: JsonConverter<Pizza>
         PizzaPocotaEntity pocotaEntity = _context.Entity<PizzaPocotaEntity>(value);
         writer.WriteStartObject();
         writer.WritePropertyName(pocotaEntity.IsSerialized ? "$ref" : "$id");
-        pocotaEntity.IsSerialized = true;
+        if (withFieldsAccess)
+        {
+            writer.WriteStartArray();
+            writer.WriteNumberValue((int)pocotaEntity.Access);
+        }
         writer.WriteNumberValue(pocotaEntity.PocotaId);
+        if (withFieldsAccess)
+        {
+            writer.WriteEndArray();
+        }
+        pocotaEntity.IsSerialized = true;
         if(!pocotaEntity.Id.IsSent)
         {
-            pocotaEntity.Id.IsSent = true;
-            writer.WritePropertyName("Id");
-            if(withFieldsAccess)
+            if(pocotaEntity.Id.Access is not AccessKind.NotSet)
             {
-                writer.WriteStartArray();
-                writer.WriteNumberValue((int)pocotaEntity.Id.Access);
-            }
-            if(
-                pocotaEntity.Id.Access is PropertyAccess.Hidden
-            )
-            {
-                writer.WriteNullValue();
-            }
-            else if(
-                pocotaEntity.Id.Access is PropertyAccess.NotSet
-            )
-            {
-                JsonSerializer.Serialize(writer, pocotaEntity.Id.NotSetStub, options);
-            }
-            else
-            {
-                JsonSerializer.Serialize(writer, value.Id, options);
-            }
-            if(withFieldsAccess)
-            {
-                writer.WriteEndArray();
+                pocotaEntity.Id.IsSent = true;
+                writer.WritePropertyName("Id");
+                if(withFieldsAccess)
+                {
+                    writer.WriteStartArray();
+                    writer.WriteNumberValue((int)pocotaEntity.Id.Access);
+                }
+                if(
+                    pocotaEntity.Id.Access is AccessKind.Hidden
+                )
+                {
+                    writer.WriteNullValue();
+                }
+                else
+                {
+                    JsonSerializer.Serialize(writer, value.Id, options);
+                }
+                if(withFieldsAccess)
+                {
+                    writer.WriteEndArray();
+                }
             }
         }
         if(!pocotaEntity.Name.IsSent)
         {
-            pocotaEntity.Name.IsSent = true;
-            writer.WritePropertyName("Name");
-            if(withFieldsAccess)
+            if(pocotaEntity.Name.Access is not AccessKind.NotSet)
             {
-                writer.WriteStartArray();
-                writer.WriteNumberValue((int)pocotaEntity.Name.Access);
-            }
-            if(
-                pocotaEntity.Name.Access is PropertyAccess.Hidden
-            )
-            {
-                writer.WriteNullValue();
-            }
-            else if(
-                pocotaEntity.Name.Access is PropertyAccess.NotSet
-            )
-            {
-                JsonSerializer.Serialize(writer, pocotaEntity.Name.NotSetStub, options);
-            }
-            else
-            {
-                JsonSerializer.Serialize(writer, value.Name, options);
-            }
-            if(withFieldsAccess)
-            {
-                writer.WriteEndArray();
+                pocotaEntity.Name.IsSent = true;
+                writer.WritePropertyName("Name");
+                if(withFieldsAccess)
+                {
+                    writer.WriteStartArray();
+                    writer.WriteNumberValue((int)pocotaEntity.Name.Access);
+                }
+                if(
+                    pocotaEntity.Name.Access is AccessKind.Hidden
+                )
+                {
+                    writer.WriteNullValue();
+                }
+                else
+                {
+                    JsonSerializer.Serialize(writer, value.Name, options);
+                }
+                if(withFieldsAccess)
+                {
+                    writer.WriteEndArray();
+                }
             }
         }
         if(!pocotaEntity.Sauce.IsSent)
         {
-            pocotaEntity.Sauce.IsSent = true;
-            writer.WritePropertyName("Sauce");
-            if(withFieldsAccess)
+            if(pocotaEntity.Sauce.Access is not AccessKind.NotSet)
             {
-                writer.WriteStartArray();
-                writer.WriteNumberValue((int)pocotaEntity.Sauce.Access);
-            }
-            if(
-                pocotaEntity.Sauce.Access is PropertyAccess.Hidden
-            )
-            {
-                writer.WriteNullValue();
-            }
-            else if(
-                pocotaEntity.Sauce.Access is PropertyAccess.NotSet
-            )
-            {
-                JsonSerializer.Serialize(writer, pocotaEntity.Sauce.NotSetStub, options);
-            }
-            else
-            {
-                JsonSerializer.Serialize(writer, value.Sauce, options);
-            }
-            if(withFieldsAccess)
-            {
-                writer.WriteEndArray();
+                pocotaEntity.Sauce.IsSent = true;
+                writer.WritePropertyName("Sauce");
+                if(withFieldsAccess)
+                {
+                    writer.WriteStartArray();
+                    writer.WriteNumberValue((int)pocotaEntity.Sauce.Access);
+                }
+                if(
+                    pocotaEntity.Sauce.Access is AccessKind.Hidden
+                )
+                {
+                    writer.WriteNullValue();
+                }
+                else
+                {
+                    JsonSerializer.Serialize(writer, value.Sauce, options);
+                }
+                if(withFieldsAccess)
+                {
+                    writer.WriteEndArray();
+                }
             }
         }
         if(!pocotaEntity.Toppings.IsSent)
         {
-            pocotaEntity.Toppings.IsSent = true;
-            writer.WritePropertyName("Toppings");
-            if(withFieldsAccess)
+            if(pocotaEntity.Toppings.Access is not AccessKind.NotSet)
             {
-                writer.WriteStartArray();
-                writer.WriteNumberValue((int)pocotaEntity.Toppings.Access);
-            }
-            if(
-                pocotaEntity.Toppings.Access is PropertyAccess.Hidden
-            )
-            {
-                writer.WriteNullValue();
-            }
-            else if(
-                pocotaEntity.Toppings.Access is PropertyAccess.NotSet
-            )
-            {
-                JsonSerializer.Serialize(writer, pocotaEntity.Toppings.NotSetStub, options);
-            }
-            else
-            {
-                JsonSerializer.Serialize(writer, value.Toppings, options);
-            }
-            if(withFieldsAccess)
-            {
-                writer.WriteEndArray();
+                pocotaEntity.Toppings.IsSent = true;
+                writer.WritePropertyName("Toppings");
+                if(withFieldsAccess)
+                {
+                    writer.WriteStartArray();
+                    writer.WriteNumberValue((int)pocotaEntity.Toppings.Access);
+                }
+                if(
+                    pocotaEntity.Toppings.Access is AccessKind.Hidden
+                )
+                {
+                    writer.WriteNullValue();
+                }
+                else
+                {
+                    JsonSerializer.Serialize(writer, value.Toppings, options);
+                }
+                if(withFieldsAccess)
+                {
+                    writer.WriteEndArray();
+                }
             }
         }
         writer.WriteEndObject();

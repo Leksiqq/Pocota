@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.PizzaPocotaEntity                   //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-15T18:39:17.                                 //
+// at 2024-04-16T16:51:08.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -50,9 +50,6 @@ public class PizzaPocotaEntity: PocotaEntity
                     break;
                 case "Toppings":
                     _Toppings ??= new EntityPropertyProperty(this, property);
-                    break;
-                default:
-                    AddKeyValue(property.Metadata.Name, property.CurrentValue);
                     break;
             }
         }

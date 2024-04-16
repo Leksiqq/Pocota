@@ -4,10 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ContosoPizza.Models;
 
-[PrimaryKey(nameof(Id), nameof(Id1))]
 public class Sauce
 {
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     public int Id1 { get; set; }
     [Required]

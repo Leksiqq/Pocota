@@ -8,7 +8,7 @@
 @Html.Partial("Header", Model)
 public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
 {
-    public @Model.ClassName@{}(DbContextOptions@{}@Html.Raw($"<{@Model.ClassName}>") options) : base(options) { }
+    public @Model.ClassName@{}(DbContextOptions options) : base(options) { }
 
 @foreach(PropertyModel pm in Model.Properties)
 {

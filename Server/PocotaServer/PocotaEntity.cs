@@ -1,14 +1,39 @@
-﻿namespace Net.Leksi.Pocota.Server;
+﻿using Net.Leksi.Pocota.Contract;
+
+namespace Net.Leksi.Pocota.Server;
 
 public abstract class PocotaEntity
 {
     private bool _isSerialized = false;
     private bool _isAccessCalculated = false;
-    private readonly Dictionary<string, object?> _keyValues = [];
-    private readonly Dictionary<string, object> _probes = [];
+    private AccessKind _entityAccess = AccessKind.Full;
     private object? _entity;
     internal bool InitializingProperties { get; private set; }
     public ulong PocotaId { get; internal set; }
+    public virtual AccessKind Access
+    {
+        get => _entityAccess;
+        set
+        {
+            if (
+                (
+                    value is AccessKind.Hidden
+                    || value is AccessKind.Readonly
+                    || value is AccessKind.Full
+                )
+                && (
+                    value <= _entityAccess 
+                ) 
+            )
+            {
+                _entityAccess = value;
+            }
+            else
+            {
+                throw new InvalidOperationException();
+            }
+        }
+    }
     public bool IsSerialized
     {
         get => _isSerialized;
@@ -56,10 +81,6 @@ public abstract class PocotaEntity
                 throw new InvalidOperationException();
             }
         }
-    }
-    protected void AddKeyValue(string name, object? value)
-    {
-        _keyValues.Add(name, value);
     }
     protected abstract void InitProperties();
 }

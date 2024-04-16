@@ -10,6 +10,6 @@ public class PizzaAccess : PizzaAccessBase
 
     protected override void DoCalculate(Pizza entity, PizzaPocotaEntity pocotaEntity)
     {
-        pocotaEntity.Name.Access = Net.Leksi.Pocota.Contract.PropertyAccess.Hidden;
+        pocotaEntity.Name.Access = Net.Leksi.Pocota.Contract.AccessKind.Hidden;
     }
 }
