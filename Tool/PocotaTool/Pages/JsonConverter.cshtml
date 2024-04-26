@@ -53,7 +53,7 @@ internal class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {st
                     writer.WriteNumberValue((int)pocotaEntity.@prop.Name@{}.Access);
                 }
                 if(
-                    pocotaEntity.@prop.Name@{}.Access is @nameof(AccessKind).@nameof(AccessKind.Hidden)
+                    pocotaEntity.@prop.Name@{}.Access is @nameof(AccessKind).@nameof(AccessKind.Forbidden)
                 )
                 {
                     writer.WriteNullValue();

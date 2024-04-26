@@ -4,8 +4,8 @@ namespace Net.Leksi.Pocota.Tool.Pages;
 
 public class ServiceBaseModel : ClassModel
 {
-    public void OnGet([FromServices] SourceGenerator generator)
+    public void OnGet()
     {
-        generator.PopulateServiceBaseModel(this);
+        SourceGenerator.PopulateServiceBaseModel(this);
     }
 }

@@ -1,6 +1,8 @@
-﻿namespace Net.Leksi.Pocota.Server;
+﻿using Net.Leksi.Pocota.Contract;
+
+namespace Net.Leksi.Pocota.Server;
 
 public interface IAccessCalculator
 {
-    void Calculate(object entity);
+    AccessKind Calculate(object entity);
 }

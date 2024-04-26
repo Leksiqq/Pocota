@@ -1,0 +1,16 @@
+﻿@page
+@using Net.Leksi.Pocota.Tool
+@using Net.Leksi.Pocota.Tool.Pages
+@using Net.Leksi.Pocota.Tool.Pages.Client.CS
+@model ModelModel
+@{
+}
+@Html.Partial("Header", Model)
+public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {string.Join(", ", Model.Inheritances)}") : string.Empty)
+{
+@foreach (PropertyModel prop in Model.Properties)
+{
+    <text>    public @Html.Raw(prop.TypeName)@(prop.IsNullable ? "?" : string.Empty) @prop.Name { get; set; }
+</text>
+}
+}

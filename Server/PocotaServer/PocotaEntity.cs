@@ -17,7 +17,7 @@ public abstract class PocotaEntity
         {
             if (
                 (
-                    value is AccessKind.Hidden
+                    value is AccessKind.Forbidden
                     || value is AccessKind.Readonly
                     || value is AccessKind.Full
                 )

@@ -1,11 +1,12 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.ToppingAccessBase                   //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-16T16:51:08.                                 //
+// at 2024-04-26T12:56:14.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Net.Leksi.Pocota.Contract;
 using Net.Leksi.Pocota.Server;
 using System.Collections.Generic;
 
@@ -23,7 +24,7 @@ public class ToppingAccessBase: IAccessCalculator
         _context = _services.GetRequiredService<PocotaContext>();
         _dbContext = _services.GetRequiredService<PizzaDbContext>();
     }
-    public void Calculate(object entity)
+    public AccessKind Calculate(object entity)
     {
         ToppingPocotaEntity pocotaEntity = _context.Entity<ToppingPocotaEntity>(entity);
         if(!pocotaEntity.IsAccessCalculated && entity is Topping value)
@@ -54,7 +55,11 @@ public class ToppingAccessBase: IAccessCalculator
                                 IAccessCalculator accessCalculator = _services.GetRequiredKeyedService<IAccessCalculator>(typeof(Pizza));
                                 foreach(Pizza item in value.Pizzas)
                                 {
-                                    accessCalculator.Calculate(item);
+                                    AccessKind access = accessCalculator.Calculate(item);
+                                    if(pocotaEntity.Access is AccessKind.Forbidden && access is AccessKind.Anonym)
+                                    {
+                                        pocotaEntity.Access = AccessKind.Anonym;
+                                    }
                                 }
                             }
                             break;
@@ -64,6 +69,7 @@ public class ToppingAccessBase: IAccessCalculator
                 }
             }
         }
+        return pocotaEntity.Access;
     }
 
     protected virtual void DoCalculate(Topping entity, ToppingPocotaEntity pocotaEntity) { }

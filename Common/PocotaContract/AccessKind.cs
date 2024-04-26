@@ -4,7 +4,8 @@ public enum AccessKind
 {
     NotSet = 0,
     Key = 1,
-    Hidden = 2,
-    Readonly = 3,
-    Full = 4,
+    Forbidden = 2,
+    Anonym = 3,
+    Readonly = 4,
+    Full = 5,
 }

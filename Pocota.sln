@@ -23,7 +23,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{C4FBB8
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PocotaContract", "Common\PocotaContract\PocotaContract.csproj", "{2FAE1524-9FE6-4C6C-B144-69C65CDE0187}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerImpl", "Demo\ContosoPizzaRemake\ServerImpl\ServerImpl.csproj", "{A78271D8-BE89-4190-A61D-634FD07675BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerImpl", "Demo\ContosoPizzaRemake\ServerImpl\ServerImpl.csproj", "{A78271D8-BE89-4190-A61D-634FD07675BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpClient", "Demo\ContosoPizzaRemake\Client\CSharpClient\CSharpClient.csproj", "{BDC65443-0B28-4A0E-BD56-5389F72B6D33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +57,10 @@ Global
 		{A78271D8-BE89-4190-A61D-634FD07675BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A78271D8-BE89-4190-A61D-634FD07675BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A78271D8-BE89-4190-A61D-634FD07675BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDC65443-0B28-4A0E-BD56-5389F72B6D33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDC65443-0B28-4A0E-BD56-5389F72B6D33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDC65443-0B28-4A0E-BD56-5389F72B6D33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDC65443-0B28-4A0E-BD56-5389F72B6D33}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +73,7 @@ Global
 		{4D461ADA-45D3-4903-8176-128C42DD56A8} = {C6EB8231-E535-46FD-9C56-7E0D5A1FD4DF}
 		{2FAE1524-9FE6-4C6C-B144-69C65CDE0187} = {C4FBB88D-3786-49B3-9858-46E6DD874A55}
 		{A78271D8-BE89-4190-A61D-634FD07675BE} = {C6EB8231-E535-46FD-9C56-7E0D5A1FD4DF}
+		{BDC65443-0B28-4A0E-BD56-5389F72B6D33} = {C6EB8231-E535-46FD-9C56-7E0D5A1FD4DF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {03A22767-6ACB-43F5-ACE0-24BDB396D7E9}

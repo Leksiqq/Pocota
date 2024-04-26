@@ -2,7 +2,7 @@
   "profiles": {
     "PocotaTool": {
       "commandName": "Project",
-      "commandLineArgs": "gen --contract-assembly W:\\C#\\PocotaEF\\Demo\\ContosoPizzaRemake\\Contract\\bin\\Debug\\net8.0\\Contract.dll --server-base W:\\C#\\PocotaEF\\Demo\\ContosoPizzaRemake\\Server"
+      "commandLineArgs": "gen --contract-assembly W:\\C#\\PocotaEF\\Demo\\ContosoPizzaRemake\\Contract\\bin\\Debug\\net8.0\\Contract.dll --server-base W:\\C#\\PocotaEF\\Demo\\ContosoPizzaRemake\\Server --client-base W:\\C#\\PocotaEF\\Demo\\ContosoPizzaRemake\\Client\\CSharpClient"
     }
   }
 }

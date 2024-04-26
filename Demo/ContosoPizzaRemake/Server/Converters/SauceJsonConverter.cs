@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.SauceJsonConverter                  //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-16T16:51:07.                                 //
+// at 2024-04-26T12:56:14.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -61,7 +61,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
                     writer.WriteNumberValue((int)pocotaEntity.Id.Access);
                 }
                 if(
-                    pocotaEntity.Id.Access is AccessKind.Hidden
+                    pocotaEntity.Id.Access is AccessKind.Forbidden
                 )
                 {
                     writer.WriteNullValue();
@@ -88,7 +88,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
                     writer.WriteNumberValue((int)pocotaEntity.Id1.Access);
                 }
                 if(
-                    pocotaEntity.Id1.Access is AccessKind.Hidden
+                    pocotaEntity.Id1.Access is AccessKind.Forbidden
                 )
                 {
                     writer.WriteNullValue();
@@ -115,7 +115,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
                     writer.WriteNumberValue((int)pocotaEntity.Name.Access);
                 }
                 if(
-                    pocotaEntity.Name.Access is AccessKind.Hidden
+                    pocotaEntity.Name.Access is AccessKind.Forbidden
                 )
                 {
                     writer.WriteNullValue();
@@ -142,7 +142,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
                     writer.WriteNumberValue((int)pocotaEntity.IsVegan.Access);
                 }
                 if(
-                    pocotaEntity.IsVegan.Access is AccessKind.Hidden
+                    pocotaEntity.IsVegan.Access is AccessKind.Forbidden
                 )
                 {
                     writer.WriteNullValue();

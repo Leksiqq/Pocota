@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.ToppingJsonConverter                //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-16T16:51:07.                                 //
+// at 2024-04-26T12:56:14.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -62,7 +62,7 @@ internal class ToppingJsonConverter: JsonConverter<Topping>
                     writer.WriteNumberValue((int)pocotaEntity.Id.Access);
                 }
                 if(
-                    pocotaEntity.Id.Access is AccessKind.Hidden
+                    pocotaEntity.Id.Access is AccessKind.Forbidden
                 )
                 {
                     writer.WriteNullValue();
@@ -89,7 +89,7 @@ internal class ToppingJsonConverter: JsonConverter<Topping>
                     writer.WriteNumberValue((int)pocotaEntity.Name.Access);
                 }
                 if(
-                    pocotaEntity.Name.Access is AccessKind.Hidden
+                    pocotaEntity.Name.Access is AccessKind.Forbidden
                 )
                 {
                     writer.WriteNullValue();
@@ -116,7 +116,7 @@ internal class ToppingJsonConverter: JsonConverter<Topping>
                     writer.WriteNumberValue((int)pocotaEntity.Calories.Access);
                 }
                 if(
-                    pocotaEntity.Calories.Access is AccessKind.Hidden
+                    pocotaEntity.Calories.Access is AccessKind.Forbidden
                 )
                 {
                     writer.WriteNullValue();
@@ -143,7 +143,7 @@ internal class ToppingJsonConverter: JsonConverter<Topping>
                     writer.WriteNumberValue((int)pocotaEntity.Pizzas.Access);
                 }
                 if(
-                    pocotaEntity.Pizzas.Access is AccessKind.Hidden
+                    pocotaEntity.Pizzas.Access is AccessKind.Forbidden
                 )
                 {
                     writer.WriteNullValue();

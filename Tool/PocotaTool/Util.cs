@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using Net.Leksi.E6dWebApp;
+using System.Reflection;
 using System.Text;
 using static Net.Leksi.Pocota.Tool.Constants;
 
@@ -149,7 +150,45 @@ internal class Util
         sb.Append(']');
         return sb.ToString();
     }
-
+    internal static string BuildResutTypeName(Type type, string? replaceName = null)
+    {
+        return $"{(string.IsNullOrEmpty(type.Namespace) ? string.Empty : $"{type.Namespace}.")}{(string.IsNullOrEmpty(replaceName) ? type.Name[1..] : replaceName)}";
+    }
+    internal static async Task ProcessPageAsync(IConnector connector, PageOptions? parameter, string uri, string path)
+    {
+        HttpRequestMessage request = new(HttpMethod.Get, uri);
+        HttpResponseMessage response = connector.Send(request, parameter);
+        Stream input = await response.Content.ReadAsStreamAsync();
+        using FileStream output = new(path, FileMode.Create);
+        await input.CopyToAsync(output);
+    }
+    internal static string BuildFilePath(string targetFolder, string name, string fileExtension)
+    {
+        string typeName = Util.GetTypeName(name);
+        return $"{Path.Combine(targetFolder, typeName)}{fileExtension}";
+    }
+    internal static string PascalCase(string folder)
+    {
+        StringBuilder sb = new();
+        bool upper = true;
+        foreach (char ch in folder)
+        {
+            if (upper)
+            {
+                sb.Append(new string([ch]).ToUpper());
+                upper = false;
+            }
+            else if (ch == '-')
+            {
+                upper = true;
+            }
+            else
+            {
+                sb.Append(ch);
+            }
+        }
+        return sb.ToString();
+    }
     private static string RenderValue(PropertyInfo pi, object target)
     {
         if (pi.PropertyType == typeof(bool))

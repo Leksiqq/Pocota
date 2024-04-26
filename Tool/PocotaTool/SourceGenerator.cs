@@ -5,12 +5,11 @@ using Net.Leksi.E6dWebApp;
 using Net.Leksi.Pocota.Contract;
 using Net.Leksi.Pocota.Server;
 using Net.Leksi.Pocota.Tool;
+using Net.Leksi.Pocota.Tool.Client;
 using Net.Leksi.Pocota.Tool.Pages;
 using System.Reflection;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Xml.Linq;
 using static Net.Leksi.Pocota.Tool.Constants;
 
 namespace Net.Leksi.Pocota;
@@ -23,6 +22,7 @@ public class SourceGenerator : Runner, ICommand
     private readonly string[] _clientFolders = ["connectors", "client-models", "client-converters", "client-extensions"];
     private readonly string _clientLanguage = s_cSharp;
     private readonly string _fileExtension = s_cs;
+    internal IClientSourceGenerator? ClientSourceGenerator { get; private init; }
     public SourceGenerator(IServiceProvider services) : base()
     {
         _services = services;
@@ -38,12 +38,6 @@ public class SourceGenerator : Runner, ICommand
                     return;
                 }
                 _clientLanguage = cl;
-                switch (_clientLanguage)
-                {
-                    case s_cSharp:
-                        _fileExtension = s_cs;
-                        break;
-                }
             }
         }
         if (_configuration["server-base"] is string sb && !string.IsNullOrEmpty(sb))
@@ -52,7 +46,7 @@ public class SourceGenerator : Runner, ICommand
             {
                 if (_configuration[folder] is null)
                 {
-                    _configuration[folder] = Path.Combine(sb, PascalCase(folder.StartsWith("server-") ? folder["server-".Length..] : folder));
+                    _configuration[folder] = Path.Combine(sb, Util.PascalCase(folder.StartsWith("server-") ? folder["server-".Length..] : folder));
                 }
                 else if (string.IsNullOrWhiteSpace(_configuration[folder]))
                 {
@@ -66,11 +60,18 @@ public class SourceGenerator : Runner, ICommand
         }
         if (_configuration["client-base"] is string cb && !string.IsNullOrEmpty(cb))
         {
+            switch (_clientLanguage)
+            {
+                case s_cSharp:
+                    _fileExtension = s_cs;
+                    ClientSourceGenerator = new CSharpSourceGenerator(_services);
+                    break;
+            }
             foreach (string folder in _clientFolders)
             {
                 if (_configuration[folder] is null)
                 {
-                    _configuration[folder] = Path.Combine(cb, PascalCase(folder.StartsWith("client-") ? folder["client-".Length..] : folder));
+                    _configuration[folder] = Path.Combine(cb, Util.PascalCase(folder.StartsWith("client-") ? folder["client-".Length..] : folder));
                 }
                 else if (string.IsNullOrWhiteSpace(_configuration[folder]))
                 {
@@ -132,7 +133,7 @@ public class SourceGenerator : Runner, ICommand
                     _logger?.LogError("Contract name must start with 'I'.");
                     return;
                 }
-                await ProcessContractAsync(connector, type, pca.ContractName ?? BuildResutTypeName(type));
+                await ProcessContractAsync(connector, type, pca.ContractName ?? Util.BuildResutTypeName(type));
                 _logger?.LogInformation("Done processing contract type.");
             }
         }
@@ -158,7 +159,7 @@ public class SourceGenerator : Runner, ICommand
             model.Properties.Add(pm);
         }
     }
-    internal void PopulateServiceBaseModel(ServiceBaseModel model)
+    internal static void PopulateServiceBaseModel(ServiceBaseModel model)
     {
         PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
@@ -316,6 +317,7 @@ public class SourceGenerator : Runner, ICommand
         model.AddUsing(typeof(ReferenceEntry));
         model.AddUsing(typeof(CollectionEntry));
         model.AddUsing(typeof(EntityEntry));
+        model.AddUsing(typeof(AccessKind));
         model.AddInheritance(typeof(IAccessCalculator));
         foreach (PropertyInfo pi in options.EntityType!.GetProperties())
         {
@@ -371,92 +373,109 @@ public class SourceGenerator : Runner, ICommand
     }
     private async Task ProcessContractAsync(IConnector connector, Type contractType, string name)
     {
-        if (_configuration["db-contexts"] is string dbContextsFolder && !string.IsNullOrEmpty(dbContextsFolder))
+        if (!string.IsNullOrEmpty(_configuration["server-base"]))
         {
-            if (!Directory.Exists(dbContextsFolder))
+            if (_configuration["db-contexts"] is string dbContextsFolder && !string.IsNullOrEmpty(dbContextsFolder))
             {
-                Directory.CreateDirectory(dbContextsFolder);
-            }
-            await GenerateDbContextAsync(connector, contractType, dbContextsFolder, $"{name}DbContext");
-        }
-        if (_configuration["server-extensions"] is string serverExtensionsFolder && !string.IsNullOrEmpty(serverExtensionsFolder))
-        {
-            if (!Directory.Exists(serverExtensionsFolder))
-            {
-                Directory.CreateDirectory(serverExtensionsFolder);
-            }
-            await GenerateServerExtensionsAsync(connector, contractType, serverExtensionsFolder, $"{name}Extensions");
-        }
-        if (_configuration["server-converters"] is string serverConvertersFolder && !string.IsNullOrEmpty(serverConvertersFolder))
-        {
-            if (!Directory.Exists(serverConvertersFolder))
-            {
-                Directory.CreateDirectory(serverConvertersFolder);
-            }
-            await GenerateServerConvertersAsync(connector, contractType, serverConvertersFolder, name);
-        }
-        if (_configuration["access"] is string accessFolder && !string.IsNullOrEmpty(accessFolder))
-        {
-            if (!Directory.Exists(accessFolder))
-            {
-                Directory.CreateDirectory(accessFolder);
-            }
-            await GenerateAccessAsync(connector, contractType, accessFolder, name);
-        }
-        if (_configuration["pocota-entities"] is string pocotaEntitiesFolder && !string.IsNullOrEmpty(pocotaEntitiesFolder))
-        {
-            if (!Directory.Exists(pocotaEntitiesFolder))
-            {
-                Directory.CreateDirectory(pocotaEntitiesFolder);
-            }
-            await GeneratePocotaEntityAsync(connector, contractType, pocotaEntitiesFolder);
-        }
-        if (_configuration["controllers"] is string controllersFolder && !string.IsNullOrEmpty(controllersFolder))
-        {
-            if (!Directory.Exists(controllersFolder))
-            {
-                Directory.CreateDirectory(controllersFolder);
-            }
-            await GenerateControllerAsync(connector, contractType, controllersFolder, $"{name}Controller");
-        }
-        if (_configuration["services"] is string servicesFolder && !string.IsNullOrEmpty(servicesFolder))
-        {
-            if (!Directory.Exists(servicesFolder))
-            {
-                Directory.CreateDirectory(servicesFolder);
-            }
-            await GenerateServiceBaseAsync(connector, contractType, servicesFolder, $"{name}ServiceBase");
-        }
-        if (_configuration["connectors"] is string connectorsFolder && !string.IsNullOrEmpty(connectorsFolder))
-        {
-            if (!Directory.Exists(connectorsFolder))
-            {
-                Directory.CreateDirectory(connectorsFolder);
-            }
-            await GenerateConnectorAsync(connector, contractType, connectorsFolder, $"{name}Connector");
-        }
-        foreach (EntityAttribute entityAttribute in contractType.GetCustomAttributes<EntityAttribute>())
-        {
-            if (_configuration["client-models"] is string clientModelsFolder && !string.IsNullOrEmpty(clientModelsFolder))
-            {
-                if (!Directory.Exists(clientModelsFolder))
+                if (!Directory.Exists(dbContextsFolder))
                 {
-                    Directory.CreateDirectory(clientModelsFolder);
+                    Directory.CreateDirectory(dbContextsFolder);
                 }
-                await GenerateClientModelAsync(connector, contractType, entityAttribute.EntityType, clientModelsFolder);
+                await GenerateDbContextAsync(connector, contractType, dbContextsFolder, $"{name}DbContext");
+            }
+            if (_configuration["server-extensions"] is string serverExtensionsFolder && !string.IsNullOrEmpty(serverExtensionsFolder))
+            {
+                if (!Directory.Exists(serverExtensionsFolder))
+                {
+                    Directory.CreateDirectory(serverExtensionsFolder);
+                }
+                await GenerateServerExtensionsAsync(connector, contractType, serverExtensionsFolder, $"{name}Extensions");
+            }
+            if (_configuration["server-converters"] is string serverConvertersFolder && !string.IsNullOrEmpty(serverConvertersFolder))
+            {
+                if (!Directory.Exists(serverConvertersFolder))
+                {
+                    Directory.CreateDirectory(serverConvertersFolder);
+                }
+                await GenerateServerConverterFactoryAsync(connector, contractType, serverConvertersFolder, $"{name}JsonConverterFactory");
+                foreach (EntityAttribute attribute in contractType.GetCustomAttributes<EntityAttribute>())
+                {
+                    string entityName = Util.BuildTypeName(attribute.EntityType);
+                    await GenerateServerEntityConverterAsync(connector, contractType, attribute.EntityType, serverConvertersFolder, $"{entityName}JsonConverter");
+                }
+            }
+            if (_configuration["access"] is string accessFolder && !string.IsNullOrEmpty(accessFolder))
+            {
+                if (!Directory.Exists(accessFolder))
+                {
+                    Directory.CreateDirectory(accessFolder);
+                }
+                foreach (EntityAttribute attribute in contractType.GetCustomAttributes<EntityAttribute>())
+                {
+                    string entityName = Util.BuildTypeName(attribute.EntityType);
+                    await GenerateModelAccessAsync(connector, contractType, attribute.EntityType, accessFolder, $"{entityName}AccessBase");
+                }
+            }
+            if (_configuration["pocota-entities"] is string pocotaEntitiesFolder && !string.IsNullOrEmpty(pocotaEntitiesFolder))
+            {
+                if (!Directory.Exists(pocotaEntitiesFolder))
+                {
+                    Directory.CreateDirectory(pocotaEntitiesFolder);
+                }
+                foreach (EntityAttribute attribute in contractType.GetCustomAttributes<EntityAttribute>())
+                {
+                    string entityName = Util.BuildTypeName(attribute.EntityType);
+                    await GenerateModelPocotaEntityAsync(connector, contractType, attribute.EntityType, pocotaEntitiesFolder, $"{entityName}PocotaEntity");
+                }
+            }
+            if (_configuration["controllers"] is string controllersFolder && !string.IsNullOrEmpty(controllersFolder))
+            {
+                if (!Directory.Exists(controllersFolder))
+                {
+                    Directory.CreateDirectory(controllersFolder);
+                }
+                await GenerateControllerAsync(connector, contractType, controllersFolder, $"{name}Controller");
+            }
+            if (_configuration["services"] is string servicesFolder && !string.IsNullOrEmpty(servicesFolder))
+            {
+                if (!Directory.Exists(servicesFolder))
+                {
+                    Directory.CreateDirectory(servicesFolder);
+                }
+                await GenerateServiceBaseAsync(connector, contractType, servicesFolder, $"{name}ServiceBase");
+            }
+        }
+        if (ClientSourceGenerator is IClientSourceGenerator clientSourceGenerator)
+        {
+            if (_configuration["connectors"] is string connectorsFolder && !string.IsNullOrEmpty(connectorsFolder))
+            {
+                if (!Directory.Exists(connectorsFolder))
+                {
+                    Directory.CreateDirectory(connectorsFolder);
+                }
+                    await clientSourceGenerator.GenerateConnectorAsync(connector, contractType, connectorsFolder, $"{name}Connector");
+            }
+            foreach (EntityAttribute entityAttribute in contractType.GetCustomAttributes<EntityAttribute>())
+            {
+                if (_configuration["client-models"] is string clientModelsFolder && !string.IsNullOrEmpty(clientModelsFolder))
+                {
+                    if (!Directory.Exists(clientModelsFolder))
+                    {
+                        Directory.CreateDirectory(clientModelsFolder);
+                    }
+                    await clientSourceGenerator.GenerateModelAsync(connector, contractType, entityAttribute.EntityType, clientModelsFolder);
+                }
+            }
+            if (_configuration["client-extensions"] is string clientExtensionsFolder && !string.IsNullOrEmpty(clientExtensionsFolder))
+            {
+                if (!Directory.Exists(clientExtensionsFolder))
+                {
+                    Directory.CreateDirectory(clientExtensionsFolder);
+                }
+                await clientSourceGenerator.GenerateExtensionsAsync(connector, contractType, clientExtensionsFolder, $"{name}Extensions");
             }
         }
     }
-
-    private async Task GeneratePocotaEntityAsync(IConnector connector, Type contractType, string targetFolder)
-    {
-        foreach (EntityAttribute attribute in contractType.GetCustomAttributes<EntityAttribute>())
-        {
-            string entityName = Util.BuildTypeName(attribute.EntityType);
-            await GenerateModelPocotaEntityAsync(connector, contractType, attribute.EntityType, targetFolder, $"{entityName}PocotaEntity");
-        }
-    }
-
     private async Task GenerateModelPocotaEntityAsync(IConnector connector, Type contractType, Type entityType, string targetFolder, string name)
     {
         _logger?.LogInformation("Generating model's pocota {name} at {folder}.", name, targetFolder);
@@ -464,21 +483,11 @@ public class SourceGenerator : Runner, ICommand
         {
             ContractType = contractType,
             EntityType = entityType,
-            ClassName = BuildResutTypeName(entityType, name),
+            ClassName = Util.BuildResutTypeName(entityType, name),
         };
-        await ProcessPageAsync(connector, options, "/PocotaEntity", BuildFilePath(targetFolder, name));
+        await Util.ProcessPageAsync(connector, options, "/PocotaEntity", Util.BuildFilePath(targetFolder, name, _fileExtension));
         _logger?.LogInformation("Done.");
     }
-
-    private async Task GenerateAccessAsync(IConnector connector, Type contractType, string targetFolder, string name)
-    {
-        foreach (EntityAttribute attribute in contractType.GetCustomAttributes<EntityAttribute>())
-        {
-            string entityName = Util.BuildTypeName(attribute.EntityType);
-            await GenerateModelAccessAsync(connector, contractType, attribute.EntityType, targetFolder, $"{entityName}AccessBase");
-        }
-    }
-
     private async Task GenerateModelAccessAsync(IConnector connector, Type contractType, Type entityType, string targetFolder, string name)
     {
         _logger?.LogInformation("Generating model's access {name} at {folder}.", name, targetFolder);
@@ -486,9 +495,9 @@ public class SourceGenerator : Runner, ICommand
         {
             ContractType = contractType,
             EntityType = entityType,
-            ClassName = BuildResutTypeName(entityType, name),
+            ClassName = Util.BuildResutTypeName(entityType, name),
         };
-        await ProcessPageAsync(connector, options, "/Access", BuildFilePath(targetFolder, name));
+        await Util.ProcessPageAsync(connector, options, "/Access", Util.BuildFilePath(targetFolder, name, _fileExtension));
         _logger?.LogInformation("Done.");
     }
 
@@ -498,21 +507,11 @@ public class SourceGenerator : Runner, ICommand
         PageOptions options = new()
         {
             ContractType = contractType,
-            ClassName = BuildResutTypeName(contractType, name),
+            ClassName = Util.BuildResutTypeName(contractType, name),
         };
-        await ProcessPageAsync(connector, options, "/Extensions", BuildFilePath(targetFolder, name));
+        await Util.ProcessPageAsync(connector, options, "/Extensions", Util.BuildFilePath(targetFolder, name, _fileExtension));
         _logger?.LogInformation("Done.");
     }
-    private async Task GenerateServerConvertersAsync(IConnector connector, Type contractType, string targetFolder, string name)
-    {
-        await GenerateServerConverterFactoryAsync(connector, contractType, targetFolder, $"{name}JsonConverterFactory");
-        foreach (EntityAttribute attribute in contractType.GetCustomAttributes<EntityAttribute>())
-        {
-            string entityName = Util.BuildTypeName(attribute.EntityType);
-            await GenerateServerEntityConverterAsync(connector, contractType, attribute.EntityType, targetFolder, $"{entityName}JsonConverter");
-        }
-    }
-
     private async Task GenerateServerEntityConverterAsync(IConnector connector, Type contractType, Type entityType, string targetFolder, string name)
     {
         _logger?.LogInformation("Generating server's converter {name} at {folder}.", name, targetFolder);
@@ -520,54 +519,21 @@ public class SourceGenerator : Runner, ICommand
         {
             ContractType = contractType,
             EntityType = entityType,
-            ClassName = BuildResutTypeName(entityType, name),
+            ClassName = Util.BuildResutTypeName(entityType, name),
         };
-        await ProcessPageAsync(connector, options, "/JsonConverter", BuildFilePath(targetFolder, name));
+        await Util.ProcessPageAsync(connector, options, "/JsonConverter", Util.BuildFilePath(targetFolder, name, _fileExtension));
         _logger?.LogInformation("Done.");
     }
-
     private async Task GenerateServerConverterFactoryAsync(IConnector connector, Type contractType, string targetFolder, string name)
     {
         _logger?.LogInformation("Generating server's converter factory {name} at {folder}.", name, targetFolder);
         PageOptions options = new()
         {
             ContractType = contractType,
-            ClassName = BuildResutTypeName(contractType, name),
+            ClassName = Util.BuildResutTypeName(contractType, name),
         };
-        await ProcessPageAsync(connector, options, "/JsonConverterFactory", BuildFilePath(targetFolder, name));
+        await Util.ProcessPageAsync(connector, options, "/JsonConverterFactory", Util.BuildFilePath(targetFolder, name, _fileExtension));
         _logger?.LogInformation("Done.");
-    }
-
-    private async Task GenerateConnectorAsync(IConnector connector, Type contractType, string targetFolder, string name)
-    {
-        switch (_clientLanguage)
-        {
-            case s_cSharp:
-                await GenerateCSharpConnectorAsync(connector, contractType, targetFolder, name);
-                break;
-        }
-    }
-    private async Task GenerateClientModelAsync(IConnector connector, Type contractType, Type entityType, string targetFolder)
-    {
-        switch (_clientLanguage)
-        {
-            case s_cSharp:
-                await GenerateCSharpClientModelAsync(connector, contractType, entityType, targetFolder);
-                break;
-        }
-    }
-    private async Task GenerateCSharpConnectorAsync(IConnector connector, Type contractType, string targetFolder, string name)
-    {
-        _logger?.LogInformation("Generating {lang} connector {name} at {folder}.", _clientLanguage, name, targetFolder);
-        _logger?.LogInformation("Done.");
-        await Task.CompletedTask;
-    }
-    private async Task GenerateCSharpClientModelAsync(IConnector connector, Type contractType, Type entityType, string targetFolder)
-    {
-        string name = BuildResutTypeName(entityType);
-        _logger?.LogInformation("Generating {lang} client's entity model {name} at {folder}.", _clientLanguage, name, targetFolder);
-        _logger?.LogInformation("Done.");
-        await Task.CompletedTask;
     }
     private async Task GenerateDbContextAsync(IConnector connector, Type contractType, string targetFolder, string name)
     {
@@ -575,9 +541,9 @@ public class SourceGenerator : Runner, ICommand
         PageOptions options = new()
         {
             ContractType = contractType,
-            ClassName = BuildResutTypeName(contractType, name),
+            ClassName = Util.BuildResutTypeName(contractType, name),
         };
-        await ProcessPageAsync(connector, options, "/DbContext", BuildFilePath(targetFolder, name));
+        await Util.ProcessPageAsync(connector, options, "/DbContext", Util.BuildFilePath(targetFolder, name, _fileExtension));
         _logger?.LogInformation("Done.");
     }
     private async Task GenerateServiceBaseAsync(IConnector connector, Type contractType, string targetFolder, string name)
@@ -586,62 +552,21 @@ public class SourceGenerator : Runner, ICommand
         PageOptions options = new()
         {
             ContractType = contractType,
-            ClassName = BuildResutTypeName(contractType, name),
+            ClassName = Util.BuildResutTypeName(contractType, name),
         };
-        await ProcessPageAsync(connector, options, "/ServiceBase", BuildFilePath(targetFolder, name));
+        await Util.ProcessPageAsync(connector, options, "/ServiceBase", Util.BuildFilePath(targetFolder, name, _fileExtension));
         _logger?.LogInformation("Done.");
     }
-
     private async Task GenerateControllerAsync(IConnector connector, Type contractType, string targetFolder, string name)
     {
         _logger?.LogInformation("Generating controller {name} at {folder}.", name, targetFolder);
         PageOptions options = new()
         {
             ContractType = contractType,
-            ClassName = BuildResutTypeName(contractType, name),
+            ClassName = Util.BuildResutTypeName(contractType, name),
         };
-        await ProcessPageAsync(connector, options, "/Controller", BuildFilePath(targetFolder, name));
+        await Util.ProcessPageAsync(connector, options, "/Controller", Util.BuildFilePath(targetFolder, name, _fileExtension));
         _logger?.LogInformation("Done.");
-    }
-    private static async Task ProcessPageAsync(IConnector connector, PageOptions? parameter, string uri, string path)
-    {
-        HttpRequestMessage request = new(HttpMethod.Get, uri);
-        HttpResponseMessage response = connector.Send(request, parameter);
-        Stream input = await response.Content.ReadAsStreamAsync();
-        using FileStream output = new(path, FileMode.Create);
-        await input.CopyToAsync(output);
-    }
-    private string BuildFilePath(string targetFolder, string name)
-    {
-        string typeName = Util.GetTypeName(name);
-        return $"{Path.Combine(targetFolder, typeName)}{_fileExtension}";
-    }
-    private static string BuildResutTypeName(Type type, string? replaceName = null)
-    {
-        return $"{(string.IsNullOrEmpty(type.Namespace) ? string.Empty : $"{type.Namespace}.")}{(string.IsNullOrEmpty(replaceName) ? type.Name[1..] : replaceName)}";
-    }
-        
-    private static string PascalCase(string folder)
-    {
-        StringBuilder sb = new();
-        bool upper = true;
-        foreach(char ch in folder)
-        {
-            if(upper)
-            {
-                sb.Append(new string([ch]).ToUpper());
-                upper = false;
-            }
-            else if(ch == '-')
-            {
-                upper = true;
-            }
-            else
-            {
-                sb.Append(ch);
-            }
-        }
-        return sb.ToString();
     }
     private static void Usage()
     {

@@ -1,11 +1,12 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.SauceAccessBase                     //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-16T16:51:08.                                 //
+// at 2024-04-26T12:56:14.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Net.Leksi.Pocota.Contract;
 using Net.Leksi.Pocota.Server;
 
 namespace ContosoPizza.Models;
@@ -22,7 +23,7 @@ public class SauceAccessBase: IAccessCalculator
         _context = _services.GetRequiredService<PocotaContext>();
         _dbContext = _services.GetRequiredService<PizzaDbContext>();
     }
-    public void Calculate(object entity)
+    public AccessKind Calculate(object entity)
     {
         SaucePocotaEntity pocotaEntity = _context.Entity<SaucePocotaEntity>(entity);
         if(!pocotaEntity.IsAccessCalculated && entity is Sauce value)
@@ -53,6 +54,7 @@ public class SauceAccessBase: IAccessCalculator
                 }
             }
         }
+        return pocotaEntity.Access;
     }
 
     protected virtual void DoCalculate(Sauce entity, SaucePocotaEntity pocotaEntity) { }

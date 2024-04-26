@@ -1,11 +1,12 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.PizzaAccessBase                     //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-16T16:51:07.                                 //
+// at 2024-04-26T12:56:14.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Net.Leksi.Pocota.Contract;
 using Net.Leksi.Pocota.Server;
 using System.Collections.Generic;
 
@@ -23,7 +24,7 @@ public class PizzaAccessBase: IAccessCalculator
         _context = _services.GetRequiredService<PocotaContext>();
         _dbContext = _services.GetRequiredService<PizzaDbContext>();
     }
-    public void Calculate(object entity)
+    public AccessKind Calculate(object entity)
     {
         PizzaPocotaEntity pocotaEntity = _context.Entity<PizzaPocotaEntity>(entity);
         if(!pocotaEntity.IsAccessCalculated && entity is Pizza value)
@@ -41,7 +42,11 @@ public class PizzaAccessBase: IAccessCalculator
                             if(value.Sauce is {})
                             {
                                 IAccessCalculator accessCalculator = _services.GetRequiredKeyedService<IAccessCalculator>(typeof(Sauce));
-                                accessCalculator.Calculate(value.Sauce);
+                                AccessKind access = accessCalculator.Calculate(value.Sauce);
+                                if(pocotaEntity.Access is AccessKind.Forbidden && access is AccessKind.Anonym)
+                                {
+                                    pocotaEntity.Access = AccessKind.Anonym;
+                                }
                             }
                             break;
                         default:
@@ -61,7 +66,11 @@ public class PizzaAccessBase: IAccessCalculator
                                 IAccessCalculator accessCalculator = _services.GetRequiredKeyedService<IAccessCalculator>(typeof(Topping));
                                 foreach(Topping item in value.Toppings)
                                 {
-                                    accessCalculator.Calculate(item);
+                                    AccessKind access = accessCalculator.Calculate(item);
+                                    if(pocotaEntity.Access is AccessKind.Forbidden && access is AccessKind.Anonym)
+                                    {
+                                        pocotaEntity.Access = AccessKind.Anonym;
+                                    }
                                 }
                             }
                             break;
@@ -71,6 +80,7 @@ public class PizzaAccessBase: IAccessCalculator
                 }
             }
         }
+        return pocotaEntity.Access;
     }
 
     protected virtual void DoCalculate(Pizza entity, PizzaPocotaEntity pocotaEntity) { }
