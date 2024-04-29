@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaConnector          //
 // was generated automatically from            //
-// at 2024-04-29T15:06:27.                     //
+// at 2024-04-29T17:17:24.                     //
 // Modifying this file will break the program! //
 /////////////////////////////////////////////////
 
@@ -10,6 +10,7 @@ using ContosoPizza.Models.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Net.Leksi.Pocota.Client;
 using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,9 +21,13 @@ public class PizzaConnector: Connector
 {
     private readonly SemaphoreSlim _asyncLock = new(1, 1);
     private readonly PizzaPocotaContext _context;
+    private readonly JsonSerializerOptions _serializerOptions = new();
     public PizzaConnector(IServiceProvider services): base(services) 
     {
         _context = _services.GetRequiredService<PizzaPocotaContext>();
+        _serializerOptions.Converters.Add(
+            _services.GetRequiredService<PizzaJsonConverterFactory>()
+        );
     }
     public async Task GetAllPizzasAsync(ICollection<Pizza> target) 
     {
@@ -30,6 +35,7 @@ public class PizzaConnector: Connector
         try 
         {
             _context.ClearSentEntities();
+            HttpRequestMessage _request = new(HttpMethod.Get, "/Pizza/GetAllPizzas");
         }
         finally 
         {
@@ -42,6 +48,7 @@ public class PizzaConnector: Connector
         try 
         {
             _context.ClearSentEntities();
+            HttpRequestMessage _request = new(HttpMethod.Get, "/Pizza/FindPizzas");
         }
         finally 
         {
@@ -54,6 +61,7 @@ public class PizzaConnector: Connector
         try 
         {
             _context.ClearSentEntities();
+            HttpRequestMessage _request = new(HttpMethod.Get, "/Pizza/GetPizza");
         }
         finally 
         {
@@ -66,6 +74,7 @@ public class PizzaConnector: Connector
         try 
         {
             _context.ClearSentEntities();
+            HttpRequestMessage _request = new(HttpMethod.Get, "/Pizza/GetAllSauces");
         }
         finally 
         {
@@ -78,6 +87,7 @@ public class PizzaConnector: Connector
         try 
         {
             _context.ClearSentEntities();
+            HttpRequestMessage _request = new(HttpMethod.Get, "/Pizza/GetSauce");
         }
         finally 
         {
@@ -90,6 +100,7 @@ public class PizzaConnector: Connector
         try 
         {
             _context.ClearSentEntities();
+            HttpRequestMessage _request = new(HttpMethod.Get, "/Pizza/GetAllToppings");
         }
         finally 
         {
@@ -102,6 +113,7 @@ public class PizzaConnector: Connector
         try 
         {
             _context.ClearSentEntities();
+            HttpRequestMessage _request = new(HttpMethod.Get, "/Pizza/GetTopping");
         }
         finally 
         {
@@ -114,6 +126,7 @@ public class PizzaConnector: Connector
         try
         {
             _context.ClearSentEntities();
+            HttpRequestMessage _request = new(HttpMethod.Post, "/Pizza");
             await Task.CompletedTask;
         }
         finally

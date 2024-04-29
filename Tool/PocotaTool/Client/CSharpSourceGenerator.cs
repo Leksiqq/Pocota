@@ -132,9 +132,11 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         model.ClassName = Util.GetTypeName(options.ClassName!);
         model.NamespaceValue = $"{Util.GetNamespace(options.ClassName!)}.Client";
         model.ContractName = options.ContractType!.GetCustomAttribute<PocotaContractAttribute>()!.ContractName!;
+        model.JsonConverterFactoryClassName = $"{model.ContractName}JsonConverterFactory";
         model.AddInheritance(typeof(Connector));
         model.AddUsing(typeof(IServiceProvider));
         model.AddUsing(typeof(SemaphoreSlim));
+        model.AddUsing(typeof(JsonSerializerOptions));
         model.AddUsing(s_dependencyInjectionNs);
         foreach (MethodInfo mi in options.ContractType!.GetMethods())
         {

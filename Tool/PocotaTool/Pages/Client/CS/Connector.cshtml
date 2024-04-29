@@ -9,9 +9,13 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
 {
     private readonly SemaphoreSlim _asyncLock = new(1, 1);
     private readonly @Model.ContractName@{}PocotaContext _context;
+    private readonly JsonSerializerOptions _serializerOptions = new();
     public @Model.ClassName@{}(IServiceProvider services): base(services) 
     {
         _context = _services.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}PocotaContext>")@{}();
+        _serializerOptions.Converters.Add(
+            _services.GetRequiredService@{}@Html.Raw($"<{Model.JsonConverterFactoryClassName}>")@{}()
+        );
     }
 @foreach (MethodModel mm in @Model.Methods)
 {
@@ -21,6 +25,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
         try 
         {
             _context.ClearSentEntities();
+            HttpRequestMessage _request = new(HttpMethod.Get, "/@Model.ContractName/@mm.Name.Replace("Async", string.Empty)");
         }
         finally 
         {
@@ -35,6 +40,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
         try
         {
             _context.ClearSentEntities();
+            HttpRequestMessage _request = new(HttpMethod.Post, "/@Model.ContractName");
             await Task.CompletedTask;
         }
         finally
