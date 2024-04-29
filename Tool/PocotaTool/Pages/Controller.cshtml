@@ -56,6 +56,10 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
     }
 </text>
 }
+    [HttpPost]
+    public async Task UpdateAll@{}() {
+        await Task.CompletedTask;
+    }
     private static JsonSerializerOptions GetJsonSerializerOptions(IServiceProvider services)
     {
         JsonSerializerOptions _serializerOptions = new();

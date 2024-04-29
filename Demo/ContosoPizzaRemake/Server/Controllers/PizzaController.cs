@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaController                            //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-26T12:56:14.                                 //
+// at 2024-04-29T15:06:27.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -141,6 +141,10 @@ public class PizzaController: ControllerBase
             NotFound();
         }
 
+    }
+    [HttpPost]
+    public async Task UpdateAll() {
+        await Task.CompletedTask;
     }
     private static JsonSerializerOptions GetJsonSerializerOptions(IServiceProvider services)
     {

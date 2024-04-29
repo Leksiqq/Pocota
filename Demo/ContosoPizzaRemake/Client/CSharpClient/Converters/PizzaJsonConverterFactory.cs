@@ -1,17 +1,18 @@
 /////////////////////////////////////////////////////////////
-// ContosoPizza.PizzaJsonConverterFactory                  //
+// ContosoPizza.Client.PizzaJsonConverterFactory           //
 // was generated automatically from ContosoPizza.IContract //
 // at 2024-04-29T15:06:27.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
-using ContosoPizza.Models;
+using ContosoPizza.Models.Client;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace ContosoPizza;
+namespace ContosoPizza.Client;
 
 
 internal class PizzaJsonConverterFactory(IServiceProvider services): JsonConverterFactory

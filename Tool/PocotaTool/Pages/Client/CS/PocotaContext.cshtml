@@ -1,0 +1,36 @@
+﻿@page
+@using Net.Leksi.Pocota.Client
+@using Net.Leksi.Pocota.Tool
+@using Net.Leksi.Pocota.Tool.Pages.Client.CS
+@model PocotaContextModel
+@{
+}
+@Html.Partial("Header", Model)
+public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
+{
+    private static readonly Dictionary@{}@Html.Raw($"<Type, Func<ulong,PocotaEntity>>") _entityCreators = new()
+    {
+@foreach(string type in Model.Entities)
+{
+    <text>        {typeof(@type), id => new @type@{}(id)},
+</text>
+}
+    };
+    private readonly HashSet@{}@Html.Raw("<ulong>") _sentEntities = new();
+    public @Model.ClassName@{}(IServiceProvider services): base(services) { }
+    internal T CreateEntity@{}@Html.Raw("<T>")@{}() where T : @nameof(PocotaEntity)
+    {
+        return (T)_entityCreators[typeof(T)].Invoke(Interlocked.Increment(ref _idGen));
+    }
+    internal void ClearSentEntities() {
+        _sentEntities.Clear();
+    }
+    internal bool IsSent(@nameof(PocotaEntity) entity) 
+    {
+        return _sentEntities.Contains(((@nameof(IPocotaEntity))entity).PocotaId);
+    }
+    internal bool SetSent(@nameof(PocotaEntity) entity)
+    {
+        return _sentEntities.Add(((@nameof(IPocotaEntity))entity).PocotaId);
+    }
+}

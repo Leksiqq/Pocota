@@ -29,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Client\PocotaClient\PocotaClient.csproj" />
     <ProjectReference Include="..\..\Common\PocotaContract\PocotaContract.csproj" />
     <ProjectReference Include="..\..\Server\PocotaServer\PocotaServer.csproj" />
   </ItemGroup>

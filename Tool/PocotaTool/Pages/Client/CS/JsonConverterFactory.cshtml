@@ -1,0 +1,31 @@
+﻿@page
+@using Net.Leksi.Pocota.Tool.Pages.CS
+@using Net.Leksi.Pocota.Tool
+@model JsonConverterFactoryModel
+@{
+}
+@Html.Partial("Header", Model)
+internal class @Model.ClassName@{}(IServiceProvider services)@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
+{
+    private static readonly Dictionary@{}@Html.Raw($"<Type, Type>") _entityJsonConverterTypes = new()
+    {
+@foreach(string type in Model.Entities)
+{
+    <text>        {typeof(@type), typeof(@type@{}JsonConverter)},
+</text>
+}
+    };
+    public override bool CanConvert(Type typeToConvert)
+    {
+        return _entityJsonConverterTypes.ContainsKey(typeToConvert);
+    }
+
+    public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+    {
+        if(_entityJsonConverterTypes.TryGetValue(typeToConvert, out Type? converterType))
+        {
+            return services.GetRequiredService@{}(converterType) as JsonConverter;
+        }
+        return null;
+    }
+}
