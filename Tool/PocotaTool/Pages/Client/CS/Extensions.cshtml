@@ -1,0 +1,28 @@
+﻿@page
+@using Net.Leksi.Pocota.Tool.Pages.Client.CS
+@using Net.Leksi.Pocota.Tool
+@using Net.Leksi.Pocota.Server
+@model ExtensionsModel
+@{
+}
+@Html.Partial("Header", Model)
+public static class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
+{
+    public static IServiceCollection Add@{}@Model.ContractName@{}(
+        this IServiceCollection services
+    )
+    {
+        services.AddScoped@{}@Html.Raw($"<{Model.ContractName}Connector>")@{}();
+        services.AddScoped@{}@Html.Raw($"<{Model.ContractName}PocotaContext>")@{}();
+        services.AddScoped@{}@Html.Raw($"<{Model.ContractName}JsonConverterFactory>")@{}();
+        services.AddScoped@{}@Html.Raw("<PocotaContext>")@{}(serv => serv.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}PocotaContext>")@{}());
+        services.AddScoped@{}@Html.Raw("<Connector>")@{}(serv => serv.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}Connector>")@{}());
+@foreach(PropertyModel pm in Model.Properties)
+{
+    <text>        services.AddTransient@{}@Html.Raw($"<{pm.Name}JsonConverter>")@{}();
+</text>
+}
+
+        return services;
+    }
+}

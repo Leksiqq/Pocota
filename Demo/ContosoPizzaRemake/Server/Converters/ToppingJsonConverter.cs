@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.ToppingJsonConverter                //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-29T17:17:23.                                 //
+// at 2024-04-30T14:05:55.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -19,13 +19,18 @@ namespace ContosoPizza.Models;
 
 internal class ToppingJsonConverter: JsonConverter<Topping>
 {
+    private const string s_Id = "Id";
+    private const string s_Name = "Name";
+    private const string s_Calories = "Calories";
+    private const string s_Pizzas = "Pizzas";
+    private const string s_refName = "$ref";
+    private const string s_idName = "$id";
     private readonly IServiceProvider _services;
     private readonly PocotaContext _context;
     public ToppingJsonConverter(IServiceProvider services)
     {
         _services = services;
         _context = _services.GetRequiredService<PocotaContext>();
-
     }
     public override Topping? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -38,7 +43,7 @@ internal class ToppingJsonConverter: JsonConverter<Topping>
             .Request.Headers.ContainsKey(PocotaHeader.WithFieldsAccess);
         ToppingPocotaEntity pocotaEntity = _context.Entity<ToppingPocotaEntity>(value);
         writer.WriteStartObject();
-        writer.WritePropertyName(pocotaEntity.IsSerialized ? "$ref" : "$id");
+        writer.WritePropertyName(pocotaEntity.IsSerialized ? s_refName : s_idName);
         if (withFieldsAccess)
         {
             writer.WriteStartArray();
@@ -55,7 +60,7 @@ internal class ToppingJsonConverter: JsonConverter<Topping>
             if(pocotaEntity.Id.Access is not AccessKind.NotSet)
             {
                 pocotaEntity.Id.IsSent = true;
-                writer.WritePropertyName("Id");
+                writer.WritePropertyName(s_Id);
                 if(withFieldsAccess)
                 {
                     writer.WriteStartArray();
@@ -82,7 +87,7 @@ internal class ToppingJsonConverter: JsonConverter<Topping>
             if(pocotaEntity.Name.Access is not AccessKind.NotSet)
             {
                 pocotaEntity.Name.IsSent = true;
-                writer.WritePropertyName("Name");
+                writer.WritePropertyName(s_Name);
                 if(withFieldsAccess)
                 {
                     writer.WriteStartArray();
@@ -109,7 +114,7 @@ internal class ToppingJsonConverter: JsonConverter<Topping>
             if(pocotaEntity.Calories.Access is not AccessKind.NotSet)
             {
                 pocotaEntity.Calories.IsSent = true;
-                writer.WritePropertyName("Calories");
+                writer.WritePropertyName(s_Calories);
                 if(withFieldsAccess)
                 {
                     writer.WriteStartArray();
@@ -136,7 +141,7 @@ internal class ToppingJsonConverter: JsonConverter<Topping>
             if(pocotaEntity.Pizzas.Access is not AccessKind.NotSet)
             {
                 pocotaEntity.Pizzas.IsSent = true;
-                writer.WritePropertyName("Pizzas");
+                writer.WritePropertyName(s_Pizzas);
                 if(withFieldsAccess)
                 {
                     writer.WriteStartArray();

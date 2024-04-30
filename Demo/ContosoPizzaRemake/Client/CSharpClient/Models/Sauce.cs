@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Sauce                        //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-29T17:17:24.                                 //
+// at 2024-04-30T14:05:55.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -13,10 +13,14 @@ namespace ContosoPizza.Models.Client;
 
 public class Sauce: PocotaEntity, ISaucePocotaEntity
 {
-    private readonly EntityProperty _IdEntityProperty = new();
-    private readonly EntityProperty _Id1EntityProperty = new();
-    private readonly EntityProperty _NameEntityProperty = new();
-    private readonly EntityProperty _IsVeganEntityProperty = new();
+    private const string s_Id = "Id";
+    private const string s_Id1 = "Id1";
+    private const string s_Name = "Name";
+    private const string s_IsVegan = "IsVegan";
+    private readonly EntityProperty _IdEntityProperty = new(typeof(Sauce), s_Id);
+    private readonly EntityProperty _Id1EntityProperty = new(typeof(Sauce), s_Id1);
+    private readonly EntityProperty _NameEntityProperty = new(typeof(Sauce), s_Name);
+    private readonly EntityProperty _IsVeganEntityProperty = new(typeof(Sauce), s_IsVegan);
     public Int32 Id { get; set; }
     public Int32 Id1 { get; set; }
     public String? Name { get; set; }

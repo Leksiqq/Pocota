@@ -1,4 +1,5 @@
 ﻿@page
+@using Net.Leksi.Pocota.Client
 @using Net.Leksi.Pocota.Tool
 @using Net.Leksi.Pocota.Tool.Pages.Client.CS
 @model ConnectorModel
@@ -9,7 +10,6 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
 {
     private readonly SemaphoreSlim _asyncLock = new(1, 1);
     private readonly @Model.ContractName@{}PocotaContext _context;
-    private readonly JsonSerializerOptions _serializerOptions = new();
     public @Model.ClassName@{}(IServiceProvider services): base(services) 
     {
         _context = _services.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}PocotaContext>")@{}();
@@ -19,13 +19,30 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
     }
 @foreach (MethodModel mm in @Model.Methods)
 {
-    <text>    public async @Html.Raw(mm.ReturnTypeName) @mm.Name@{}(@Html.Raw(string.Join(", ", mm.Parameters.Select(p => $"{p.TypeName} {p.Name}")))) 
+    <text>    public async @Html.Raw(mm.ReturnTypeName) @mm.Name@{}(@Html.Raw(string.Join(", ", mm.Parameters.Select(p => $"{p.TypeName} {p.Name}")))@(mm.Parameters.Count > 0 ? ", " : string.Empty)@{}CancellationToken cancellationToken) 
     {
-        await _asyncLock.WaitAsync();
+        await _asyncLock.WaitAsync(cancellationToken);
         try 
         {
             _context.ClearSentEntities();
-            HttpRequestMessage _request = new(HttpMethod.Get, "/@Model.ContractName/@mm.Name.Replace("Async", string.Empty)");
+            _context.KeyOnlyJson = true;
+    @foreach(ParameterModel pm in mm.Parameters.Skip(mm.IsEnumeration ? 1 : 0)) {
+        <text>            string _@{}@pm.Name = HttpUtility.UrlEncode(JsonSerializer.Serialize(@pm.Name, _serializerOptions));
+</text>
+    }
+            HttpRequestMessage _request = new(
+                HttpMethod.Get, 
+                $"/@Model.ContractName/@mm.Name.Replace("Async", string.Empty)@(mm.Parameters.Count > (mm.IsEnumeration ? 1 : 0) ? "/" : string.Empty)@string.Join('/', mm.Parameters.Skip(mm.IsEnumeration ? 1 : 0).Select(p => $"{{_{p.Name}}}"))"
+            );
+        @if(mm.IsEnumeration)
+        {
+            <text>            await GetResponseAsyncEnumerable@{}@Html.Raw($"<{mm.Parameters[0].ItemTypeName}>")@{}(@mm.Parameters[0].Name, _request, _serializerOptions, cancellationToken);
+</text>
+        }
+        else {
+            <text>            return await GetResponseAsync@{}@Html.Raw($"<{mm.ReturnItemTypeName}>")@{}(_request, _serializerOptions, cancellationToken);
+</text>
+        }
         }
         finally 
         {
@@ -34,12 +51,13 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
     }
 </text>
 }
-    public async Task UpdateAll() 
+    public async Task UpdateAll(CancellationToken cancellationToken)
     {
-        await _asyncLock.WaitAsync();
+        await _asyncLock.WaitAsync(cancellationToken);
         try
         {
             _context.ClearSentEntities();
+            _context.KeyOnlyJson = false;
             HttpRequestMessage _request = new(HttpMethod.Post, "/@Model.ContractName");
             await Task.CompletedTask;
         }

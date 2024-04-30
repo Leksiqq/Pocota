@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaPocotaContext                  //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-29T17:17:24.                                 //
+// at 2024-04-30T14:05:55.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -14,27 +14,43 @@ namespace ContosoPizza.Client;
 
 public class PizzaPocotaContext: PocotaContext
 {
-    private static readonly Dictionary<Type, Func<ulong,PocotaEntity>> _entityCreators = new()
+    static PizzaPocotaContext()
     {
-        {typeof(Pizza), id => new Pizza(id)},
-        {typeof(Sauce), id => new Sauce(id)},
-        {typeof(Topping), id => new Topping(id)},
-    };
-    private readonly HashSet<ulong> _sentEntities = new();
+        PocotaContext.s_entityCreators.Add(typeof(Pizza), id => new Pizza(id));
+        PocotaContext.s_entityCreators.Add(typeof(Sauce), id => new Sauce(id));
+        PocotaContext.s_entityCreators.Add(typeof(Topping), id => new Topping(id));
+    }
     public PizzaPocotaContext(IServiceProvider services): base(services) { }
-    internal T CreateEntity<T>() where T : PocotaEntity
+    internal bool KeyOnlyJson {  get; set; }
+    internal new T CreateEntity<T>() where T : PocotaEntity
     {
-        return (T)_entityCreators[typeof(T)].Invoke(Interlocked.Increment(ref _idGen));
+        return base.CreateEntity<T>();
     }
-    internal void ClearSentEntities() {
-        _sentEntities.Clear();
+    internal new void ClearSentEntities() {
+        base.ClearSentEntities();
     }
-    internal bool IsSent(PocotaEntity entity) 
+    internal new bool IsSent(PocotaEntity entity) 
     {
-        return _sentEntities.Contains(((IPocotaEntity)entity).PocotaId);
+        return base.IsSent(entity);
     }
-    internal bool SetSent(PocotaEntity entity)
+    internal new bool SetSent(PocotaEntity entity)
     {
-        return _sentEntities.Add(((IPocotaEntity)entity).PocotaId);
+        return base.SetSent(entity);
+    }
+    internal new bool IsKey(EntityProperty property) 
+    {
+        return base.IsKey(property);
+    }
+    internal new void MarkAsKey(EntityProperty property)
+    {
+        base.MarkAsKey(property);
+    }
+    internal new bool KeysFilled(PocotaEntity entity)
+    {
+        return base.KeysFilled(entity);
+    }
+    internal new void SetKeysFilled(PocotaEntity entity)
+    {
+        base.SetKeysFilled(entity);
     }
 }

@@ -3,4 +3,5 @@
 public interface IPocotaEntity
 {
     ulong PocotaId { get; }
+    EntityState State { get; }
 }

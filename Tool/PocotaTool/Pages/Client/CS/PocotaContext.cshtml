@@ -8,29 +8,45 @@
 @Html.Partial("Header", Model)
 public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
 {
-    private static readonly Dictionary@{}@Html.Raw($"<Type, Func<ulong,PocotaEntity>>") _entityCreators = new()
+    static @Model.ClassName@{}()
     {
 @foreach(string type in Model.Entities)
 {
-    <text>        {typeof(@type), id => new @type@{}(id)},
+    <text>        PocotaContext.s_entityCreators.Add(typeof(@type), id => new @type@{}(id));
 </text>
 }
-    };
-    private readonly HashSet@{}@Html.Raw("<ulong>") _sentEntities = new();
+    }
     public @Model.ClassName@{}(IServiceProvider services): base(services) { }
-    internal T CreateEntity@{}@Html.Raw("<T>")@{}() where T : @nameof(PocotaEntity)
+    internal bool KeyOnlyJson {  get; set; }
+    internal new T CreateEntity@{}@Html.Raw("<T>")@{}() where T : @nameof(PocotaEntity)
     {
-        return (T)_entityCreators[typeof(T)].Invoke(Interlocked.Increment(ref _idGen));
+        return base.CreateEntity@{}@Html.Raw("<T>")@{}();
     }
-    internal void ClearSentEntities() {
-        _sentEntities.Clear();
+    internal new void ClearSentEntities() {
+        base.ClearSentEntities();
     }
-    internal bool IsSent(@nameof(PocotaEntity) entity) 
+    internal new bool IsSent(@nameof(PocotaEntity) entity) 
     {
-        return _sentEntities.Contains(((@nameof(IPocotaEntity))entity).PocotaId);
+        return base.IsSent(entity);
     }
-    internal bool SetSent(@nameof(PocotaEntity) entity)
+    internal new bool SetSent(@nameof(PocotaEntity) entity)
     {
-        return _sentEntities.Add(((@nameof(IPocotaEntity))entity).PocotaId);
+        return base.SetSent(entity);
+    }
+    internal new bool IsKey(@nameof(EntityProperty) property) 
+    {
+        return base.IsKey(property);
+    }
+    internal new void MarkAsKey(@nameof(EntityProperty) property)
+    {
+        base.MarkAsKey(property);
+    }
+    internal new bool KeysFilled(PocotaEntity entity)
+    {
+        return base.KeysFilled(entity);
+    }
+    internal new void SetKeysFilled(PocotaEntity entity)
+    {
+        base.SetKeysFilled(entity);
     }
 }

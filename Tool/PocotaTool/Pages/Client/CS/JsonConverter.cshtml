@@ -8,11 +8,17 @@
 @Html.Partial("Header", Model)
 internal class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {string.Join(", ", Model.Inheritances)}") : string.Empty)
 {
+@foreach (PropertyModel prop in Model.Properties)
+{
+    <text>    private const string s_@{}@prop.Name = "@prop.Name";
+</text>
+}
     private readonly IServiceProvider _services;
+    private readonly @Model.ContractName@{}PocotaContext _context;
     public @Model.ClassName@{}(IServiceProvider services)
     {
         _services = services;
-
+        _context = _services.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}PocotaContext>")@{}();
     }
     public override @Model.EntityTypeName? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -21,13 +27,37 @@ internal class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {st
 
     public override void Write(Utf8JsonWriter writer, @Model.EntityTypeName value, JsonSerializerOptions options)
     {
+        if(_context.KeyOnlyJson) 
+        {
+            WriteKeyOnly(writer, value, options);
+        }
+        else 
+        {
+            WriteUpdateAll(writer, value, options);
+        }
+    }
+    private void WriteKeyOnly(Utf8JsonWriter writer, @Model.EntityTypeName value, JsonSerializerOptions options)
+    {
+        I@{}@Model.EntityTypeName@{}PocotaEntity? pocotaEntity = _context.Entity@{}@Html.Raw($"<I{Model.EntityTypeName}PocotaEntity>")@{}(value);
+        if (pocotaEntity is null)
+        {
+            throw new InvalidOperationException();
+        }
+        bool keysFilled = _context.KeysFilled(value);
         writer.WriteStartObject();
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>        writer.WritePropertyName(@Html.Raw($"\"{prop.Name}\""));
-        JsonSerializer.Serialize(writer, value@{}.@prop.Name, options);
+    <text>        if(!keysFilled || _context.IsKey(pocotaEntity@{}.@prop.Name)) 
+        {
+            writer.WritePropertyName(s_@{}@prop.Name);
+            JsonSerializer.Serialize(writer, value@{}.@prop.Name, options);
+        }
 </text>
 }
         writer.WriteEndObject();
+    }
+    private void WriteUpdateAll(Utf8JsonWriter writer, @Model.EntityTypeName value, JsonSerializerOptions options)
+    {
+        throw new NotImplementedException();
     }
 }

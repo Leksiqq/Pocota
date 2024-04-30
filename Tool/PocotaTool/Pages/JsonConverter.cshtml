@@ -8,13 +8,19 @@
 @Html.Partial("Header", Model)
 internal class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {string.Join(", ", Model.Inheritances)}") : string.Empty)
 {
+@foreach (PropertyModel prop in Model.Properties)
+{
+    <text>    private const string s_@{}@prop.Name = "@prop.Name";
+</text>
+}
+    private const string s_refName = "$ref";
+    private const string s_idName = "$id";
     private readonly IServiceProvider _services;
     private readonly PocotaContext _context;
     public @Model.ClassName@{}(IServiceProvider services)
     {
         _services = services;
         _context = _services.GetRequiredService@{}@Html.Raw($"<PocotaContext>")@{}();
-
     }
     public override @Model.EntityTypeName? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -27,7 +33,7 @@ internal class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {st
             .Request.Headers.ContainsKey(PocotaHeader.WithFieldsAccess);
         @Model.EntityTypeName@{}PocotaEntity pocotaEntity = _context.Entity@{}@Html.Raw($"<{Model.EntityTypeName}PocotaEntity>")@{}(value);
         writer.WriteStartObject();
-        writer.WritePropertyName(pocotaEntity.IsSerialized ? "$ref" : "$id");
+        writer.WritePropertyName(pocotaEntity.IsSerialized ? s_refName : s_idName);
         if (withFieldsAccess)
         {
             writer.WriteStartArray();
@@ -46,7 +52,7 @@ internal class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {st
             if(pocotaEntity.@prop.Name@{}.Access is not @nameof(AccessKind).@nameof(AccessKind.NotSet))
             {
                 pocotaEntity.@prop.Name@{}.IsSent = true;
-                writer.WritePropertyName(@Html.Raw($"\"{prop.Name}\""));
+                writer.WritePropertyName(s_@{}@prop.Name);
                 if(withFieldsAccess)
                 {
                     writer.WriteStartArray();

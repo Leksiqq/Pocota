@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.SauceJsonConverter                  //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-04-29T17:17:23.                                 //
+// at 2024-04-30T14:05:55.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -18,13 +18,18 @@ namespace ContosoPizza.Models;
 
 internal class SauceJsonConverter: JsonConverter<Sauce>
 {
+    private const string s_Id = "Id";
+    private const string s_Id1 = "Id1";
+    private const string s_Name = "Name";
+    private const string s_IsVegan = "IsVegan";
+    private const string s_refName = "$ref";
+    private const string s_idName = "$id";
     private readonly IServiceProvider _services;
     private readonly PocotaContext _context;
     public SauceJsonConverter(IServiceProvider services)
     {
         _services = services;
         _context = _services.GetRequiredService<PocotaContext>();
-
     }
     public override Sauce? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -37,7 +42,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
             .Request.Headers.ContainsKey(PocotaHeader.WithFieldsAccess);
         SaucePocotaEntity pocotaEntity = _context.Entity<SaucePocotaEntity>(value);
         writer.WriteStartObject();
-        writer.WritePropertyName(pocotaEntity.IsSerialized ? "$ref" : "$id");
+        writer.WritePropertyName(pocotaEntity.IsSerialized ? s_refName : s_idName);
         if (withFieldsAccess)
         {
             writer.WriteStartArray();
@@ -54,7 +59,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
             if(pocotaEntity.Id.Access is not AccessKind.NotSet)
             {
                 pocotaEntity.Id.IsSent = true;
-                writer.WritePropertyName("Id");
+                writer.WritePropertyName(s_Id);
                 if(withFieldsAccess)
                 {
                     writer.WriteStartArray();
@@ -81,7 +86,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
             if(pocotaEntity.Id1.Access is not AccessKind.NotSet)
             {
                 pocotaEntity.Id1.IsSent = true;
-                writer.WritePropertyName("Id1");
+                writer.WritePropertyName(s_Id1);
                 if(withFieldsAccess)
                 {
                     writer.WriteStartArray();
@@ -108,7 +113,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
             if(pocotaEntity.Name.Access is not AccessKind.NotSet)
             {
                 pocotaEntity.Name.IsSent = true;
-                writer.WritePropertyName("Name");
+                writer.WritePropertyName(s_Name);
                 if(withFieldsAccess)
                 {
                     writer.WriteStartArray();
@@ -135,7 +140,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
             if(pocotaEntity.IsVegan.Access is not AccessKind.NotSet)
             {
                 pocotaEntity.IsVegan.IsSent = true;
-                writer.WritePropertyName("IsVegan");
+                writer.WritePropertyName(s_IsVegan);
                 if(withFieldsAccess)
                 {
                     writer.WriteStartArray();

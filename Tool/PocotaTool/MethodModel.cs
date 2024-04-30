@@ -7,4 +7,5 @@ internal class MethodModel
     internal List<ParameterModel> Parameters { get; private init; } = [];
     internal List<string> Attributes { get; private init; } = [];
     internal bool IsEnumeration { get; set; }
+    internal string? ReturnItemTypeName { get; set; } = null!;
 }
