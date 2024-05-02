@@ -1,0 +1,9 @@
+﻿<Application x:Class="WpfApp1.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
+             xmlns:local="clr-namespace:WpfApp1">
+    <Application.Resources>
+        <l:BindingProxy x:Key="ServiceProvider" Value="{Binding Path=ServiceProvider, Source={x:Static Application.Current}}"/>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,53 @@
+﻿<Window x:Class="Net.Leksi.Pocota.Client.DefaultMainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
+        mc:Ignorable="d"
+        Title="DefaultMainWindow" Height="450" Width="800" DataContext="{Binding RelativeSource={RelativeSource Self}}" WindowState="Maximized">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Dictionary1.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <l:BindingProxy x:Key="SortCommand" Value="{Binding SortCommand}"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <DockPanel LastChildFill="True">
+        <DataGrid ItemsSource="{Binding ConnectorViewSource.View}" IsReadOnly="True" AutoGenerateColumns="False">
+            <DataGrid.Resources>
+                <DataTemplate x:Key="Method">
+                    <TextBlock Text="{Binding Name}" Margin="10"/>
+                </DataTemplate>
+                <DataTemplate x:Key="Connector">
+                    <TextBlock Text="{Binding DeclaringType}" Margin="10"/>
+                </DataTemplate>
+                <DataTemplate x:Key="Module">
+                    <TextBlock Text="{Binding Module}" Margin="10"/>
+                </DataTemplate>
+                <DataTemplate x:Key="Actions">
+                    <StackPanel Orientation="Horizontal" Margin="10">
+                        <Button Style="{StaticResource PlayButtonStyle}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn 
+                    HeaderTemplate="{l:ParameterizedResource SortHeader, Replaces=$name:Метод|$command:SortCommand|$field:Name}" 
+                    CellTemplate="{StaticResource Method}"
+                    />
+                <DataGridTemplateColumn 
+                    HeaderTemplate="{l:ParameterizedResource SortHeader, Replaces=$name:Коннектор|$command:SortCommand|$field:DeclaringType}" 
+                    CellTemplate="{StaticResource Connector}"
+                    />
+                <DataGridTemplateColumn 
+                    HeaderTemplate="{l:ParameterizedResource SortHeader, Replaces=$name:Модуль|$command:SortCommand|$field:Module}" 
+                    CellTemplate="{StaticResource Module}"
+                    />
+                <DataGridTemplateColumn Header="Действия" CellTemplate="{StaticResource Actions}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</Window>

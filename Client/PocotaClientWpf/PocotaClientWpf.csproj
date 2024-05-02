@@ -6,12 +6,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <AssemblyName>Net.Leksi.Pocota.WPFApp</AssemblyName>
+    <AssemblyName>Net.Leksi.Pocota.ClientWpf</AssemblyName>
     <RootNamespace>Net.Leksi.Pocota.Client</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Net.Leksi.WpfMarkupExtension" Version="2.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PocotaClient\PocotaClient.csproj" />
   </ItemGroup>
 
 </Project>

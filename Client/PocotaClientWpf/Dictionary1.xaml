@@ -1,0 +1,78 @@
+﻿<ResourceDictionary 
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
+        xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    >
+    <local:MultiValueToArrayConverter x:Key="MultiValueToArrayConverter"/>
+    <l:StyleCombiner TargetType="Button" x:Key="ActionButtonStyle">
+        <Style TargetType="Button">
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Margin" Value="10,0,0,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="PlayButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="▶"/>
+            <Setter Property="ToolTip" Value="Вызвать"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="ToggleButton" x:Key="ActionToggleButtonStyle">
+        <Style TargetType="ToggleButton">
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="ToggleButton" x:Key="SortButtonStyle">
+        <StaticResource ResourceKey="ActionToggleButtonStyle"/>
+        <Style TargetType="ToggleButton">
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="False">
+                    <Setter Property="Content" Value="⇈"/>
+                    <Setter Property="ToolTip" Value="По возрастанию"/>
+                </Trigger>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Content" Value="⇊"/>
+                    <Setter Property="ToolTip" Value="По убыванию"/>
+                    <Setter Property="Background" Value="Transparent"/>
+                </Trigger>
+            </Style.Triggers>
+            <Setter Property="Content" Value="⇵"/>
+            <Setter Property="ToolTip" Value="Не сортировано"/>
+            <Setter Property="IsThreeState" Value="True"/>
+        </Style>
+    </l:StyleCombiner>
+    <DataTemplate x:Key="SortHeader" x:Shared="False">
+        <DataTemplate.Resources>
+            <l:BindingProxy x:Key="Field" Value="{l:ParameterizedResource $field, AsValueOfType=sys:String}"/>
+        </DataTemplate.Resources>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Source={l:ParameterizedResource $name, AsValueOfType={x:Type sys:String}}}"/>
+            <ToggleButton 
+                IsChecked="{x:Null}"
+                Style="{StaticResource SortButtonStyle}" 
+                Command="{Binding Value, Source={l:ParameterizedResource $command}}"
+                >
+                <ToggleButton.CommandParameter>
+                    <MultiBinding Converter="{StaticResource MultiValueToArrayConverter}">
+                        <MultiBinding.Bindings>
+                            <Binding RelativeSource="{RelativeSource Self}"/>
+                            <Binding Path="Value" Source="{StaticResource Field}"/>
+                        </MultiBinding.Bindings>
+                    </MultiBinding>
+                </ToggleButton.CommandParameter>
+            </ToggleButton>
+        </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>
