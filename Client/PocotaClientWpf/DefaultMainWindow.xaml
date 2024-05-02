@@ -13,11 +13,21 @@
                 <ResourceDictionary Source="Dictionary1.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy x:Key="SortCommand" Value="{Binding SortCommand}"/>
+            <l:BindingProxy x:Key="RunCommand" Value="{Binding RunCommand}"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
-        <DataGrid ItemsSource="{Binding ConnectorViewSource.View}" IsReadOnly="True" AutoGenerateColumns="False">
+        <DataGrid 
+            ItemsSource="{Binding ConnectorViewSource.View}" 
+            IsReadOnly="True" 
+            AutoGenerateColumns="False"
+            SelectedCellsChanged="DataGrid_SelectedCellsChanged"
+            >
             <DataGrid.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
+                      Color="{x:Static SystemColors.WindowColor}" />
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"
+                      Color="{x:Static SystemColors.ControlTextColor}" />
                 <DataTemplate x:Key="Method">
                     <TextBlock Text="{Binding Name}" Margin="10"/>
                 </DataTemplate>
@@ -29,7 +39,11 @@
                 </DataTemplate>
                 <DataTemplate x:Key="Actions">
                     <StackPanel Orientation="Horizontal" Margin="10">
-                        <Button Style="{StaticResource PlayButtonStyle}"/>
+                        <Button 
+                            Style="{StaticResource PlayButtonStyle}" 
+                            Command="{Binding Value, Source={StaticResource RunCommand}}"
+                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                            />
                     </StackPanel>
                 </DataTemplate>
             </DataGrid.Resources>
@@ -48,6 +62,15 @@
                     />
                 <DataGridTemplateColumn Header="Действия" CellTemplate="{StaticResource Actions}"/>
             </DataGrid.Columns>
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="BorderBrush" Value="{x:Static SystemColors.WindowBrush}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.CellStyle>
         </DataGrid>
     </DockPanel>
 </Window>
