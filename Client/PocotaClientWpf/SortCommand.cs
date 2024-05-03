@@ -1,16 +1,13 @@
-﻿using System.Collections;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
+﻿using System.ComponentModel;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Net.Leksi.Pocota.Client;
 
-public class SortCommand(CollectionViewSource source) : ICommand
+public class SortCommand(Window owner, CollectionViewSource source) : ICommand, IValueConverter
 {
     public event EventHandler? CanExecuteChanged
     {
@@ -23,90 +20,74 @@ public class SortCommand(CollectionViewSource source) : ICommand
             CommandManager.RequerySuggested -= value;
         }
     }
-    private readonly Dictionary<string,ToggleButton> _buttons = [];
-
     public bool CanExecute(object? parameter)
     {
-        if (
-            parameter is object[] parameters
-            && parameters.Length > 1
-            && parameters[0] is ToggleButton button
-            && parameters[1] is string field
-        )
-        {
-            _buttons.TryAdd(field, button);
-            return true;
-        }
-        return false;
+        return true;
+    }
+
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        return value;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        return value;
     }
 
     public void Execute(object? parameter)
     {
-        if(
-            parameter is object[] parameters 
-            && parameters.Length > 1 
-            && parameters[0] is ToggleButton button 
+        if (
+            parameter is object[] parameters
+            && parameters.Length > 1
+            && parameters[0] is Button button
             && parameters[1] is string field
         )
         {
-            Console.WriteLine(button.ToolTip);
-            _buttons.TryAdd(field, button);
-            KeyStates keyStates = Keyboard.GetKeyStates(Key.LeftCtrl) | Keyboard.GetKeyStates(Key.RightCtrl);
-            if(!keyStates.HasFlag(KeyStates.Down))
+            if (button.Tag is bool b)
             {
-                bool? isChecked = button.IsChecked;
-                //ResetButtonsOrder();
-                button.IsChecked = isChecked;
-                source.SortDescriptions.Clear();
-                if (button.IsChecked is bool b)
+                if (!b)
+                {
+                    button.Tag = true;
+                    button.Style = owner.FindResource("DescendingSortButtonStyle") as Style;
+                }
+                else
+                {
+                    button.Tag = null;
+                    button.Style = owner.FindResource("UnsortedSortButtonStyle") as Style;
+                }
+            }
+            else {
+                button.Tag = false;
+                button.Style = owner.FindResource("AscendingSortButtonStyle") as Style;
+            }
+            if (button.Tag is bool b1)
+            {
+                if(
+                    Enumerable.Range(0, source.SortDescriptions.Count).Where(i => source.SortDescriptions[i].PropertyName == field)
+                        .FirstOrDefault(-1) is int pos && pos >= 0
+                )
+                {
+                    source.SortDescriptions[pos] = new SortDescription
+                    {
+                        PropertyName = field,
+                        Direction = b1 ? ListSortDirection.Descending : ListSortDirection.Ascending,
+                    };
+                }
+                else
                 {
                     source.SortDescriptions.Add(new SortDescription
                     {
                         PropertyName = field,
-                        Direction = b ? ListSortDirection.Descending : ListSortDirection.Ascending,
+                        Direction = b1 ? ListSortDirection.Descending : ListSortDirection.Ascending,
                     });
                 }
-            }
-            else
+            } 
+            else if(source.SortDescriptions.Where(d => d.PropertyName == field).FirstOrDefault() is SortDescription sd)
             {
-                source.SortDescriptions.Add(new SortDescription
-                {
-                    PropertyName = "field",
-                    Direction = ListSortDirection.Descending,
-                });
+                source.SortDescriptions.Remove(sd);
             }
+            Console.WriteLine(source.SortDescriptions.Count);
         }
-    }
-    private void ResetButtonsOrder()
-    {
-        DependencyObject? dg = null;
-        foreach (ToggleButton button in _buttons.Values)
-        {
-            if (dg is null)
-            {
-                for (dg = button; dg != null && dg is not DataGrid; dg = VisualTreeHelper.GetParent(dg)) { }
-            }
-            DependencyObject cur = button;
-            for (; cur != null && cur is not StackPanel; cur = VisualTreeHelper.GetParent(cur)) { }
-            int cnt = VisualTreeHelper.GetChildrenCount(cur);
-            for (int i = 0; i < cnt; ++i)
-            {
-                if (VisualTreeHelper.GetChild(cur, i) is StackPanel sp && sp.Name == "SortOrder")
-                {
-                    var descriptor = DependencyPropertyDescriptor.FromName(
-                        "Visibility",
-                        sp.GetType(),
-                        sp.GetType()
-                    );
-
-                    descriptor.SetValue(sp, Visibility.Hidden);
-                    break;
-                }
-            }
-            //button.IsChecked = null;
-
-            Console.WriteLine(button.ToolTip);
-        }
-        (dg as DataGrid)?.InvalidateVisual();
     }
 }

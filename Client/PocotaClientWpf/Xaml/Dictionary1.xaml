@@ -9,6 +9,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     >
     <local:MultiValueToArrayConverter x:Key="MultiValueToArrayConverter"/>
+    <local:ObjectToBooleanConverter x:Key="ObjectToBooleanConverter"/>
     <Style TargetType="TextBox" x:Key="DataGridCellTextBoxStyle">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -37,8 +38,8 @@
             <Setter Property="ToolTip" Value="Вызвать"/>
         </Style>
     </l:StyleCombiner>
-    <l:StyleCombiner TargetType="ToggleButton" x:Key="ActionToggleButtonStyle">
-        <Style TargetType="ToggleButton">
+    <l:StyleCombiner TargetType="Button" x:Key="ActionToggleButtonStyle">
+        <Style TargetType="Button">
             <Setter Property="Width" Value="20"/>
             <Setter Property="Height" Value="20"/>
             <Setter Property="FontSize" Value="12"/>
@@ -46,27 +47,44 @@
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
     </l:StyleCombiner>
-    <l:StyleCombiner TargetType="ToggleButton" x:Key="SortButtonStyle">
+    <l:StyleCombiner TargetType="Button" x:Key="SortButtonStyle">
         <StaticResource ResourceKey="ActionToggleButtonStyle"/>
-        <Style TargetType="ToggleButton">
+        <Style TargetType="Button">
             <Style.Triggers>
-                <Trigger Property="IsChecked" Value="False">
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}, Converter={StaticResource ObjectToBooleanConverter}}" Value="False">
                     <Setter Property="Content" Value="⇈"/>
                     <Setter Property="ToolTip" Value="По возрастанию"/>
-                </Trigger>
-                <Trigger Property="IsChecked" Value="True">
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}, Converter={StaticResource ObjectToBooleanConverter}}" Value="True">
                     <Setter Property="Content" Value="⇊"/>
                     <Setter Property="ToolTip" Value="По убыванию"/>
-                </Trigger>
-                <Trigger Property="IsChecked" Value="{x:Null}">
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}, Converter={StaticResource ObjectToBooleanConverter}}" Value="{x:Null}">
                     <Setter Property="Content" Value="⇵"/>
                     <Setter Property="ToolTip" Value="Не сортировано"/>
-                </Trigger>
+                </DataTrigger>
             </Style.Triggers>
-            <!--<Setter Property="Content" Value="⇵"/>-->
-            <!--<Setter Property="ToolTip" Value="Не сортировано"/>-->
-            <Setter Property="IsThreeState" Value="True"/>
-            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="UnsortedSortButtonStyle">
+        <StaticResource ResourceKey="ActionToggleButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="⇵"/>
+            <Setter Property="ToolTip" Value="Не сортировано"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="AscendingSortButtonStyle">
+        <StaticResource ResourceKey="ActionToggleButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="⇈"/>
+            <Setter Property="ToolTip" Value="По возрастанию"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="DescendingSortButtonStyle">
+        <StaticResource ResourceKey="ActionToggleButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="⇊"/>
+            <Setter Property="ToolTip" Value="По убыванию"/>
         </Style>
     </l:StyleCombiner>
     <DataTemplate x:Key="SortHeader" x:Shared="False">
@@ -75,23 +93,32 @@
         </DataTemplate.Resources>
         <StackPanel Orientation="Horizontal">
             <TextBlock Text="{Binding Source={l:ParameterizedResource $name, AsValueOfType={x:Type sys:String}}}"/>
-            <ToggleButton 
-                IsChecked="{x:Null}"
-                Style="{l:ParameterizedResource SortButtonStyle}" 
+            <Button 
+                Name="btn"
+                Style="{StaticResource UnsortedSortButtonStyle}" 
                 Command="{Binding Value, Source={l:ParameterizedResource $command}}"
                 >
-                <ToggleButton.CommandParameter>
+                <Button.CommandParameter>
                     <MultiBinding Converter="{StaticResource MultiValueToArrayConverter}">
                         <MultiBinding.Bindings>
                             <Binding RelativeSource="{RelativeSource Self}"/>
-                            <Binding Path="Value" Source="{StaticResource Field}"/>
+                            <Binding Path="Value" Source="{l:ParameterizedResource Field}"/>
                         </MultiBinding.Bindings>
                     </MultiBinding>
-                </ToggleButton.CommandParameter>
-            </ToggleButton>
-            <StackPanel Orientation="Horizontal" Visibility="Hidden" Name="SortOrder">
+                </Button.CommandParameter>
+            </Button>
+            <StackPanel Orientation="Horizontal" d:Visibility="{Binding Path=., Converter={l:ParameterizedResource $converter}}" Name="SortOrder">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="{Binding Converter={l:ParameterizedResource $converter}}"/>
+                    </Style>
+                </StackPanel.Style>
                 <TextBlock Text="["/>
-                <TextBlock Text="" Name="SortOrderText"/>
+                <TextBlock 
+                    Text="" 
+                    Name="SortOrderText" 
+                    >
+                </TextBlock>
                 <TextBlock Text="]"/>
             </StackPanel>
         </StackPanel>

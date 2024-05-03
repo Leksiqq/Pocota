@@ -4,13 +4,14 @@
         xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
         mc:Ignorable="d"
         Title="DefaultMainWindow" 
         Height="450" 
         Width="800" 
         DataContext="{Binding RelativeSource={RelativeSource Self}}" 
-        WindowState="Maximized" 
+        d:WindowState="Maximized" 
         >
     <Window.Resources>
         <ResourceDictionary>
@@ -19,6 +20,8 @@
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy x:Key="SortCommand" Value="{Binding SortCommand}"/>
             <l:BindingProxy x:Key="RunCommand" Value="{Binding RunCommand}"/>
+            <l:BindingProxy Value="{Binding SortCommand}" x:Key="DataConverterProxy"/>
+            <l:BindingProxyMarkup x:Key="DataConverter" BindingProxy="{StaticResource DataConverterProxy}"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
@@ -32,6 +35,11 @@
                     <ResourceDictionary.MergedDictionaries>
                         <ResourceDictionary Source="UnhighlightedDataGridSelection.xaml" />
                     </ResourceDictionary.MergedDictionaries>
+                    <local:TemplateSelector 
+                        x:Key="TemplateSelector" 
+                        x:Shared="False" 
+                        HeaderDataTemplate="{StaticResource SortHeader}"
+                        />
                     <DataTemplate x:Key="Method" x:Shared="True">
                         <TextBox Text="{Binding Name, Mode=OneTime}" Style="{StaticResource ReadonlyDataGridCellTextBoxStyle}"/>
                     </DataTemplate>
@@ -50,20 +58,37 @@
                             />
                         </StackPanel>
                     </DataTemplate>
-                    <l:BindingProxy x:Key="SortHeader1" Value="{l:ParameterizedResource SortHeader, Replaces=$command:SortCommand}" x:Shared="False"/>
+                    <l:BindingProxy x:Key="SortHeader1" Value="{l:ParameterizedResource SortHeader, Replaces=$command:SortCommand|$converter:SortCommand}" x:Shared="False"/>
                 </ResourceDictionary>
             </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTemplateColumn 
-                    HeaderTemplate="{Binding Value, Source={l:ParameterizedResource SortHeader1, Replaces=$name:Метод|$field:Name}}" 
+                    d:HeaderTemplateSelector="{l:ParameterizedResource TemplateSelector, Replaces=$name:Метод|$field:Name}"
+                    d:HeaderTemplate="{Binding Value, Source={l:ParameterizedResource SortHeader1, Replaces=$name:Метод|$field:Name}}" 
                     CellTemplate="{StaticResource Method}"
-                    />
+                    >
+                    <DataGridTemplateColumn.HeaderTemplateSelector>
+                        <l:ParameterizedResource ResourceKey="TemplateSelector">
+                            <l:ParameterizedResource.Replaces>
+                                <x:Array Type="sys:String">
+                                    <sys:String>$command:SortCommand</sys:String>
+                                    <sys:String>$converter:DataConverter</sys:String>
+                                    <sys:String>$name:Метод</sys:String>
+                                    <sys:String>$field:Name</sys:String>
+                                </x:Array>
+                            </l:ParameterizedResource.Replaces>
+                        </l:ParameterizedResource>
+
+                    </DataGridTemplateColumn.HeaderTemplateSelector>
+                </DataGridTemplateColumn>
                 <DataGridTemplateColumn 
-                    HeaderTemplate="{Binding Value, Source={l:ParameterizedResource SortHeader1, Replaces=$name:Коннектор|$field:DeclaringType}}" 
+                    d:HeaderTemplateSelector="{l:ParameterizedResource TemplateSelector, Replaces=$name:Коннектор|$field:DeclaringType}"
+                    d:HeaderTemplate="{Binding Value, Source={l:ParameterizedResource SortHeader1, Replaces=$name:Коннектор|$field:DeclaringType}}" 
                     CellTemplate="{StaticResource Connector}"
                     />
                 <DataGridTemplateColumn 
-                    HeaderTemplate="{Binding Value, Source={l:ParameterizedResource SortHeader1, Replaces=$name:Модуль|$field:Module}}" 
+                    d:HeaderTemplateSelector="{l:ParameterizedResource TemplateSelector, Replaces=$name:Модуль|$field:Module}"
+                    d:HeaderTemplate="{Binding Value, Source={l:ParameterizedResource SortHeader1, Replaces=$name:Модуль|$field:Module}}" 
                     CellTemplate="{StaticResource Module}"
                     />
                 <DataGridTemplateColumn Header="Действия" CellTemplate="{StaticResource Actions}"/>
