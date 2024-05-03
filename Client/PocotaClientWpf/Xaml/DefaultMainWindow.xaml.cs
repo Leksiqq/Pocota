@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 
 namespace Net.Leksi.Pocota.Client;
 public partial class DefaultMainWindow : Window
@@ -16,13 +17,5 @@ public partial class DefaultMainWindow : Window
         InitializeComponent();
         Console.WriteLine(((BindingProxy)Application.Current.Resources["ServiceProvider"]).Value);
         ConnectorViewSource.Source = new ConnectorsMethodsList();
-    }
-
-    private void DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
-    {
-        if(sender is DataGrid dg)
-        {
-            //dg.UnselectAllCells();
-        }
     }
 }

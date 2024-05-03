@@ -12,6 +12,6 @@ public class MultiValueToArrayConverter : IMultiValueConverter
 
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
     {
-        return ((object[])value).ToArray();
+        return [.. ((object[])value)];
     }
 }

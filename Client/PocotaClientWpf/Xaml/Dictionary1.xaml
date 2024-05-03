@@ -9,6 +9,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     >
     <local:MultiValueToArrayConverter x:Key="MultiValueToArrayConverter"/>
+    <Style TargetType="TextBox" x:Key="DataGridCellTextBoxStyle">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Margin" Value="10"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <l:StyleCombiner TargetType="TextBox" x:Key="ReadonlyDataGridCellTextBoxStyle">
+        <StaticResource ResourceKey="DataGridCellTextBoxStyle"/>
+        <Style TargetType="TextBox">
+            <Setter Property="IsReadOnly" Value="True"/>
+        </Style>
+    </l:StyleCombiner>
     <l:StyleCombiner TargetType="Button" x:Key="ActionButtonStyle">
         <Style TargetType="Button">
             <Setter Property="Width" Value="20"/>
@@ -45,12 +57,16 @@
                 <Trigger Property="IsChecked" Value="True">
                     <Setter Property="Content" Value="⇊"/>
                     <Setter Property="ToolTip" Value="По убыванию"/>
-                    <Setter Property="Background" Value="Transparent"/>
+                </Trigger>
+                <Trigger Property="IsChecked" Value="{x:Null}">
+                    <Setter Property="Content" Value="⇵"/>
+                    <Setter Property="ToolTip" Value="Не сортировано"/>
                 </Trigger>
             </Style.Triggers>
-            <Setter Property="Content" Value="⇵"/>
-            <Setter Property="ToolTip" Value="Не сортировано"/>
+            <!--<Setter Property="Content" Value="⇵"/>-->
+            <!--<Setter Property="ToolTip" Value="Не сортировано"/>-->
             <Setter Property="IsThreeState" Value="True"/>
+            <Setter Property="Background" Value="Transparent"/>
         </Style>
     </l:StyleCombiner>
     <DataTemplate x:Key="SortHeader" x:Shared="False">
@@ -61,7 +77,7 @@
             <TextBlock Text="{Binding Source={l:ParameterizedResource $name, AsValueOfType={x:Type sys:String}}}"/>
             <ToggleButton 
                 IsChecked="{x:Null}"
-                Style="{StaticResource SortButtonStyle}" 
+                Style="{l:ParameterizedResource SortButtonStyle}" 
                 Command="{Binding Value, Source={l:ParameterizedResource $command}}"
                 >
                 <ToggleButton.CommandParameter>
@@ -73,6 +89,11 @@
                     </MultiBinding>
                 </ToggleButton.CommandParameter>
             </ToggleButton>
+            <StackPanel Orientation="Horizontal" Visibility="Hidden" Name="SortOrder">
+                <TextBlock Text="["/>
+                <TextBlock Text="" Name="SortOrderText"/>
+                <TextBlock Text="]"/>
+            </StackPanel>
         </StackPanel>
     </DataTemplate>
 </ResourceDictionary>
