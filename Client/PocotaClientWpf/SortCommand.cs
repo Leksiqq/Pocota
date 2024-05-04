@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel;
-using System.Globalization;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Net.Leksi.Pocota.Client;
 
-public class SortCommand(Window owner, CollectionViewSource source) : ICommand, IValueConverter
+public class SortCommand(CollectionViewSource source) : ICommand, INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler? CanExecuteChanged
     {
         add
@@ -20,21 +19,19 @@ public class SortCommand(Window owner, CollectionViewSource source) : ICommand, 
             CommandManager.RequerySuggested -= value;
         }
     }
+    public int Notification 
+    {  
+        get
+        {
+            return 0;
+        }
+    }
+
+
     public bool CanExecute(object? parameter)
     {
         return true;
     }
-
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return value;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return value;
-    }
-
     public void Execute(object? parameter)
     {
         if (
@@ -49,17 +46,14 @@ public class SortCommand(Window owner, CollectionViewSource source) : ICommand, 
                 if (!b)
                 {
                     button.Tag = true;
-                    button.Style = owner.FindResource("DescendingSortButtonStyle") as Style;
                 }
                 else
                 {
                     button.Tag = null;
-                    button.Style = owner.FindResource("UnsortedSortButtonStyle") as Style;
                 }
             }
             else {
                 button.Tag = false;
-                button.Style = owner.FindResource("AscendingSortButtonStyle") as Style;
             }
             if (button.Tag is bool b1)
             {
@@ -87,7 +81,7 @@ public class SortCommand(Window owner, CollectionViewSource source) : ICommand, 
             {
                 source.SortDescriptions.Remove(sd);
             }
-            Console.WriteLine(source.SortDescriptions.Count);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Notification)));
         }
     }
 }

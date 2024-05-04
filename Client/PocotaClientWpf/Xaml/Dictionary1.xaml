@@ -9,7 +9,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     >
     <local:MultiValueToArrayConverter x:Key="MultiValueToArrayConverter"/>
-    <local:ObjectToBooleanConverter x:Key="ObjectToBooleanConverter"/>
     <Style TargetType="TextBox" x:Key="DataGridCellTextBoxStyle">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -51,40 +50,27 @@
         <StaticResource ResourceKey="ActionToggleButtonStyle"/>
         <Style TargetType="Button">
             <Style.Triggers>
-                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}, Converter={StaticResource ObjectToBooleanConverter}}" Value="False">
-                    <Setter Property="Content" Value="⇈"/>
-                    <Setter Property="ToolTip" Value="По возрастанию"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}, Converter={StaticResource ObjectToBooleanConverter}}" Value="True">
-                    <Setter Property="Content" Value="⇊"/>
-                    <Setter Property="ToolTip" Value="По убыванию"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}, Converter={StaticResource ObjectToBooleanConverter}}" Value="{x:Null}">
-                    <Setter Property="Content" Value="⇵"/>
-                    <Setter Property="ToolTip" Value="Не сортировано"/>
-                </DataTrigger>
+                <l:DataSwitch Binding="{
+                    Binding 
+                    Tag, 
+                    RelativeSource={RelativeSource Self}, 
+                    Converter={l:ParameterizedResource $converter}, 
+                    ConverterParameter=tag
+                    }">
+                    <DataTrigger  Value="False">
+                        <Setter Property="Content" Value="⇈"/>
+                        <Setter Property="ToolTip" Value="По возрастанию"/>
+                    </DataTrigger>
+                    <DataTrigger Value="True">
+                        <Setter Property="Content" Value="⇊"/>
+                        <Setter Property="ToolTip" Value="По убыванию"/>
+                    </DataTrigger>
+                    <DataTrigger Value="{x:Null}">
+                        <Setter Property="Content" Value="⇵"/>
+                        <Setter Property="ToolTip" Value="Не сортировано"/>
+                    </DataTrigger>
+                </l:DataSwitch> 
             </Style.Triggers>
-        </Style>
-    </l:StyleCombiner>
-    <l:StyleCombiner TargetType="Button" x:Key="UnsortedSortButtonStyle">
-        <StaticResource ResourceKey="ActionToggleButtonStyle"/>
-        <Style TargetType="Button">
-            <Setter Property="Content" Value="⇵"/>
-            <Setter Property="ToolTip" Value="Не сортировано"/>
-        </Style>
-    </l:StyleCombiner>
-    <l:StyleCombiner TargetType="Button" x:Key="AscendingSortButtonStyle">
-        <StaticResource ResourceKey="ActionToggleButtonStyle"/>
-        <Style TargetType="Button">
-            <Setter Property="Content" Value="⇈"/>
-            <Setter Property="ToolTip" Value="По возрастанию"/>
-        </Style>
-    </l:StyleCombiner>
-    <l:StyleCombiner TargetType="Button" x:Key="DescendingSortButtonStyle">
-        <StaticResource ResourceKey="ActionToggleButtonStyle"/>
-        <Style TargetType="Button">
-            <Setter Property="Content" Value="⇊"/>
-            <Setter Property="ToolTip" Value="По убыванию"/>
         </Style>
     </l:StyleCombiner>
     <DataTemplate x:Key="SortHeader" x:Shared="False">
@@ -94,8 +80,7 @@
         <StackPanel Orientation="Horizontal">
             <TextBlock Text="{Binding Source={l:ParameterizedResource $name, AsValueOfType={x:Type sys:String}}}"/>
             <Button 
-                Name="btn"
-                Style="{StaticResource UnsortedSortButtonStyle}" 
+                Style="{l:ParameterizedResource SortButtonStyle}" 
                 Command="{Binding Value, Source={l:ParameterizedResource $command}}"
                 >
                 <Button.CommandParameter>
@@ -107,18 +92,23 @@
                     </MultiBinding>
                 </Button.CommandParameter>
             </Button>
-            <StackPanel Orientation="Horizontal" d:Visibility="{Binding Path=., Converter={l:ParameterizedResource $converter}}" Name="SortOrder">
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Setter Property="Visibility" Value="{Binding Converter={l:ParameterizedResource $converter}}"/>
-                    </Style>
-                </StackPanel.Style>
+            <StackPanel Orientation="Horizontal" Visibility="{
+                Binding 
+                Value.Notification,
+                Source={l:ParameterizedResource $command},
+                Mode=OneWay, 
+                Converter={l:ParameterizedResource $converter}, 
+                ConverterParameter=sortPositionVisibility
+                }">
                 <TextBlock Text="["/>
-                <TextBlock 
-                    Text="" 
-                    Name="SortOrderText" 
-                    >
-                </TextBlock>
+                <TextBlock Text="{
+                    Binding 
+                    Value.Notification,
+                    Source={l:ParameterizedResource $command},
+                    Mode=OneWay, 
+                    Converter={l:ParameterizedResource $converter}, 
+                    ConverterParameter=sortPositionText
+                    }" />
                 <TextBlock Text="]"/>
             </StackPanel>
         </StackPanel>
