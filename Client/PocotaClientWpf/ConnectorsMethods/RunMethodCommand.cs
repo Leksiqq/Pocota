@@ -2,7 +2,7 @@
 
 namespace Net.Leksi.Pocota.Client;
 
-public class RunCommand : ICommand
+public class RunMethodCommand : ICommand
 {
     public event EventHandler? CanExecuteChanged
     {

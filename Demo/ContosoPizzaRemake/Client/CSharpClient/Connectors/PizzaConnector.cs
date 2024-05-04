@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaConnector          //
 // was generated automatically from            //
-// at 2024-05-02T20:44:06.                     //
+// at 2024-05-04T18:29:40.                     //
 // Modifying this file will break the program! //
 /////////////////////////////////////////////////
 
@@ -159,7 +159,7 @@ public class PizzaConnector: Connector
             _asyncLock.Release();
         }
     }
-    public async Task UpdateAll(CancellationToken cancellationToken)
+    public async Task UpdateAllAsync(CancellationToken cancellationToken)
     {
         await _asyncLock.WaitAsync(cancellationToken);
         try

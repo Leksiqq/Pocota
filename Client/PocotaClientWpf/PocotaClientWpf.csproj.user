@@ -2,18 +2,21 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
-    <Compile Update="Xaml\DefaultMainWindow.xaml.cs">
+    <Compile Update="ConnectorsMethods\DefaultMainWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Xaml\DefaultMainWindow.xaml">
+    <Page Update="DataGridManager\DataGridManager.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Xaml\Dictionary1.xaml">
+    <Page Update="ConnectorsMethods\DefaultMainWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Xaml\UnhighlightedDataGridSelection.xaml">
+    <Page Update="CommonXaml\Dictionary1.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="DataGridManager\UnhighlightedDataGridSelection.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

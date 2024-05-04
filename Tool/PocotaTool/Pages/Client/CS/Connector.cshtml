@@ -51,7 +51,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
     }
 </text>
 }
-    public async Task UpdateAll(CancellationToken cancellationToken)
+    public async Task UpdateAllAsync(CancellationToken cancellationToken)
     {
         await _asyncLock.WaitAsync(cancellationToken);
         try
