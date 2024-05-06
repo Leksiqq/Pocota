@@ -4,18 +4,24 @@ using System.Windows;
 
 namespace Net.Leksi.Pocota.Client;
 
-internal class Starter(IServiceProvider services) : BackgroundService
+internal class Starter(IServiceProvider services) : IHostedService
 {
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         try
         {
-            Application app = services.GetRequiredKeyedService<Application>(PocotaWpfAppExtension.s_applicationServiceKey);
+            Application app = services.GetRequiredService<Application>();
             app.Run(services.GetRequiredKeyedService<Window>(PocotaWpfAppExtension.s_mainWindowServiceKey));
         }
         finally
         {
-            await services.GetRequiredService<IHost>().StopAsync(stoppingToken);
+            await services.GetRequiredService<IHost>().StopAsync(cancellationToken);
         }
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+
     }
 }

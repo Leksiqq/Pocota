@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Net.Leksi.Pocota.Client;
 
-namespace WpfApp1;
+namespace WpfApp2;
 
 class Program
 {
@@ -11,9 +11,10 @@ class Program
     {
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
-        builder.Services.AddPocotaWpfApp<App>(touch: typeof(Pizza));
+        builder.Services.AddPocotaWpfApp<App, MainWindow>(touch: typeof(Pizza));
 
         IHost host = builder.Build();
+
         host.Run();
     }
 }

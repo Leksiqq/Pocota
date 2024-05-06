@@ -5,18 +5,24 @@
     <Compile Update="ConnectorsMethods\DefaultMainWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="ConnectorsMethods\MethodWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="DataGridManager\DataGridManager.xaml">
+    <Page Update="ConnectorsMethods\MethodWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Xaml\DataGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="ConnectorsMethods\DefaultMainWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="CommonXaml\Dictionary1.xaml">
+    <Page Update="Xaml\Dictionary1.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="DataGridManager\UnhighlightedDataGridSelection.xaml">
+    <Page Update="Xaml\UnhighlightedDataGridSelection.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
