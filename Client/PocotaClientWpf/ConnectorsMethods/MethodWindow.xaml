@@ -6,12 +6,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
     mc:Ignorable="d"
-    Title="MethodWindow" 
     Height="450" 
     Width="800"
     DataContext="{Binding RelativeSource={RelativeSource Self}}" 
-        >
+    >
     <DockPanel LastChildFill="True">
-        <TextBlock Text="{Binding MethodMetrics}" DockPanel.Dock="Top"/>
+        <FlowDocumentReader x:Name="Metrics"/>
     </DockPanel>
 </Window>
