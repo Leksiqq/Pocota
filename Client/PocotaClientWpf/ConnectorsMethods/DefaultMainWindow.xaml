@@ -27,7 +27,7 @@
     </Window.Resources>
     <DockPanel LastChildFill="True" Grid.Row="0">
         <Menu DockPanel.Dock="Top">
-            <l:ParameterizedResource ResourceKey="WindowsMenuItem" Replaces="$window:Window"/>
+            <MenuItem Style="{l:ParameterizedResource WindowsMenuItemStyle,  Replaces=$window:Window}"/>
         </Menu>
         <DataGrid 
             ItemsSource="{Binding ConnectorsDataGridManager.ViewSource.View}" 

@@ -34,17 +34,23 @@
             <Setter Property="ToolTip" Value="Вызвать"/>
         </Style>
     </l:StyleCombiner>
-    <MenuItem x:Key="WindowsMenuItem" x:Shared="True"  Header="Окна" ItemsSource="{Binding Value.Windows, Source={l:ParameterizedResource $window}}">
-        <MenuItem.ItemContainerStyle>
-            <Style TargetType="{x:Type MenuItem}">
-                <Setter Property="Command" Value="{Binding Value.Windows, Source={l:ParameterizedResource $window}}" />
-                <Setter Property="CommandParameter" Value="{Binding}"/>
-            </Style>
-        </MenuItem.ItemContainerStyle>
-        <MenuItem.ItemTemplate>
-            <HierarchicalDataTemplate DataType="Window">
-                <TextBlock Text="{Binding Title}"/>
-            </HierarchicalDataTemplate>
-        </MenuItem.ItemTemplate>
-    </MenuItem>
+    <Style TargetType="MenuItem" x:Key="WindowsMenuItemStyle" x:Shared="True" >
+        <Setter Property="Header" Value="Окна"/>
+        <Setter Property="ItemsSource" Value="{Binding Value.Windows, Source={l:ParameterizedResource $window}}"/>
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="{x:Type MenuItem}">
+                    <Setter Property="Command" Value="{Binding Value.Windows, Source={l:ParameterizedResource $window}}" />
+                    <Setter Property="CommandParameter" Value="{Binding}"/>
+                </Style>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <HierarchicalDataTemplate DataType="Window">
+                    <TextBlock Text="{Binding Title}"/>
+                </HierarchicalDataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

@@ -14,7 +14,6 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="../Xaml/DataGrid.xaml" />
                 <ResourceDictionary Source="../Xaml/Dictionary1.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
@@ -23,7 +22,7 @@
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
-            <l:ParameterizedResource ResourceKey="WindowsMenuItem" Replaces="$window:Window"/>
+            <MenuItem Style="{l:ParameterizedResource WindowsMenuItemStyle,  Replaces=$window:Window}"/>
         </Menu>
         <WrapPanel x:Name="Metrics" DockPanel.Dock="Top" Orientation="Horizontal" />
     </DockPanel>

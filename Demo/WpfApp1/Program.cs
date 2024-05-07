@@ -1,6 +1,8 @@
 ﻿using ContosoPizza.Models.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Net.Leksi.Pocota.Client;
+using System.Windows;
 
 namespace WpfApp1;
 
