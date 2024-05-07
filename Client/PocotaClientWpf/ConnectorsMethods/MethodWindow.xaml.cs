@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 
 namespace Net.Leksi.Pocota.Client
@@ -23,21 +24,16 @@ namespace Net.Leksi.Pocota.Client
             Title = $"Метод: {_method.Name}";
             Windows.Touch();
         }
+
+        private void InitializeMethodMetrics()
+        {
+            Metrics.Children.Add(new TextBlock(new Run(_method.ToString())));
+        }
+
         protected override void OnClosed(EventArgs e)
         {
             Windows.Touch();
             base.OnClosed(e);
         }
-        private void InitializeMethodMetrics()
-        {
-            Paragraph par = new();
-            Span returnType = new();
-            returnType.Inlines.Add("Hello, world!");
-            par.Inlines.Add(returnType);
-            FlowDocument doc = new();
-            doc.Blocks.Add(par);
-            Metrics.Document = doc;
-        }
-
     }
 }

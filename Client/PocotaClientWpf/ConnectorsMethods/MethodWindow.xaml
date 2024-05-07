@@ -2,6 +2,7 @@
     x:Class="Net.Leksi.Pocota.Client.MethodWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
@@ -10,7 +11,20 @@
     Width="800"
     DataContext="{Binding RelativeSource={RelativeSource Self}}" 
     >
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Xaml/DataGrid.xaml" />
+                <ResourceDictionary Source="../Xaml/Dictionary1.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <l:BindingProxy Value="{Binding}" x:Key="Window"/>
+            <l:BindingProxy Value="{Binding Windows}" x:Key="Windows"/>
+        </ResourceDictionary>
+    </Window.Resources>
     <DockPanel LastChildFill="True">
-        <FlowDocumentReader x:Name="Metrics"/>
+        <Menu DockPanel.Dock="Top">
+            <l:ParameterizedResource ResourceKey="WindowsMenuItem" Replaces="$window:Window"/>
+        </Menu>
+        <WrapPanel x:Name="Metrics" DockPanel.Dock="Top" Orientation="Horizontal" />
     </DockPanel>
 </Window>
