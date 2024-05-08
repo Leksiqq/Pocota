@@ -20,7 +20,7 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="../Xaml/Dictionary1.xaml" />
+                <ResourceDictionary Source="../Xaml/Dictionaries/Dictionary1.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
             <l:BindingProxy Value="{Binding Windows}" x:Key="Windows"/>
@@ -30,6 +30,14 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Style="{l:ParameterizedResource WindowsMenuItemStyle,  Replaces=$window:Window}"/>
         </Menu>
-        <local:MethodInfoChip x:Name="Metrics" DockPanel.Dock="Top" TypeChipStyle="{StaticResource TypeChipStyle}" Margin="10" HorizontalAlignment="Center" FontSize="14"/>
+        <local:MethodInfoChip 
+            x:Name="Metrics" 
+            DockPanel.Dock="Top" 
+            TypeChipStyle="{StaticResource TypeChipStyle}" 
+            Margin="10" 
+            HorizontalAlignment="Center" 
+            FontSize="14" 
+            />
+        <StackPanel />
     </DockPanel>
 </Window>

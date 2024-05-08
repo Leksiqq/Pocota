@@ -2,10 +2,10 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
-    <Compile Update="ConnectorsMethods\DefaultMainWindow.xaml.cs">
+    <Compile Update="Xaml\DefaultMainWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="ConnectorsMethods\MethodWindow.xaml.cs">
+    <Compile Update="Xaml\MethodWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="MethodInfoChip.xaml.cs">
@@ -16,7 +16,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="ConnectorsMethods\MethodWindow.xaml">
+    <Page Update="Xaml\MethodWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="MethodInfoChip.xaml">
@@ -25,16 +25,16 @@
     <Page Update="TypeChip.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Xaml\DataGrid.xaml">
+    <Page Update="Xaml\Dictionaries\DataGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="ConnectorsMethods\DefaultMainWindow.xaml">
+    <Page Update="Xaml\DefaultMainWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Xaml\Dictionary1.xaml">
+    <Page Update="Xaml\Dictionaries\Dictionary1.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Xaml\UnhighlightedDataGridSelection.xaml">
+    <Page Update="Xaml\Dictionaries\UnhighlightedDataGridSelection.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

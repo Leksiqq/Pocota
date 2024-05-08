@@ -126,14 +126,14 @@
   <data name="CONNECTOR" xml:space="preserve">
     <value>Коннектор</value>
   </data>
-  <data name="CONNECTORS_METHODS" xml:space="preserve">
-    <value>Методы коннекторов</value>
-  </data>
   <data name="DESCENDING" xml:space="preserve">
     <value>По убыванию</value>
   </data>
   <data name="HIDE-NAMESPACE" xml:space="preserve">
     <value>Скрыть Namespace</value>
+  </data>
+  <data name="MAIN_WINDOW_TITLE" xml:space="preserve">
+    <value>Главное окно: Методы коннекторов</value>
   </data>
   <data name="METHOD" xml:space="preserve">
     <value>Метод</value>
@@ -144,10 +144,16 @@
   <data name="SHOW-NAMESPACE" xml:space="preserve">
     <value>Показать Namespace</value>
   </data>
+  <data name="SORT_POSITION" xml:space="preserve">
+    <value>Порядок сортировки</value>
+  </data>
   <data name="UNSORT" xml:space="preserve">
     <value>Сбросить сортировку</value>
   </data>
   <data name="UNSORTED" xml:space="preserve">
     <value>Не сортировано</value>
+  </data>
+  <data name="WINDOWS" xml:space="preserve">
+    <value>Окна</value>
   </data>
 </root>

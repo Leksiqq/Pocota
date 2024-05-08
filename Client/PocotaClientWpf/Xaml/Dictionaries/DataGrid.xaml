@@ -10,7 +10,7 @@
     mc:Ignorable="d"
     >
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="../Xaml/Dictionary1.xaml" />
+        <ResourceDictionary Source="Dictionary1.xaml" />
     </ResourceDictionary.MergedDictionaries>
     
     <l:StyleCombiner TargetType="ButtonBase" x:Key="SortButtonStyle">
@@ -75,7 +75,7 @@
                 Mode=OneWay, 
                 Converter={l:ParameterizedResource $converter}, 
                 ConverterParameter={x:Static local:DataGridConverter.SortPositionVisibility}
-                }">
+                }" ToolTip="{Binding Source=SORT_POSITION, Converter={StaticResource I18nConverter}}">
                 <TextBlock Text="["/>
                 <TextBlock Text="{
                     Binding 

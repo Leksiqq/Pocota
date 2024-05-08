@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
     mc:Ignorable="d"
-    Title="{Binding Source=CONNECTORS_METHODS, Converter={StaticResource I18nConverter}}" 
+    Title="{Binding Source=MAIN_WINDOW_TITLE, Converter={StaticResource I18nConverter}}" 
     Height="450" 
     Width="800" 
     DataContext="{Binding RelativeSource={RelativeSource Self}}" 
@@ -17,8 +17,8 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="../Xaml/DataGrid.xaml" />
-                <ResourceDictionary Source="../Xaml/Dictionary1.xaml" />
+                <ResourceDictionary Source="../Xaml/Dictionaries/DataGrid.xaml" />
+                <ResourceDictionary Source="../Xaml/Dictionaries/Dictionary1.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy x:Key="ConnectorsDataGridManager" Value="{Binding ConnectorsDataGridManager}"/>
             <l:BindingProxy x:Key="RunCommand" Value="{Binding RunCommand}"/>
@@ -38,7 +38,7 @@
             <DataGrid.Resources>
                 <ResourceDictionary>
                     <ResourceDictionary.MergedDictionaries>
-                        <ResourceDictionary Source="../Xaml/UnhighlightedDataGridSelection.xaml" />
+                        <ResourceDictionary Source="../Xaml/Dictionaries/UnhighlightedDataGridSelection.xaml" />
                     </ResourceDictionary.MergedDictionaries>
                     <DataTemplate x:Key="Method" x:Shared="True">
                         <TextBox 
