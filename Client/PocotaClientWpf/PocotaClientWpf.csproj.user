@@ -8,9 +8,21 @@
     <Compile Update="ConnectorsMethods\MethodWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="MethodInfoChip.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="TypeChip.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="ConnectorsMethods\MethodWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="MethodInfoChip.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="TypeChip.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Xaml\DataGrid.xaml">

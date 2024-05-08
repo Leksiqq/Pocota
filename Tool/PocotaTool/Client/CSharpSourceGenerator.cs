@@ -152,7 +152,24 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 ReturnItemTypeName = Util.BuildTypeName(mi.ReturnType),
                 IsEnumeration = mi.ReturnType.IsGenericType,
             };
-            if(mm.IsEnumeration)
+            foreach (ParameterInfo pi in mi.GetParameters())
+            {
+                if (options.ContractType.GetCustomAttributes<EntityAttribute>().Where(a => a.EntityType.Name == pi.ParameterType.Name).FirstOrDefault() is null)
+                {
+                    model.AddUsing(pi.ParameterType);
+                }
+                else
+                {
+                    model.AddUsing($"{(string.IsNullOrEmpty(pi.ParameterType.Namespace) ? string.Empty : $"{pi.ParameterType.Namespace}.")}Client");
+                }
+                ParameterModel pm = new()
+                {
+                    Name = pi.Name!,
+                    TypeName = Util.BuildTypeName(pi.ParameterType),
+                };
+                mm.Parameters.Add(pm);
+            }
+            if (mm.IsEnumeration)
             {
                 model.AddUsing(typeof(Task));
                 Type itemType = mi.ReturnType.GetGenericArguments()[0];
@@ -175,23 +192,6 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
             {
                 mm.ReturnTypeName = mm.ReturnTypeName.Replace(">", "?>");
                 model.AddUsing(typeof(ValueTask));
-            }
-            foreach (ParameterInfo pi in mi.GetParameters())
-            {
-                if (options.ContractType.GetCustomAttributes<EntityAttribute>().Where(a => a.EntityType.Name == pi.ParameterType.Name).FirstOrDefault() is null)
-                {
-                    model.AddUsing(pi.ParameterType);
-                }
-                else
-                {
-                    model.AddUsing($"{(string.IsNullOrEmpty(pi.ParameterType.Namespace) ? string.Empty : $"{pi.ParameterType.Namespace}.")}Client");
-                }
-                ParameterModel pm = new()
-                {
-                    Name = pi.Name!,
-                    TypeName = Util.BuildTypeName(pi.ParameterType),
-                };
-                mm.Parameters.Add(pm);
             }
             model.Methods.Add(mm);
         }

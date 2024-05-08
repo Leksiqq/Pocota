@@ -36,6 +36,9 @@ public static class PocotaWpfAppExtension
             {
                 Application app = createApplication.Invoke(s);
                 app.Resources["ServiceProvider"] = s;
+                I18nConverter i18NConverter = new();
+                i18NConverter.AddResourceManager(Properties.Resources.ResourceManager);
+                app.Resources["I18nConverter"] = i18NConverter;
                 return app;
             }
         );

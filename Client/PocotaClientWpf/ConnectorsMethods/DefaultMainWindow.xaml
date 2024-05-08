@@ -4,10 +4,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
     mc:Ignorable="d"
-    Title="Методы коннекторов" 
+    Title="{Binding Source=CONNECTORS_METHODS, Converter={StaticResource I18nConverter}}" 
     Height="450" 
     Width="800" 
     DataContext="{Binding RelativeSource={RelativeSource Self}}" 
@@ -89,43 +90,58 @@
                 </ResourceDictionary>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTemplateColumn 
-                    HeaderTemplate="{
-                        Binding 
-                        Value, 
-                        Source={
-                            l:ParameterizedResource 
-                            SortHeader1, 
-                            Replaces=$converter:NameConverter|$name:Метод|$field:Name
-                            }
-                        }" 
-                    CellTemplate="{StaticResource Method}"
-                    />
-                <DataGridTemplateColumn 
-                    HeaderTemplate="{
-                        Binding 
-                        Value, 
-                        Source={
-                            l:ParameterizedResource 
-                            SortHeader1, 
-                            Replaces=$converter:DeclaringTypeConverter|$name:Коннектор|$field:DeclaringType
-                            }
-                        }" 
-                    CellTemplate="{StaticResource Connector}"
-                    />
-                <DataGridTemplateColumn 
-                    HeaderTemplate="{
-                        Binding 
-                        Value, 
-                        Source={
-                            l:ParameterizedResource 
-                            SortHeader1, 
-                            Replaces=$converter:ModuleConverter|$name:Модуль|$field:Module
-                            }
-                        }" 
-                    CellTemplate="{StaticResource Module}"
-                    />
-                <DataGridTemplateColumn Header="Действия" CellTemplate="{StaticResource Actions}"/>
+                <DataGridTemplateColumn CellTemplate="{StaticResource Method}">
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <Binding Path="Value">
+                            <Binding.Source>
+                                <l:ParameterizedResource ResourceKey="SortHeader1">
+                                    <l:ParameterizedResource.Replaces>
+                                        <x:Array Type="sys:Object">
+                                            <sys:String>$converter:NameConverter</sys:String>
+                                            <sys:String>$field:Name</sys:String>
+                                            <l:BindingProxy Name="$name" Value="{Binding Source=METHOD, Converter={StaticResource I18nConverter}}"/>
+                                        </x:Array>
+                                    </l:ParameterizedResource.Replaces>
+                                </l:ParameterizedResource>
+                            </Binding.Source>
+                        </Binding>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellTemplate="{StaticResource Connector}">
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <Binding Path="Value">
+                            <Binding.Source>
+                                <l:ParameterizedResource ResourceKey="SortHeader1">
+                                    <l:ParameterizedResource.Replaces>
+                                        <x:Array Type="sys:Object">
+                                            <sys:String>$converter:DeclaringTypeConverter</sys:String>
+                                            <sys:String>$field:DeclaringType</sys:String>
+                                            <l:BindingProxy Name="$name" Value="{Binding Source=CONNECTOR, Converter={StaticResource I18nConverter}}"/>
+                                        </x:Array>
+                                    </l:ParameterizedResource.Replaces>
+                                </l:ParameterizedResource>
+                            </Binding.Source>
+                        </Binding>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellTemplate="{StaticResource Module}">
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <Binding Path="Value">
+                            <Binding.Source>
+                                <l:ParameterizedResource ResourceKey="SortHeader1">
+                                    <l:ParameterizedResource.Replaces>
+                                        <x:Array Type="sys:Object">
+                                            <sys:String>$converter:ModuleConverter</sys:String>
+                                            <sys:String>$field:Module</sys:String>
+                                            <l:BindingProxy Name="$name" Value="{Binding Source=MODULE, Converter={StaticResource I18nConverter}}"/>
+                                        </x:Array>
+                                    </l:ParameterizedResource.Replaces>
+                                </l:ParameterizedResource>
+                            </Binding.Source>
+                        </Binding>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="{Binding Source=ACTIONS, Converter={StaticResource I18nConverter}}" CellTemplate="{StaticResource Actions}"/>
             </DataGrid.Columns>
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">

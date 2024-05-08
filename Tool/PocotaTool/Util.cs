@@ -5,7 +5,7 @@ using static Net.Leksi.Pocota.Tool.Constants;
 
 namespace Net.Leksi.Pocota.Tool;
 
-internal class Util
+internal static class Util
 {
     internal static string BuildTypeName(Type type)
     {
@@ -21,8 +21,12 @@ internal class Util
         {
             return BuildTypeName(type.GetGenericArguments()[0]);
         }
-        return type.GetGenericTypeDefinition().Name.Substring(0, type.GetGenericTypeDefinition().Name.IndexOf('`'))
-            + '<' + String.Join(',', type.GetGenericArguments().Select(v => BuildTypeName(v))) + '>';
+        return string.Concat(
+            type.GetGenericTypeDefinition().Name.AsSpan(0, type.GetGenericTypeDefinition().Name.IndexOf('`')), 
+            "<", 
+            String.Join(',', type.GetGenericArguments().Select(v => BuildTypeName(v))), 
+            ">"
+        );
     }
     internal static string BuildTypeFullName(Type type)
     {
@@ -61,10 +65,7 @@ internal class Util
         {
             if(constr.GetParameters().Length == 0)
             {
-                if(usedConstructor is null)
-                {
-                    usedConstructor = constr;
-                }
+                usedConstructor ??= constr;
             }
             else
             {

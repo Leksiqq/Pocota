@@ -20,15 +20,15 @@
                 <l:DataSwitch Binding="{Binding Tag, RelativeSource={RelativeSource Self}}">
                     <DataTrigger  Value="{x:Static scm:ListSortDirection.Ascending}">
                         <Setter Property="Content" Value="⇈"/>
-                        <Setter Property="ToolTip" Value="По возрастанию"/>
+                        <Setter Property="ToolTip" Value="{Binding Source=ASCENDING, Converter={StaticResource I18nConverter}}"/>
                     </DataTrigger>
                     <DataTrigger Value="{x:Static scm:ListSortDirection.Descending}">
                         <Setter Property="Content" Value="⇊"/>
-                        <Setter Property="ToolTip" Value="По убыванию"/>
+                        <Setter Property="ToolTip" Value="{Binding Source=DESCENDING, Converter={StaticResource I18nConverter}}"/>
                     </DataTrigger>
                     <DataTrigger Value="{x:Null}">
                         <Setter Property="Content" Value="⇵"/>
-                        <Setter Property="ToolTip" Value="Не сортировано"/>
+                        <Setter Property="ToolTip" Value="{Binding Source=UNSORTED, Converter={StaticResource I18nConverter}}"/>
                     </DataTrigger>
                 </l:DataSwitch>
             </Style.Triggers>
@@ -38,7 +38,7 @@
         <StaticResource ResourceKey="ActionButtonStyle"/>
         <Style TargetType="ButtonBase">
             <Setter Property="Content" Value="⇵"/>
-            <Setter Property="ToolTip" Value="Сбросить сортировку"/>
+            <Setter Property="ToolTip" Value="{Binding Source=UNSORT, Converter={StaticResource I18nConverter}}"/>
             <Setter Property="Foreground" Value="Red"/>
         </Style>
     </l:StyleCombiner>

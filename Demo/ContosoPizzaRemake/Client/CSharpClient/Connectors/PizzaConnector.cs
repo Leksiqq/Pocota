@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaConnector          //
 // was generated automatically from            //
-// at 2024-05-07T17:47:43.                     //
+// at 2024-05-08T11:28:37.                     //
 // Modifying this file will break the program! //
 /////////////////////////////////////////////////
 
@@ -47,17 +47,17 @@ public class PizzaConnector: Connector
             _asyncLock.Release();
         }
     }
-    public async Task FindPizzasAsync(ICollection<Pizza> target, PizzaFilter filter, CancellationToken cancellationToken) 
+    public async Task FindPizzasAsync(PizzaFilter filter, ICollection<Pizza> target, CancellationToken cancellationToken) 
     {
         await _asyncLock.WaitAsync(cancellationToken);
         try 
         {
             _context.ClearSentEntities();
             _context.KeyOnlyJson = true;
-            string _filter = HttpUtility.UrlEncode(JsonSerializer.Serialize(filter, _serializerOptions));
+            string _target = HttpUtility.UrlEncode(JsonSerializer.Serialize(target, _serializerOptions));
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
-                $"/Pizza/FindPizzas/{_filter}"
+                $"/Pizza/FindPizzas/{_target}"
             );
             await GetResponseAsyncEnumerable<Pizza>(target, _request, _serializerOptions, cancellationToken);
         }

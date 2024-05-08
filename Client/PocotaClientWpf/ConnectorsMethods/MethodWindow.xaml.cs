@@ -14,6 +14,7 @@ namespace Net.Leksi.Pocota.Client
         private readonly MethodInfo _method;
         private readonly IServiceProvider _services;
         public WindowsList Windows { get; private init; }
+        public string MethodName => _method is { } ? $"{Util.BuildTypeName(_method.DeclaringType!)}.{_method.Name}" : string.Empty;
         public MethodWindow(MethodInfo method)
         {
             _method = method;
@@ -21,13 +22,11 @@ namespace Net.Leksi.Pocota.Client
             Windows = _services.GetRequiredService<WindowsList>();
             InitializeComponent();
             InitializeMethodMetrics();
-            Title = $"Метод: {_method.Name}";
             Windows.Touch();
         }
-
         private void InitializeMethodMetrics()
         {
-            Metrics.Children.Add(new TextBlock(new Run(_method.ToString())));
+            Metrics.MethodInfo = _method;
         }
 
         protected override void OnClosed(EventArgs e)

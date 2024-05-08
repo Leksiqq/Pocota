@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.ToppingAccessBase                   //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-07T17:47:43.                                 //
+// at 2024-05-08T11:28:37.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 

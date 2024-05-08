@@ -16,6 +16,11 @@ class Program
         builder.Services.AddPocotaWpfApp<App>(touch: typeof(Pizza));
 
         IHost host = builder.Build();
+        if (host.Services.GetRequiredService<Application>().Resources["I18nConverter"] is I18nConverter conv)
+        {
+            conv.AddResourceManager(WpfApp1.Properties.Resources.ResourceManager);
+        }
+
         host.Run();
     }
 }
