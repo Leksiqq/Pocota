@@ -38,6 +38,15 @@
             HorizontalAlignment="Center" 
             FontSize="14" 
             />
+        <DataGrid ItemsSource="{Binding Parameters}" DockPanel.Dock="Top" HeadersVisibility="None" BorderThickness="0">
+            <DataGrid.Resources>
+                <ResourceDictionary>
+                    <ResourceDictionary.MergedDictionaries>
+                        <ResourceDictionary Source="../Xaml/Dictionaries/UnhighlightedDataGridSelection.xaml" />
+                    </ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary>
+            </DataGrid.Resources>
+        </DataGrid>
         <StackPanel />
     </DockPanel>
 </Window>
