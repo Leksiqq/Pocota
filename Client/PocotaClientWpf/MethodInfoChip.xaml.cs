@@ -27,8 +27,6 @@ public partial class MethodInfoChip : UserControl, INotifyPropertyChanged
     public MethodInfoChip()
     {
         InitializeComponent();
-        Console.WriteLine(GetType());
-        Console.WriteLine($"1:{DataContext}");
     }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {

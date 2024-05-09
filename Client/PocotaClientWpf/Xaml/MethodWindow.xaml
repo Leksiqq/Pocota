@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     mc:Ignorable="d"
     Height="450" 
     Width="800"
@@ -38,33 +39,62 @@
             HorizontalAlignment="Center" 
             FontSize="14" 
             />
-        <DataGrid ItemsSource="{Binding Parameters}" DockPanel.Dock="Top" AutoGenerateColumns="False">
-            <DataGrid.Resources>
-                <ResourceDictionary>
-                    <ResourceDictionary.MergedDictionaries>
-                        <ResourceDictionary Source="../Xaml/Dictionaries/UnhighlightedDataGridSelection.xaml" />
-                    </ResourceDictionary.MergedDictionaries>
-                    <DataTemplate x:Key="Type">
-                        <StackPanel Orientation="Horizontal">
-                            <local:TypeChip Type="{Binding Type}" Style="{StaticResource TypeChipStyle}"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ResourceDictionary>
-            </DataGrid.Resources>
-            <DataGrid.Columns>
-                <DataGridTextColumn 
-                    Header="{Binding Source=PARAMETER, Converter={StaticResource I18nConverter}}"
-                    Binding="{Binding Name}"
-                    />
-                <DataGridTemplateColumn IsReadOnly="True"
-                    CellTemplate="{StaticResource Type}" 
-                    Header="{Binding Source=TYPE, Converter={StaticResource I18nConverter}}"
-                    />
-                <DataGridTemplateColumn 
-                    Header="{Binding Source=VALUE, Converter={StaticResource I18nConverter}}"
-                    />
-            </DataGrid.Columns>
-        </DataGrid>
+        <ListView x:Name="ParametersView" ItemsSource="{Binding Parameters}" DockPanel.Dock="Top" SizeChanged="ListView_SizeChanged">
+            <ListView.Resources>
+                <DataTemplate x:Key="Default" >
+                    <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </DataTemplate>
+                <l:BindingProxy x:Key="ValueProxy" Value="{Binding Value}"/>
+                <DataTemplate x:Key="ValueTemplate">
+                    <DockPanel LastChildFill="True">
+                        <Button DockPanel.Dock="Right" Style="{StaticResource ClearButtonStyle}" Margin="0"/>
+                        <ContentControl 
+                            ContentTemplate="{StaticResource Default}"
+                            Content="{
+                                Binding 
+                                RelativeSource={
+                                    RelativeSource 
+                                    Mode=FindAncestor, 
+                                    AncestorType=DockPanel
+                                }, 
+                                Path=DataContext
+                                }"
+                            >
+                            <d:ContentControl.ContentTemplateSelector>
+                                <local:MethodParameterTemplateSelector 
+                                    Default="{StaticResource Default}"
+                                />
+                            </d:ContentControl.ContentTemplateSelector>
+                        </ContentControl>
+                    </DockPanel>
+                </DataTemplate>
+                <DataTemplate x:Key="NameTemplate">
+                    <DockPanel LastChildFill="True">
+                        <TextBlock Text="{Binding Name}" TextAlignment="Right" Margin="0,0,10,0"/>
+                    </DockPanel>
+                </DataTemplate>
+            </ListView.Resources>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Margin" Value="0"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView AllowsColumnReorder="False">
+                    <GridViewColumn 
+                        x:Name="ParameterNameColumn"
+                        Header="{Binding Source=PARAMETER, Converter={StaticResource I18nConverter}}"
+                        CellTemplate="{StaticResource NameTemplate}"
+                        />
+                    <GridViewColumn 
+                        x:Name="ParameterValueColumn"
+                        Header="{Binding Source=VALUE, Converter={StaticResource I18nConverter}}"
+                        CellTemplate="{StaticResource ValueTemplate}"
+                        />
+                </GridView>
+            </ListView.View>
+        </ListView>
         <StackPanel />
     </DockPanel>
 </Window>

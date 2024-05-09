@@ -32,7 +32,14 @@
         <StaticResource ResourceKey="ActionButtonStyle"/>
         <Style TargetType="Button">
             <Setter Property="Content" Value="▶"/>
-            <Setter Property="ToolTip" Value="Вызвать"/>
+            <Setter Property="ToolTip" Value="{Binding Source=CALL, Converter={StaticResource I18nConverter}}"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="ClearButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="➖"/>
+            <Setter Property="ToolTip" Value="{Binding Source=CLEAR, Converter={StaticResource I18nConverter}}"/>
         </Style>
     </l:StyleCombiner>
     <Style TargetType="MenuItem" x:Key="WindowsMenuItemStyle" x:Shared="True">

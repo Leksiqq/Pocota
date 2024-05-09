@@ -31,13 +31,27 @@ namespace Net.Leksi.Pocota.Client
                     Parameters.Add(new MethodParameter(parameter.Name!, parameter.ParameterType));
                 }
             }
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
+            CalcColumnsWidth(ParametersView.ActualWidth);
+            //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
             Windows.Touch();
         }
         protected override void OnClosed(EventArgs e)
         {
             Windows.Touch();
             base.OnClosed(e);
+        }
+
+        private void ListView_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.WidthChanged)
+            {
+                CalcColumnsWidth(e.NewSize.Width);
+            }
+        }
+
+        private void CalcColumnsWidth(double width)
+        {
+            ParameterValueColumn.Width = width * 0.89 - ParameterNameColumn.ActualWidth;
         }
     }
 }

@@ -47,7 +47,6 @@
             PlacementTarget="{Binding ElementName=TypeNameCaption}"
             MouseEnter="TypeNamePopup_MouseEnter" 
             MouseLeave="TypeNamePopup_MouseLeave"
-            d:MouseUp="TypeNamePopup_MouseUp"
             >
             <Button x:Name="ToggleNamespaceButton" Style="{StaticResource ButtonStyle}" Click="Button_Click" FontSize="10"/>
         </Popup>

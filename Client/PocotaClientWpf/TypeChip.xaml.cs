@@ -63,12 +63,9 @@ public partial class TypeChip : UserControl, INotifyPropertyChanged
     {
         _timer = new Timer(CallBack);
         InitializeComponent();
-        Console.WriteLine(GetType());
-        Console.WriteLine($"1:{DataContext}");
     }
     private void Button_Click(object sender, RoutedEventArgs e)
     {
-        Console.WriteLine("click");
         IsCaptionExpanded = !IsCaptionExpanded;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
         TypeNamePopup.IsOpen = false;
@@ -117,22 +114,18 @@ public partial class TypeChip : UserControl, INotifyPropertyChanged
     }
     private void TypeNameCaption_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
     {
-        Console.WriteLine("name mouse enter");
         TypeNamePopup.IsOpen = true;
     }
     private void TypeNameCaption_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
     {
-        Console.WriteLine("name mouse leave");
         _timer.Change(s_dueTime, Timeout.Infinite);
     }
     private void TypeNamePopup_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
     {
-        Console.WriteLine("popup mouse enter");
         _mouseOverPopup = true;
     }
     private void TypeNamePopup_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
     {
-        Console.WriteLine("popup mouse leave");
         _mouseOverPopup = false;
         TypeNamePopup.IsOpen = false;
     }
@@ -140,14 +133,7 @@ public partial class TypeChip : UserControl, INotifyPropertyChanged
     {
         if (!_mouseOverPopup)
         {
-            Console.WriteLine("timer callback");
             Dispatcher.Invoke(() => TypeNamePopup.IsOpen = false);
         }
-    }
-
-    private void TypeNamePopup_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
-    {
-        Console.WriteLine("popup mouse up");
-        Button_Click(sender, e);
     }
 }
