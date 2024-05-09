@@ -7,18 +7,18 @@
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
     xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
     mc:Ignorable="d" 
-    DataContext="{Binding RelativeSource={RelativeSource Self}}" 
+    x:Name="tc"
     >
     <UserControl.Resources>
         <ResourceDictionary>
             <Style TargetType="ButtonBase" x:Key="ButtonStyle">
                 <Style.Triggers>
-                    <l:DataSwitch Binding="{Binding IsCaptionExpanded}">
+                    <l:DataSwitch Binding="{Binding IsCaptionExpanded, ElementName=tc}">
                         <DataTrigger Value="True">
-                            <Setter Property="Content" Value="{Binding CollapseCaption}"/>
+                            <Setter Property="Content" Value="{Binding CollapseCaption, ElementName=tc}"/>
                         </DataTrigger>
                         <DataTrigger Value="False">
-                            <Setter Property="Content" Value="{Binding ExpandCaption}"/>
+                            <Setter Property="Content" Value="{Binding ExpandCaption, ElementName=tc}"/>
                         </DataTrigger>
                     </l:DataSwitch>
                 </Style.Triggers>
@@ -26,10 +26,10 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <WrapPanel Orientation="Horizontal">
-        <WrapPanel Orientation="Horizontal" Visibility="{Binding NamespaceVisibility}">
+        <WrapPanel Orientation="Horizontal" Visibility="{Binding NamespaceVisibility, ElementName=tc}">
             <TextBlock 
             x:Name="NamespaceCaption" 
-            Text="{Binding Namespace}" 
+            Text="{Binding Namespace, ElementName=tc}" 
             MouseEnter="TypeNameCaption_MouseEnter" 
             MouseLeave="TypeNameCaption_MouseLeave" 
             />
@@ -37,7 +37,7 @@
         </WrapPanel>
         <TextBlock 
             x:Name="TypeNameCaption" 
-            Text="{Binding TypeName}" 
+            Text="{Binding TypeName, ElementName=tc}" 
             MouseEnter="TypeNameCaption_MouseEnter" 
             MouseLeave="TypeNameCaption_MouseLeave" 
             Foreground="#5BBFEA"
@@ -47,10 +47,11 @@
             PlacementTarget="{Binding ElementName=TypeNameCaption}"
             MouseEnter="TypeNamePopup_MouseEnter" 
             MouseLeave="TypeNamePopup_MouseLeave"
+            d:MouseUp="TypeNamePopup_MouseUp"
             >
-            <Button Style="{StaticResource ButtonStyle}" Click="Button_Click" FontSize="10"/>
+            <Button x:Name="ToggleNamespaceButton" Style="{StaticResource ButtonStyle}" Click="Button_Click" FontSize="10"/>
         </Popup>
-        <WrapPanel Visibility="{Binding GenericArgumentsVisibility}" Orientation="Horizontal">
+        <WrapPanel Visibility="{Binding GenericArgumentsVisibility, ElementName=tc}" Orientation="Horizontal">
             <TextBlock Text="&lt;"></TextBlock>
             <WrapPanel x:Name="GenericArguments" Orientation="Horizontal"/>
             <TextBlock Text="&gt;"></TextBlock>

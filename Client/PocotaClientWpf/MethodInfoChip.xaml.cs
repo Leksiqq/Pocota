@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Net.Leksi.WpfMarkup;
+using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,6 +27,8 @@ public partial class MethodInfoChip : UserControl, INotifyPropertyChanged
     public MethodInfoChip()
     {
         InitializeComponent();
+        Console.WriteLine(GetType());
+        Console.WriteLine($"1:{DataContext}");
     }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {

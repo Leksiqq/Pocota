@@ -38,14 +38,32 @@
             HorizontalAlignment="Center" 
             FontSize="14" 
             />
-        <DataGrid ItemsSource="{Binding Parameters}" DockPanel.Dock="Top" HeadersVisibility="None" BorderThickness="0">
+        <DataGrid ItemsSource="{Binding Parameters}" DockPanel.Dock="Top" AutoGenerateColumns="False">
             <DataGrid.Resources>
                 <ResourceDictionary>
                     <ResourceDictionary.MergedDictionaries>
                         <ResourceDictionary Source="../Xaml/Dictionaries/UnhighlightedDataGridSelection.xaml" />
                     </ResourceDictionary.MergedDictionaries>
+                    <DataTemplate x:Key="Type">
+                        <StackPanel Orientation="Horizontal">
+                            <local:TypeChip Type="{Binding Type}" Style="{StaticResource TypeChipStyle}"/>
+                        </StackPanel>
+                    </DataTemplate>
                 </ResourceDictionary>
             </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTextColumn 
+                    Header="{Binding Source=PARAMETER, Converter={StaticResource I18nConverter}}"
+                    Binding="{Binding Name}"
+                    />
+                <DataGridTemplateColumn IsReadOnly="True"
+                    CellTemplate="{StaticResource Type}" 
+                    Header="{Binding Source=TYPE, Converter={StaticResource I18nConverter}}"
+                    />
+                <DataGridTemplateColumn 
+                    Header="{Binding Source=VALUE, Converter={StaticResource I18nConverter}}"
+                    />
+            </DataGrid.Columns>
         </DataGrid>
         <StackPanel />
     </DockPanel>

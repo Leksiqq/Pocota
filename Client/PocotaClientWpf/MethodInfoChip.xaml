@@ -7,27 +7,26 @@
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
     xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
     mc:Ignorable="d" 
-    DataContext="{Binding RelativeSource={RelativeSource Self}}" 
+    x:Name="mic"
     >
     <UserControl.Resources>
         <ResourceDictionary>
-            <l:BindingProxy x:Key="This" Value="{Binding}"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <WrapPanel Orientation="Horizontal">
         <local:TypeChip 
-            Type="{Binding Value.ReturnType, Source={StaticResource This}}" 
-            Style="{Binding Value.TypeChipStyle, Source={StaticResource This}}"
+            Type="{Binding ReturnType, ElementName=mic}" 
+            Style="{Binding TypeChipStyle, ElementName=mic}"
             />
         <TextBlock Text=" "/>
         <local:TypeChip 
-            Type="{Binding Value.DeclaringType, Source={StaticResource This}}"
-            Style="{Binding Value.TypeChipStyle, Source={StaticResource This}}"
+            Type="{Binding DeclaringType, ElementName=mic}"
+            Style="{Binding TypeChipStyle, ElementName=mic}"
             />
         <TextBlock Text="."/>
-        <TextBlock Text="{Binding  MethodName}" Foreground="#84531F"/>
+        <TextBlock Text="{Binding  MethodName, ElementName=mic}" Foreground="#84531F"/>
         <TextBlock Text="("/>
-        <WrapPanel x:Name="Arguments" Orientation="Horizontal" Visibility="{Binding ArgumentsVisibility}"/>
+        <WrapPanel x:Name="Arguments" Orientation="Horizontal" Visibility="{Binding ArgumentsVisibility, ElementName=mic}"/>
         <TextBlock Text=")"/>
     </WrapPanel>
 </UserControl>
