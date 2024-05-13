@@ -19,7 +19,7 @@ namespace Net.Leksi.Pocota.Client
                 {
                     if (typeof(Connector).IsAssignableFrom(type) && type != typeof(Connector))
                     {
-                        foreach(MethodInfo method in type.GetMethods().Where(m => m.DeclaringType == type)) 
+                        foreach(MethodInfo method in type.GetMethods().Where(m => m.DeclaringType == type && m.Name != nameof(Connector.GetPocotaConfigAsync))) 
                         {
                             _methods.Add(method);
                         }

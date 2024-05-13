@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
+using static Net.Leksi.Pocota.Client.Constants;
 
 namespace Net.Leksi.Pocota.Client
 {
@@ -14,13 +15,13 @@ namespace Net.Leksi.Pocota.Client
         public event PropertyChangedEventHandler? PropertyChanged;
         private readonly MethodInfo _method;
         private readonly IServiceProvider _services;
-        public ObservableCollection<MethodParameter> Parameters { get; private init; } = [];
+        public ObservableCollection<NamedValue> Parameters { get; private init; } = [];
         public WindowsList Windows { get; private init; }
         public string MethodName => _method is { } ? $"{Util.BuildTypeName(_method.DeclaringType!)}.{_method.Name}" : string.Empty;
         public MethodWindow(MethodInfo method)
         {
             _method = method;
-            _services = (IServiceProvider)Application.Current.Resources["ServiceProvider"];
+            _services = (IServiceProvider)Application.Current.Resources[ServiceProvider];
             Windows = _services.GetRequiredService<WindowsList>();
             InitializeComponent();
             Metrics.MethodInfo = _method;
@@ -28,11 +29,10 @@ namespace Net.Leksi.Pocota.Client
             {
                 if(parameter.ParameterType != typeof(CancellationToken) && parameter.Name != "target")
                 {
-                    Parameters.Add(new MethodParameter(parameter.Name!, parameter.ParameterType));
+                    Parameters.Add(new NamedValue(parameter.Name!, parameter.ParameterType));
                 }
             }
             CalcColumnsWidth(ParametersView.ActualWidth);
-            //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
             Windows.Touch();
         }
         protected override void OnClosed(EventArgs e)
@@ -40,7 +40,6 @@ namespace Net.Leksi.Pocota.Client
             Windows.Touch();
             base.OnClosed(e);
         }
-
         private void ListView_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (e.WidthChanged)
@@ -48,10 +47,13 @@ namespace Net.Leksi.Pocota.Client
                 CalcColumnsWidth(e.NewSize.Width);
             }
         }
-
         private void CalcColumnsWidth(double width)
         {
             ParameterValueColumn.Width = width * 0.89 - ParameterNameColumn.ActualWidth;
+        }
+        private void ListViewItem_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            CalcColumnsWidth(ParametersView.ActualWidth);
         }
     }
 }

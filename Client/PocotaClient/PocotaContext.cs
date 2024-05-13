@@ -1,24 +1,71 @@
-﻿namespace Net.Leksi.Pocota.Client;
+﻿using Net.Leksi.Pocota.Contract;
+using System.Reflection;
+
+namespace Net.Leksi.Pocota.Client;
 
 public class PocotaContext
 {
-    protected static readonly Dictionary<Type, Func<ulong, PocotaEntity>> s_entityCreators = [];
-    private readonly Dictionary<Type, HashSet<string>> _keyProperties = [];
+    protected static readonly Dictionary<Type, Func<ulong, PocotaContext, PocotaEntity>> s_entityCreators = [];
+    private readonly Dictionary<Type, Dictionary<string, bool>> _keyProperties = [];
     private readonly HashSet<Type> _keyPropertiesFilled = [];
     private readonly HashSet<ulong> _sentEntities = [];
+    private PocotaConfig? _pocotaConfig;
     protected readonly IServiceProvider _services;
     private ulong _idGen = 0;
+    internal PocotaConfig? PocotaConfig 
+    { 
+        get => _pocotaConfig;
+        set
+        {
+            if(_pocotaConfig != value && value is { })
+            {
+                _pocotaConfig = value;
+                _keyProperties.Clear();
+                foreach(Type type in s_entityCreators.Keys)
+                {
+                    if(_pocotaConfig.Keys.TryGetValue(type.FullName!, out Dictionary<string, bool>? keys))
+                    {
+                        _keyProperties.Add(type, keys);
+                    }
+                }
+            }
+        }
+    }
     public PocotaContext(IServiceProvider services)
     {
         _services = services;
     }
     public static T? Entity<T>(PocotaEntity entity) where T : class, IPocotaEntity
     {
-        return entity as T; 
+        if(s_entityCreators.ContainsKey(typeof(T)))
+        {
+            return entity as T;
+        }
+        return null;
     }
-    protected T CreateEntity<T>() where T : PocotaEntity
+    public static bool IsEntityType(Type type)
     {
-        return (T)s_entityCreators[typeof(T)].Invoke(Interlocked.Increment(ref _idGen));
+        return s_entityCreators.ContainsKey(type);
+    }
+    public virtual T CreateEntity<T>() where T : PocotaEntity
+    {
+        return (T)s_entityCreators[typeof(T)].Invoke(Interlocked.Increment(ref _idGen), this);
+    }
+    public virtual object? CreateEntity(Type type)
+    {
+        return s_entityCreators.TryGetValue(type, out Func<ulong, PocotaContext, PocotaEntity>? creator) 
+            ? creator.Invoke(Interlocked.Increment(ref _idGen), this) : null;
+    }
+    public bool IsKey(EntityProperty entityProperty)
+    {
+        return _keyProperties.TryGetValue(entityProperty.Entity.GetType(), out Dictionary<string, bool>? keys) && keys.ContainsKey(entityProperty.Name);
+    }
+    public bool? IsAutoKey(EntityProperty entityProperty)
+    {
+        return !_keyProperties.TryGetValue(entityProperty.Entity.GetType(), out Dictionary<string, bool>? keys) 
+            || !keys.TryGetValue(entityProperty.Name, out bool ans) 
+            ? null 
+            : ans;
     }
     protected void ClearSentEntities()
     {
@@ -31,28 +78,6 @@ public class PocotaContext
     protected bool SetSent(PocotaEntity entity)
     {
         return _sentEntities.Add(((IPocotaEntity)entity).PocotaId);
-    }
-    protected bool IsKey(EntityProperty property)
-    {
-        return _keyPropertiesFilled.Contains(property.EntityType) 
-            && _keyProperties.TryGetValue(property.EntityType, out HashSet<string>? keys) 
-            && keys.Contains(property.Name)
-        ;
-    }
-    protected void MarkAsKey(EntityProperty property)
-    {
-        if (!_keyPropertiesFilled.Contains(property.EntityType))
-        {
-            if(!_keyProperties.TryGetValue(property.EntityType, out HashSet<string>? keys))
-            {
-                keys = [];
-                _keyProperties.Add(property.EntityType, keys);
-            }
-            if(!keys.Contains(property.Name))
-            {
-                keys.Add(property.Name);
-            }
-        }
     }
     protected bool KeysFilled(PocotaEntity entity)
     {

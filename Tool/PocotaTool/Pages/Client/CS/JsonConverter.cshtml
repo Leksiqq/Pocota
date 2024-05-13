@@ -47,7 +47,7 @@ internal class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {st
         writer.WriteStartObject();
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>        if(!keysFilled || _context.IsKey(pocotaEntity@{}.@prop.Name)) 
+    <text>        if(!keysFilled || _context.IsKey(pocotaEntity@{}.@prop.Name@{})) 
         {
             writer.WritePropertyName(s_@{}@prop.Name);
             JsonSerializer.Serialize(writer, value@{}.@prop.Name, options);

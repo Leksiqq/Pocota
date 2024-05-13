@@ -22,6 +22,7 @@ public static class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string
 {
     <text>        services.AddTransient@{}@Html.Raw($"<{pm.Name}JsonConverter>")@{}();
         services.AddTransient@{}@Html.Raw($"<{pm.Name}PocotaEntity>")@{}();
+        @Html.Raw($"{Model.ContractName}Controller")@{}.Entities.Add(typeof(@pm.Name));
 </text>
 }
 

@@ -42,6 +42,27 @@
             <Setter Property="ToolTip" Value="{Binding Source=CLEAR, Converter={StaticResource I18nConverter}}"/>
         </Style>
     </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="EditButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="🖉"/>
+            <Setter Property="ToolTip" Value="{Binding Source=EDIT, Converter={StaticResource I18nConverter}}"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="CreateButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="➕"/>
+            <Setter Property="ToolTip" Value="{Binding Source=CREATE, Converter={StaticResource I18nConverter}}"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="FindButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="🔍"/>
+            <Setter Property="ToolTip" Value="{Binding Source=FIND, Converter={StaticResource I18nConverter}}"/>
+        </Style>
+    </l:StyleCombiner>
     <Style TargetType="MenuItem" x:Key="WindowsMenuItemStyle" x:Shared="True">
         <Setter Property="Header" Value="{Binding Source=WINDOWS, Converter={StaticResource I18nConverter}}"/>
         <Setter Property="ItemsSource" Value="{Binding Value.Windows, Source={l:ParameterizedResource $window}}"/>

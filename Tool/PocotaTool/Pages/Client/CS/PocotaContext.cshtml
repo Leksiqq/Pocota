@@ -12,16 +12,17 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
     {
 @foreach(string type in Model.Entities)
 {
-    <text>        PocotaContext.s_entityCreators.Add(typeof(@type), id => new @type@{}(id));
+    <text>        s_entityCreators.Add(typeof(@type), (id, ctx) => new @type@{}(id, ctx));
 </text>
 }
     }
     public @Model.ClassName@{}(IServiceProvider services): base(services) { }
     internal bool KeyOnlyJson {  get; set; }
-    internal new T CreateEntity@{}@Html.Raw("<T>")@{}() where T : @nameof(PocotaEntity)
+    public override T CreateEntity@{}@Html.Raw("<T>")@{}()
     {
         return base.CreateEntity@{}@Html.Raw("<T>")@{}();
     }
+    internal static void Touch() { }
     internal new void ClearSentEntities() {
         base.ClearSentEntities();
     }
@@ -32,14 +33,6 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
     internal new bool SetSent(@nameof(PocotaEntity) entity)
     {
         return base.SetSent(entity);
-    }
-    internal new bool IsKey(@nameof(EntityProperty) property) 
-    {
-        return base.IsKey(property);
-    }
-    internal new void MarkAsKey(@nameof(EntityProperty) property)
-    {
-        base.MarkAsKey(property);
     }
     internal new bool KeysFilled(PocotaEntity entity)
     {

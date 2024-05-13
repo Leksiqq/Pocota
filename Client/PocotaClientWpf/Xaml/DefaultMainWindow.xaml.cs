@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Net.Leksi.WpfMarkup;
 using System.Windows;
+using static Net.Leksi.Pocota.Client.Constants;
 
 namespace Net.Leksi.Pocota.Client;
 public partial class DefaultMainWindow : Window
@@ -12,7 +13,7 @@ public partial class DefaultMainWindow : Window
     public DefaultMainWindow()
     {
         Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
-        _services = (IServiceProvider)Application.Current.Resources["ServiceProvider"];
+        _services = (IServiceProvider)Application.Current.Resources[ServiceProvider];
         RunCommand = new RunMethodCommand();
         ConnectorsDataGridManager.ViewSource.Source = new ConnectorsMethodsList();
         Windows = _services.GetRequiredService<WindowsList>();

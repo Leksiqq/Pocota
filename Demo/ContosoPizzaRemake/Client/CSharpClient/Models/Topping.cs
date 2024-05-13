@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Topping                      //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-08T20:36:28.                                 //
+// at 2024-05-13T17:59:08.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -19,10 +19,10 @@ public class Topping: PocotaEntity, IToppingPocotaEntity
     private const string s_Name = "Name";
     private const string s_Calories = "Calories";
     private const string s_Pizzas = "Pizzas";
-    private readonly EntityProperty _IdEntityProperty = new(typeof(Topping), s_Id);
-    private readonly EntityProperty _NameEntityProperty = new(typeof(Topping), s_Name);
-    private readonly EntityProperty _CaloriesEntityProperty = new(typeof(Topping), s_Calories);
-    private readonly EntityProperty _PizzasEntityProperty = new(typeof(Topping), s_Pizzas);
+    private readonly EntityProperty _IdEntityProperty;
+    private readonly EntityProperty _NameEntityProperty;
+    private readonly EntityProperty _CaloriesEntityProperty;
+    private readonly EntityProperty _PizzasEntityProperty;
     public Int32 Id { get; set; }
     public String? Name { get; set; }
     public Decimal Calories { get; set; }
@@ -31,5 +31,11 @@ public class Topping: PocotaEntity, IToppingPocotaEntity
     EntityProperty IToppingPocotaEntity.Name => _NameEntityProperty;
     EntityProperty IToppingPocotaEntity.Calories => _CaloriesEntityProperty;
     EntityProperty IToppingPocotaEntity.Pizzas => _PizzasEntityProperty;
-    internal Topping(ulong pocotaId): base(pocotaId) { }
+    internal Topping(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
+    {
+        _IdEntityProperty = new EntityProperty(this, s_Id);
+        _NameEntityProperty = new EntityProperty(this, s_Name);
+        _CaloriesEntityProperty = new EntityProperty(this, s_Calories);
+        _PizzasEntityProperty = new EntityProperty(this, s_Pizzas);
+    }
 }

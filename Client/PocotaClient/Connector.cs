@@ -1,14 +1,11 @@
-﻿using Microsoft.VisualBasic;
-using Net.Leksi.Pocota.Contract;
-using System.Diagnostics.CodeAnalysis;
+﻿using Net.Leksi.Pocota.Contract;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-
+using Microsoft.Extensions.DependencyInjection;
 namespace Net.Leksi.Pocota.Client;
 
-public class Connector
+public abstract class Connector
 {
     private Uri? _baseAddress;
     private TimeSpan _timeout;
@@ -54,6 +51,11 @@ public class Connector
     public void AddConverter(JsonConverter converter)
     {
         _serializerOptions.Converters.Add(converter);
+    }
+    public async Task GetPocotaConfigAsync(string path, CancellationToken cancellationToken)
+    {
+        HttpRequestMessage request = new(HttpMethod.Get, path);
+        _services.GetRequiredService<PocotaContext>().PocotaConfig = await GetResponseAsync<PocotaConfig>(request, _serializerOptions, cancellationToken);
     }
     public async Task GetResponseAsyncEnumerable<T>(
         ICollection<T>? target,

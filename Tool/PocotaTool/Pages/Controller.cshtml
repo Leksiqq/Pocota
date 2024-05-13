@@ -8,6 +8,19 @@
 @Html.Partial("Header", Model)
 public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
 {
+    internal static HashSet<Type> Entities { get; private set; } = [];
+    [HttpGet]
+    public async Task GetPocotaConfig()
+    {
+        HttpContext.Response.ContentType = "application/json";
+        await JsonSerializer.SerializeAsync(
+            HttpContext.Response.Body,
+            HttpContext.RequestServices.GetRequiredService@{}@Html.Raw($"<PocotaContext>")@{}().GetPocotaConfig(
+                HttpContext.RequestServices.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}DbContext>")@{}(), 
+                Entities
+            )
+        );
+    }
 @foreach(MethodModel mm in @Model.Methods)
 {
     <text>    @foreach (string attr in mm.Attributes)

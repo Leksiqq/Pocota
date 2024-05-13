@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaController                            //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-08T20:36:28.                                 //
+// at 2024-05-13T17:59:08.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -19,6 +19,19 @@ namespace ContosoPizza;
 
 public class PizzaController: ControllerBase
 {
+    internal static HashSet<Type> Entities { get; private set; } = [];
+    [HttpGet]
+    public async Task GetPocotaConfig()
+    {
+        HttpContext.Response.ContentType = "application/json";
+        await JsonSerializer.SerializeAsync(
+            HttpContext.Response.Body,
+            HttpContext.RequestServices.GetRequiredService<PocotaContext>().GetPocotaConfig(
+                HttpContext.RequestServices.GetRequiredService<PizzaDbContext>(), 
+                Entities
+            )
+        );
+    }
     [HttpGet("GetAllPizzas")]
     public async Task GetAllPizzas()
     {

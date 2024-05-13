@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaConnector          //
 // was generated automatically from            //
-// at 2024-05-08T20:36:28.                     //
+// at 2024-05-13T17:59:08.                     //
 // Modifying this file will break the program! //
 /////////////////////////////////////////////////
 
@@ -28,6 +28,10 @@ public class PizzaConnector: Connector
         _serializerOptions.Converters.Add(
             _services.GetRequiredService<PizzaJsonConverterFactory>()
         );
+    }
+    public async Task GetPocotaConfigAsync(CancellationToken cancellationToken)
+    {
+        await GetPocotaConfigAsync("/Pizza", cancellationToken);
     }
     public async Task GetAllPizzasAsync(ICollection<Pizza> target, CancellationToken cancellationToken) 
     {

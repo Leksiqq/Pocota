@@ -17,6 +17,10 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
             _services.GetRequiredService@{}@Html.Raw($"<{Model.JsonConverterFactoryClassName}>")@{}()
         );
     }
+    public async Task GetPocotaConfigAsync(CancellationToken cancellationToken)
+    {
+        await GetPocotaConfigAsync("/@Model.ContractName", cancellationToken);
+    }
 @foreach (MethodModel mm in @Model.Methods)
 {
     <text>    public async @Html.Raw(mm.ReturnTypeName) @mm.Name@{}(@Html.Raw(string.Join(", ", mm.Parameters.Select(p => $"{p.TypeName} {p.Name}")))@(mm.Parameters.Count > 0 ? ", " : string.Empty)@{}CancellationToken cancellationToken) 

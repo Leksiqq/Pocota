@@ -16,7 +16,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
 }
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>    private readonly @nameof(EntityProperty) _@prop.Name@{}EntityProperty = new(typeof(@Model.ClassName), s_@{}@prop.Name);
+    <text>    private readonly @nameof(EntityProperty) _@prop.Name@{}EntityProperty;
 </text>
 }
 @foreach (PropertyModel prop in Model.Properties)
@@ -29,5 +29,12 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
     <text>    @nameof(EntityProperty) I@{}@Model.ClassName@{}PocotaEntity.@{}@prop.Name => _@prop.Name@{}EntityProperty;
 </text>
 }
-    internal @Model.ClassName@{}(ulong pocotaId): base(pocotaId) { }
+    internal @Model.ClassName@{}(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
+    {
+@foreach (PropertyModel prop in Model.Properties)
+{
+    <text>        _@prop.Name@{}EntityProperty = new @nameof(EntityProperty)@{}(this, s_@{}@prop.Name);
+</text>
+}
+    }
 }

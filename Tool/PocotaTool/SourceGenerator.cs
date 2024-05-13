@@ -204,6 +204,7 @@ public class SourceGenerator : Runner, ICommand
         model.ClassName = Util.GetTypeName(options.ClassName!);
         model.NamespaceValue = Util.GetNamespace(options.ClassName!);
         model.ServiceClassName = model.ClassName.Replace("Controller", "ServiceBase");
+        model.ContractName = options.ContractType!.GetCustomAttribute<PocotaContractAttribute>()!.ContractName!;
         model.JsonConverterFactoryClassName = model.ClassName.Replace("Controller", "JsonConverterFactory");
         model.AddInheritance(typeof(ControllerBase));
         model.AddUsing(typeof(JsonSerializer));

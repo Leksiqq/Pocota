@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.DependencyInjection;
+using Net.Leksi.Pocota.Contract;
 
 namespace Net.Leksi.Pocota.Server;
 
@@ -11,7 +14,6 @@ public class PocotaContext
     {
         _services = services;
     }
-
     public T Entity<T>(object entity) where T : PocotaEntity
     {
         if(!_entityCache.TryGetValue(entity, out PocotaEntity? value))
@@ -23,6 +25,23 @@ public class PocotaContext
         }
         return (T)value;
     }
+    public PocotaConfig GetPocotaConfig(DbContext dbContext, HashSet<Type> entities)
+    {
+        PocotaConfig config = new();
+        foreach (Type type in entities)
+        {
+            config.Keys.Add(type.FullName!, []);
+            object obj = Activator.CreateInstance(type)!;
+            foreach (var prop in dbContext.Entry(obj).Properties)
+            {
+                if (prop.Metadata.IsPrimaryKey())
+                {
+                    config.Keys[type.FullName!].Add(prop.Metadata.Name, prop.Metadata.ValueGenerated is not ValueGenerated.Never);
+                }
+            }
+        }
+        return config;
+    }
     public static async IAsyncEnumerable<TEntity> ProcessEntitiesAsync<TEntity>(IAccessCalculator accessCalculator, IAsyncEnumerable<TEntity> entities)
     { 
         await foreach(TEntity entity in entities)
@@ -31,7 +50,6 @@ public class PocotaContext
             yield return entity;
         }
     }
-
     public static TEntity ProcessEntity<TEntity>(IAccessCalculator accessCalculator, TEntity entity)
     {
         accessCalculator.Calculate(entity!);

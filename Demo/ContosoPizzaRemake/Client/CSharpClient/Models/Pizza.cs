@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Pizza                        //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-08T20:36:28.                                 //
+// at 2024-05-13T17:59:08.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -19,10 +19,10 @@ public class Pizza: PocotaEntity, IPizzaPocotaEntity
     private const string s_Name = "Name";
     private const string s_Sauce = "Sauce";
     private const string s_Toppings = "Toppings";
-    private readonly EntityProperty _IdEntityProperty = new(typeof(Pizza), s_Id);
-    private readonly EntityProperty _NameEntityProperty = new(typeof(Pizza), s_Name);
-    private readonly EntityProperty _SauceEntityProperty = new(typeof(Pizza), s_Sauce);
-    private readonly EntityProperty _ToppingsEntityProperty = new(typeof(Pizza), s_Toppings);
+    private readonly EntityProperty _IdEntityProperty;
+    private readonly EntityProperty _NameEntityProperty;
+    private readonly EntityProperty _SauceEntityProperty;
+    private readonly EntityProperty _ToppingsEntityProperty;
     public Int32 Id { get; set; }
     public String? Name { get; set; }
     public Sauce? Sauce { get; set; }
@@ -31,5 +31,11 @@ public class Pizza: PocotaEntity, IPizzaPocotaEntity
     EntityProperty IPizzaPocotaEntity.Name => _NameEntityProperty;
     EntityProperty IPizzaPocotaEntity.Sauce => _SauceEntityProperty;
     EntityProperty IPizzaPocotaEntity.Toppings => _ToppingsEntityProperty;
-    internal Pizza(ulong pocotaId): base(pocotaId) { }
+    internal Pizza(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
+    {
+        _IdEntityProperty = new EntityProperty(this, s_Id);
+        _NameEntityProperty = new EntityProperty(this, s_Name);
+        _SauceEntityProperty = new EntityProperty(this, s_Sauce);
+        _ToppingsEntityProperty = new EntityProperty(this, s_Toppings);
+    }
 }

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Sauce                        //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-08T20:36:28.                                 //
+// at 2024-05-13T17:59:08.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -17,10 +17,10 @@ public class Sauce: PocotaEntity, ISaucePocotaEntity
     private const string s_Id1 = "Id1";
     private const string s_Name = "Name";
     private const string s_IsVegan = "IsVegan";
-    private readonly EntityProperty _IdEntityProperty = new(typeof(Sauce), s_Id);
-    private readonly EntityProperty _Id1EntityProperty = new(typeof(Sauce), s_Id1);
-    private readonly EntityProperty _NameEntityProperty = new(typeof(Sauce), s_Name);
-    private readonly EntityProperty _IsVeganEntityProperty = new(typeof(Sauce), s_IsVegan);
+    private readonly EntityProperty _IdEntityProperty;
+    private readonly EntityProperty _Id1EntityProperty;
+    private readonly EntityProperty _NameEntityProperty;
+    private readonly EntityProperty _IsVeganEntityProperty;
     public Int32 Id { get; set; }
     public Int32 Id1 { get; set; }
     public String? Name { get; set; }
@@ -29,5 +29,11 @@ public class Sauce: PocotaEntity, ISaucePocotaEntity
     EntityProperty ISaucePocotaEntity.Id1 => _Id1EntityProperty;
     EntityProperty ISaucePocotaEntity.Name => _NameEntityProperty;
     EntityProperty ISaucePocotaEntity.IsVegan => _IsVeganEntityProperty;
-    internal Sauce(ulong pocotaId): base(pocotaId) { }
+    internal Sauce(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
+    {
+        _IdEntityProperty = new EntityProperty(this, s_Id);
+        _Id1EntityProperty = new EntityProperty(this, s_Id1);
+        _NameEntityProperty = new EntityProperty(this, s_Name);
+        _IsVeganEntityProperty = new EntityProperty(this, s_IsVegan);
+    }
 }
