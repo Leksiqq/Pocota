@@ -11,12 +11,30 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
 {
 @foreach (PropertyModel prop in Model.Properties)
 {
+    <text>    private class @prop.Name@{}Property(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
+    {
+        public override object? Value 
+        {
+            get => ((@Model.ClassName)Entity)?.@{}@prop.Name;
+            set {
+                if(Entity is {} && value is @Html.Raw(prop.TypeName) val && val != ((@Model.ClassName)Entity).@{}@prop.Name) 
+                {
+                    ((@Model.ClassName)Entity).@{}@prop.Name = val;
+                    OnPropertyChanged();
+                }
+            }
+        }
+    }
+</text>
+}
+@foreach (PropertyModel prop in Model.Properties)
+{
     <text>    private const string s_@{}@prop.Name = "@prop.Name";
 </text>
 }
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>    private readonly @nameof(EntityProperty) _@prop.Name@{}EntityProperty;
+    <text>    private readonly @prop.Name@{}Property _@prop.Name@{}EntityProperty;
 </text>
 }
 @foreach (PropertyModel prop in Model.Properties)
@@ -33,7 +51,15 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
     {
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>        _@prop.Name@{}EntityProperty = new @nameof(EntityProperty)@{}(this, s_@{}@prop.Name);
+    <text>        _@prop.Name@{}EntityProperty = new @prop.Name@{}Property@{}(this, s_@{}@prop.Name, typeof(@Html.Raw(prop.TypeName)));
+</text>
+}
+    }
+    protected override IEnumerable<EntityProperty> GetProperties()
+    {
+@foreach (PropertyModel prop in Model.Properties)
+{
+    <text>        yield return _@prop.Name@{}EntityProperty;
 </text>
 }
     }

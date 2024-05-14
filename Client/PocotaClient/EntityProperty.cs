@@ -1,13 +1,7 @@
 ﻿namespace Net.Leksi.Pocota.Client;
 
-public class EntityProperty
+public abstract class EntityProperty(PocotaEntity entity, string name, Type type) : Property(name, type)
 {
-    public PocotaEntity Entity { get; private init; }
-    public string Name { get; private init; }
+    public PocotaEntity Entity { get; private init; } = entity;
     public PropertyState State { get; internal set; }
-    public EntityProperty(PocotaEntity entity, string name)
-    {
-        Entity = entity;
-        Name = name;
-    }
 }

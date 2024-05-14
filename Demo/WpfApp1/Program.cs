@@ -23,7 +23,7 @@ class Program
             conv.AddResourceManager(WpfApp1.Properties.Resources.ResourceManager);
         }
 
-        host.Services.GetRequiredService<PizzaConnector>().BaseAddress = new Uri("https://localhost:49827/Pizza/");
+        host.Services.GetRequiredService<PizzaConnector>().BaseAddress = new Uri("http://localhost:5000/Pizza/");
         host.Services.GetRequiredService<PizzaConnector>().GetPocotaConfigAsync(CancellationToken.None).Wait();
 
         host.Run();
