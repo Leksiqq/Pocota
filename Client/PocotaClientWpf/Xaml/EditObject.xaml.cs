@@ -12,13 +12,16 @@ public partial class EditObject : Window, INotifyPropertyChanged
     private readonly IServiceProvider _services;
     private readonly PocotaContext _context;
     private readonly object _value;
-    public ObservableCollection<NamedValue> Properties { get; private init; } = [];
+    public ObservableCollection<Property> Properties { get; private init; } = [];
     public bool IsReadonly { get; set; }
     public bool KeysOnly { get; set; }
+    public WindowsList Windows { get; private init; }
+    internal Window? Launcher { get; set; }
     public EditObject(object value)
     {
         _services = (IServiceProvider)Application.Current.Resources[ServiceProvider];
         _context = _services.GetRequiredService<PocotaContext>();
+        Windows = _services.GetRequiredService<WindowsList>();
         InitializeComponent();
         _value = value;
         if (PocotaContext.IsEntityType(_value.GetType()))
@@ -29,15 +32,12 @@ public partial class EditObject : Window, INotifyPropertyChanged
         {
             foreach (PropertyInfo pi in _value.GetType().GetProperties())
             {
-                NamedValue prop = new(pi.Name, pi.PropertyType)
-                {
-                    IsReadonly = !pi.CanWrite,
-                    Value = pi.GetValue(_value),
-                };
+                Property prop = new PropertyInfoProperty(pi, _value);
                 Properties.Add(prop);
             }
         }
         CalcColumnsWidth(PropertiesView.ActualWidth);
+        Windows.Touch();
     }
     private void CalcColumnsWidth(double width)
     {
@@ -48,6 +48,14 @@ public partial class EditObject : Window, INotifyPropertyChanged
         if (e.WidthChanged)
         {
             CalcColumnsWidth(PropertiesView.ActualWidth);
+        }
+    }
+
+    private void MenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        if(Launcher is { })
+        {
+            Launcher.Focus();
         }
     }
 }

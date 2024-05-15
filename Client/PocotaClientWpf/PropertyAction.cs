@@ -1,6 +1,6 @@
 ﻿namespace Net.Leksi.Pocota.Client;
 
-public enum NamedValueAction
+public enum PropertyAction
 {
     Clear,
     Create,

@@ -15,7 +15,7 @@ namespace Net.Leksi.Pocota.Client
         public event PropertyChangedEventHandler? PropertyChanged;
         private readonly MethodInfo _method;
         private readonly IServiceProvider _services;
-        public ObservableCollection<NamedValue> Parameters { get; private init; } = [];
+        public ObservableCollection<Property> Parameters { get; private init; } = [];
         public WindowsList Windows { get; private init; }
         public string MethodName => _method is { } ? $"{Util.BuildTypeName(_method.DeclaringType!)}.{_method.Name}" : string.Empty;
         public MethodWindow(MethodInfo method)
@@ -29,7 +29,7 @@ namespace Net.Leksi.Pocota.Client
             {
                 if(parameter.ParameterType != typeof(CancellationToken) && parameter.Name != "target")
                 {
-                    Parameters.Add(new NamedValue(parameter.Name!, parameter.ParameterType));
+                    Parameters.Add(new ParameterInfoProperty(parameter));
                 }
             }
             CalcColumnsWidth(ParametersView.ActualWidth);

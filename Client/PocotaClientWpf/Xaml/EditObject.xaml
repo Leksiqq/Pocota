@@ -2,6 +2,7 @@
     x:Class="Net.Leksi.Pocota.Client.EditObject"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
@@ -19,10 +20,31 @@
                 <ResourceDictionary Source="../Xaml/Dictionaries/Dictionary1.xaml" />
                 <ResourceDictionary Source="../Xaml/Dictionaries/PropertyDataTemplate.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <l:BindingProxy Value="{Binding}" x:Key="Window"/>
+            <l:BindingProxy Value="{Binding Windows}" x:Key="Windows"/>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid>
-        <ListView x:Name="PropertiesView" ItemsSource="{Binding Properties}" SizeChanged="PropertiesView_SizeChanged">
+    <DockPanel LastChildFill="True">
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="{Binding Source=GO_TO_LAUNCHER, Converter={StaticResource I18nConverter}}" Click="MenuItem_Click">
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem">
+                        <Style.Triggers>
+                            <l:DataSwitch Binding="{Binding Launcher, Converter={StaticResource IsNullConverter}}">
+                                <DataTrigger Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                                <DataTrigger Value="False">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </l:DataSwitch>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+            </MenuItem>
+            <MenuItem Style="{l:ParameterizedResource WindowsMenuItemStyle, Replaces=$window:Window}"/>
+        </Menu>
+        <ListView DockPanel.Dock="Top" x:Name="PropertiesView" ItemsSource="{Binding Properties}" SizeChanged="PropertiesView_SizeChanged">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -45,5 +67,5 @@
                 </GridView>
             </ListView.View>
         </ListView>
-    </Grid>
+    </DockPanel>
 </Window>

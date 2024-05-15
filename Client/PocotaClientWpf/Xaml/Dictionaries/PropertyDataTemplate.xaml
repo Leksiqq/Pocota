@@ -21,10 +21,10 @@
                 Margin="0" 
                 >
                 <Button.Command>
-                    <local:NamedValueCommand/>
+                    <local:PropertyCommand/>
                 </Button.Command>
                 <Button.CommandParameter>
-                    <local:NamedValueCommandArgs Action="Edit" NamedValue="{Binding}"/>
+                    <local:PropertyCommandArgs Action="Edit" Property="{Binding}"/>
                 </Button.CommandParameter>
                 <Button.Style>
                     <l:StyleCombiner>
@@ -49,10 +49,17 @@
                 Margin="0" 
                 >
                 <Button.Command>
-                    <local:NamedValueCommand/>
+                    <local:PropertyCommand/>
                 </Button.Command>
                 <Button.CommandParameter>
-                    <local:NamedValueCommandArgs Action="Create" NamedValue="{Binding}"/>
+                    <local:PropertyCommandArgs Action="Create" Property="{Binding}" Launcher="{
+                        Binding
+                        RelativeSource={
+                            RelativeSource 
+                            Mode=FindAncestor, 
+                            AncestorType=Window
+                            }
+                        }"/>
                 </Button.CommandParameter>
                 <Button.Style>
                     <l:StyleCombiner>
@@ -65,10 +72,17 @@
                 Margin="0" 
                 >
                 <Button.Command>
-                    <local:NamedValueCommand/>
+                    <local:PropertyCommand/>
                 </Button.Command>
                 <Button.CommandParameter>
-                    <local:NamedValueCommandArgs Action="Find" NamedValue="{Binding}"/>
+                    <local:PropertyCommandArgs Action="Find" Property="{Binding}" Launcher="{
+                        Binding
+                        RelativeSource={
+                            RelativeSource 
+                            Mode=FindAncestor, 
+                            AncestorType=Window
+                            }
+                        }"/>
                 </Button.CommandParameter>
                 <Button.Style>
                     <l:StyleCombiner>
@@ -105,10 +119,10 @@
                 Margin="0" 
                 >
                 <Button.Command>
-                    <local:NamedValueCommand/>
+                    <local:PropertyCommand/>
                 </Button.Command>
                 <Button.CommandParameter>
-                    <local:NamedValueCommandArgs Action="Clear" NamedValue="{Binding}"/>
+                    <local:PropertyCommandArgs Action="Clear" Property="{Binding}"/>
                 </Button.CommandParameter>
                 <Button.Style>
                     <l:StyleCombiner>
@@ -140,7 +154,7 @@
                     }"
                 >
                 <ContentControl.ContentTemplateSelector>
-                    <local:NamedValueTemplateSelector 
+                    <local:PropertyTemplateSelector 
                         Default="{StaticResource DefaultPropertyDataTemplate}"
                         Class="{StaticResource ClassPropertyDataTemplate}"
                         />

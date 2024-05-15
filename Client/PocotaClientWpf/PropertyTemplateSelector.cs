@@ -4,17 +4,17 @@ using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Net.Leksi.Pocota.Client;
-public class NamedValueTemplateSelector: DataTemplateSelector
+public class PropertyTemplateSelector: DataTemplateSelector
 {
     public DataTemplate Default { get; set; } = null!;
     public DataTemplate Class { get; set; } = null!;
     public override DataTemplate? SelectTemplate(object item, DependencyObject container)
     {
         DataTemplate? result = null;
-        NamedValue? value = null;
+        Property? value = null;
         for (DependencyObject dob = container; dob is { }; dob = VisualTreeHelper.GetParent(dob))
         {
-            if(dob is FrameworkElement fe && fe.DataContext is NamedValue mp)
+            if(dob is FrameworkElement fe && fe.DataContext is Property mp)
             {
                 value = mp;
                 break;

@@ -7,6 +7,7 @@ public abstract class Property(string name, Type type) : INotifyPropertyChanged
     public string Name { get; private init; } = name;
     public Type Type { get; private init; } = type;
     public abstract object? Value { get; set; }
+    public virtual bool IsReadonly => false;
     protected void OnPropertyChanged()
     {
         if (PropertyChanged is { })

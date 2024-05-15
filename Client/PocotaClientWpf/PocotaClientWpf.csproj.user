@@ -11,10 +11,10 @@
     <Compile Update="Xaml\MethodWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="MethodInfoChip.xaml.cs">
+    <Compile Update="Xaml\MethodInfoChip.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="TypeChip.xaml.cs">
+    <Compile Update="Xaml\TypeChip.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -28,10 +28,10 @@
     <Page Update="Xaml\MethodWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="MethodInfoChip.xaml">
+    <Page Update="Xaml\MethodInfoChip.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="TypeChip.xaml">
+    <Page Update="Xaml\TypeChip.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Xaml\Dictionaries\DataGrid.xaml">
