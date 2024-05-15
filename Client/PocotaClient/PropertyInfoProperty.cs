@@ -15,5 +15,16 @@ public class PropertyInfoProperty(PropertyInfo info, object obj) : Property(info
             }
         }
     }
-    public override bool IsReadonly => !info.CanWrite;
+    public override bool IsReadonly
+    {
+        get
+        {
+            if(!info.CanWrite)
+            {
+                return true;
+            }
+            return info.SetMethod!.ReturnParameter
+                .GetRequiredCustomModifiers().Contains(typeof(System.Runtime.CompilerServices.IsExternalInit));
+        }
+    }
 }

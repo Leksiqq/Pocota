@@ -15,6 +15,7 @@ namespace Net.Leksi.Pocota.Client
         public event PropertyChangedEventHandler? PropertyChanged;
         private readonly MethodInfo _method;
         private readonly IServiceProvider _services;
+        private readonly Dictionary<string, WeakReference<EditObject>> _editWindows = [];
         public ObservableCollection<Property> Parameters { get; private init; } = [];
         public WindowsList Windows { get; private init; }
         public string MethodName => _method is { } ? $"{Util.BuildTypeName(_method.DeclaringType!)}.{_method.Name}" : string.Empty;
@@ -34,6 +35,26 @@ namespace Net.Leksi.Pocota.Client
             }
             CalcColumnsWidth(ParametersView.ActualWidth);
             Windows.Touch();
+        }
+        public EditObject Launch(string parameterName)
+        {
+            if(_editWindows.TryGetValue(parameterName, out WeakReference<EditObject>? wr))
+            {
+                if(
+                    wr.TryGetTarget(out EditObject? eo) 
+                    && Application.Current.Windows.OfType<EditObject>().Any(w => w == eo)
+                )
+                {
+                    return eo;
+                }
+                _editWindows.Remove(parameterName);
+            }
+            EditObject result = new(MethodName, parameterName)
+            {
+                Launcher = this
+            };
+            _editWindows.Add(parameterName, new WeakReference<EditObject>(result));
+            return result;
         }
         protected override void OnClosed(EventArgs e)
         {

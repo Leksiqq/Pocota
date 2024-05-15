@@ -7,13 +7,18 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
     mc:Ignorable="d"
-    Title="EditObject" 
     Height="450" 
     Width="800"
-    WindowStyle="ToolWindow"
-    ResizeMode="CanResizeWithGrip"
     DataContext="{Binding RelativeSource={RelativeSource Self}}" 
     >
+    <Window.Title>
+        <MultiBinding StringFormat="{}{0}: {1} ({2} {3})">
+            <Binding Source="EDIT_PARAMETER" Converter="{StaticResource I18nConverter}"/>
+            <Binding Path="MethodName"/>
+            <Binding Source="METHOD" Converter="{StaticResource I18nConverter}"/>
+            <Binding Path="MethodName"/>
+        </MultiBinding>
+    </Window.Title>
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

@@ -14,7 +14,38 @@
         <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsReadonly}"/>
     </DataTemplate>
     <local:IsNullConverter x:Key="IsNullConverter"/>
-    <DataTemplate x:Key="ClassPropertyDataTemplate" x:Shared="False">
+    <l:BoolExpressionConverter x:Key="BoolExpressionConverter"/>
+    <Style x:Key="ButtonVisibleIfCanEditStyle" TargetType="ButtonBase">
+        <Style.Triggers>
+            <l:DataSwitch>
+                <l:DataSwitch.Binding>
+                    <MultiBinding Converter="{StaticResource BoolExpressionConverter}" ConverterParameter="@0 | @1">
+                        <Binding Path="Value" Converter="{StaticResource IsNullConverter}"/>
+                        <Binding Path="IsReadonly"/>
+                    </MultiBinding>
+                </l:DataSwitch.Binding>
+                <DataTrigger Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <DataTrigger Value="False">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </l:DataSwitch>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="ButtonVisibleIfNotReadonly" TargetType="ButtonBase">
+        <Style.Triggers>
+            <l:DataSwitch Binding="{Binding IsReadonly}">
+                <DataTrigger Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <DataTrigger Value="False">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </l:DataSwitch>
+        </Style.Triggers>
+    </Style>
+    <DataTemplate x:Key="ListPropertyDataTemplate">
         <DockPanel LastChildFill="True">
             <Button 
                 DockPanel.Dock="Right" 
@@ -24,23 +55,48 @@
                     <local:PropertyCommand/>
                 </Button.Command>
                 <Button.CommandParameter>
-                    <local:PropertyCommandArgs Action="Edit" Property="{Binding}"/>
+                    <local:PropertyCommandArgs Action="Create" Property="{Binding}" Launcher="{
+                        Binding
+                        RelativeSource={
+                            RelativeSource 
+                            Mode=FindAncestor, 
+                            AncestorType=Window
+                            }
+                        }"/>
+                </Button.CommandParameter>
+                <Button.Style>
+                    <l:StyleCombiner>
+                        <StaticResource ResourceKey="CreateButtonStyle"/>
+                        <StaticResource ResourceKey="ButtonVisibleIfNotReadonly"/>
+                    </l:StyleCombiner>
+                </Button.Style>
+            </Button>
+            <TextBlock HorizontalAlignment="Center" FontSize="12" FontWeight="Bold">LIST</TextBlock>
+        </DockPanel>
+    </DataTemplate>
+    <DataTemplate x:Key="ClassPropertyDataTemplate">
+        <DockPanel LastChildFill="True">
+            <Button 
+                DockPanel.Dock="Right" 
+                Margin="0" 
+                >
+                <Button.Command>
+                    <local:PropertyCommand/>
+                </Button.Command>
+                <Button.CommandParameter>
+                    <local:PropertyCommandArgs Action="Edit" Property="{Binding}" Launcher="{
+                        Binding
+                        RelativeSource={
+                            RelativeSource 
+                            Mode=FindAncestor, 
+                            AncestorType=Window
+                            }
+                        }"/>
                 </Button.CommandParameter>
                 <Button.Style>
                     <l:StyleCombiner>
                         <StaticResource ResourceKey="EditButtonStyle"/>
-                        <Style TargetType="ButtonBase">
-                            <Style.Triggers>
-                                <l:DataSwitch Binding="{Binding Value, Converter={StaticResource IsNullConverter}}">
-                                    <DataTrigger Value="True">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                    <DataTrigger Value="False">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </l:DataSwitch>
-                            </Style.Triggers>
-                        </Style>
+                        <StaticResource ResourceKey="ButtonVisibleIfCanEditStyle"/>
                     </l:StyleCombiner>
                 </Button.Style>
             </Button>
@@ -64,6 +120,7 @@
                 <Button.Style>
                     <l:StyleCombiner>
                         <StaticResource ResourceKey="CreateButtonStyle"/>
+                        <StaticResource ResourceKey="ButtonVisibleIfNotReadonly"/>
                     </l:StyleCombiner>
                 </Button.Style>
             </Button>
@@ -75,18 +132,12 @@
                     <local:PropertyCommand/>
                 </Button.Command>
                 <Button.CommandParameter>
-                    <local:PropertyCommandArgs Action="Find" Property="{Binding}" Launcher="{
-                        Binding
-                        RelativeSource={
-                            RelativeSource 
-                            Mode=FindAncestor, 
-                            AncestorType=Window
-                            }
-                        }"/>
+                    <local:PropertyCommandArgs Action="Find" Property="{Binding}"/>
                 </Button.CommandParameter>
                 <Button.Style>
                     <l:StyleCombiner>
                         <StaticResource ResourceKey="FindButtonStyle"/>
+                        <StaticResource ResourceKey="ButtonVisibleIfNotReadonly"/>
                     </l:StyleCombiner>
                 </Button.Style>
             </Button>
@@ -127,18 +178,7 @@
                 <Button.Style>
                     <l:StyleCombiner>
                         <StaticResource ResourceKey="ClearButtonStyle"/>
-                        <Style TargetType="ButtonBase">
-                            <Style.Triggers>
-                                <l:DataSwitch Binding="{Binding Value, Converter={StaticResource IsNullConverter}}">
-                                    <DataTrigger Value="True">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                    <DataTrigger Value="False">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </l:DataSwitch>
-                            </Style.Triggers>
-                        </Style>
+                        <StaticResource ResourceKey="ButtonVisibleIfCanEditStyle"/>
                     </l:StyleCombiner>
                 </Button.Style>
             </Button>
@@ -157,6 +197,7 @@
                     <local:PropertyTemplateSelector 
                         Default="{StaticResource DefaultPropertyDataTemplate}"
                         Class="{StaticResource ClassPropertyDataTemplate}"
+                        List="{StaticResource ListPropertyDataTemplate}"
                         />
                 </ContentControl.ContentTemplateSelector>
             </ContentControl>

@@ -8,6 +8,7 @@ public class PropertyTemplateSelector: DataTemplateSelector
 {
     public DataTemplate Default { get; set; } = null!;
     public DataTemplate Class { get; set; } = null!;
+    public DataTemplate List { get; set; } = null!;
     public override DataTemplate? SelectTemplate(object item, DependencyObject container)
     {
         DataTemplate? result = null;
@@ -27,9 +28,9 @@ public class PropertyTemplateSelector: DataTemplateSelector
             {
                 result = Default;
             }
-            else if (typeof(IEnumerable).IsAssignableFrom(value.Type))
+            else if (value.Type.IsGenericType && typeof(List<>).IsAssignableFrom(value.Type.GetGenericTypeDefinition()))
             {
-
+                result = List;
             }
             else if (value.Type.IsClass)
             {

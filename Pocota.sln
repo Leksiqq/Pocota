@@ -35,6 +35,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfApp1", "Demo\WpfApp1\Wpf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PocotaClientWpf", "Client\PocotaClientWpf\PocotaClientWpf.csproj", "{3299B6B5-FF05-4C71-B165-BC62824B1D7E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6F7B5E12-9F91-40C8-B0C2-492F878EEC96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBoolExpressionConverter", "Tests\TestBoolExpressionConverter\TestBoolExpressionConverter.csproj", "{5FDEA37C-64AB-4A46-BB36-1E5410EC43C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +85,10 @@ Global
 		{3299B6B5-FF05-4C71-B165-BC62824B1D7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3299B6B5-FF05-4C71-B165-BC62824B1D7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3299B6B5-FF05-4C71-B165-BC62824B1D7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FDEA37C-64AB-4A46-BB36-1E5410EC43C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FDEA37C-64AB-4A46-BB36-1E5410EC43C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FDEA37C-64AB-4A46-BB36-1E5410EC43C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FDEA37C-64AB-4A46-BB36-1E5410EC43C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +105,7 @@ Global
 		{01AB979F-E8FF-45BA-BC6D-A8D72F1E1FFD} = {E196270F-9B8E-4231-8EDB-74E68391AECD}
 		{43BB5CB1-C737-4474-AE68-B98B3379DDC7} = {9F2BBAFD-4F8D-44A4-B952-EC33C9DB9125}
 		{3299B6B5-FF05-4C71-B165-BC62824B1D7E} = {E196270F-9B8E-4231-8EDB-74E68391AECD}
+		{5FDEA37C-64AB-4A46-BB36-1E5410EC43C7} = {6F7B5E12-9F91-40C8-B0C2-492F878EEC96}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {03A22767-6ACB-43F5-ACE0-24BDB396D7E9}

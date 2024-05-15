@@ -11,31 +11,47 @@ public partial class EditObject : Window, INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     private readonly IServiceProvider _services;
     private readonly PocotaContext _context;
-    private readonly object _value;
+    private object? _value;
     public ObservableCollection<Property> Properties { get; private init; } = [];
     public bool IsReadonly { get; set; }
     public bool KeysOnly { get; set; }
     public WindowsList Windows { get; private init; }
     internal Window? Launcher { get; set; }
-    public EditObject(object value)
+    public string ParameterName { get; set; }
+    public string MethodName { get; set; }
+    internal object? Value 
+    {  
+        get => _value; 
+        set
+        {
+            if(_value != value && value is { })
+            {
+                _value = value;
+                Properties.Clear();
+                if (PocotaContext.IsEntityType(_value.GetType()))
+                {
+
+                }
+                else
+                {
+                    foreach (PropertyInfo pi in _value.GetType().GetProperties())
+                    {
+                        Console.WriteLine($"{pi.Name}: {string.Join(',', pi.SetMethod!.ReturnParameter.GetRequiredCustomModifiers().Select(v => v.FullName))}");
+                        Property prop = new PropertyInfoProperty(pi, _value);
+                        Properties.Add(prop);
+                    }
+                }
+            }
+        }
+    }
+    public EditObject(string methodName, string parameterName)
     {
         _services = (IServiceProvider)Application.Current.Resources[ServiceProvider];
         _context = _services.GetRequiredService<PocotaContext>();
         Windows = _services.GetRequiredService<WindowsList>();
+        MethodName = methodName;
+        ParameterName = parameterName;
         InitializeComponent();
-        _value = value;
-        if (PocotaContext.IsEntityType(_value.GetType()))
-        {
-
-        }
-        else
-        {
-            foreach (PropertyInfo pi in _value.GetType().GetProperties())
-            {
-                Property prop = new PropertyInfoProperty(pi, _value);
-                Properties.Add(prop);
-            }
-        }
         CalcColumnsWidth(PropertiesView.ActualWidth);
         Windows.Touch();
     }
