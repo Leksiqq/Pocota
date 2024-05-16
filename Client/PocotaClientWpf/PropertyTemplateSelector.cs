@@ -23,14 +23,13 @@ public class PropertyTemplateSelector: DataTemplateSelector
         }
         if (value is { })
         {
-            Console.WriteLine(value.Type);
-            if(value.Type == typeof(string))
-            {
-                result = Default;
-            }
-            else if (value.Type.IsGenericType && typeof(List<>).IsAssignableFrom(value.Type.GetGenericTypeDefinition()))
+            if(value is ListProperty)
             {
                 result = List;
+            }
+            else if(value.Type == typeof(string))
+            {
+                result = Default;
             }
             else if (value.Type.IsClass)
             {

@@ -13,7 +13,7 @@ public class PropertyCommandArgs: Freezable
        typeof(PropertyCommandArgs)
     );
     public static readonly DependencyProperty LauncherProperty = DependencyProperty.Register(
-       nameof(Launcher), typeof(MethodWindow),
+       nameof(Launcher), typeof(Window),
        typeof(PropertyCommandArgs)
     );
     public Property? Property
@@ -26,9 +26,9 @@ public class PropertyCommandArgs: Freezable
         get => (PropertyAction)GetValue(ActionProperty);
         set => SetValue(ActionProperty, value);
     }
-    public MethodWindow? Launcher
+    public Window? Launcher
     {
-        get => (MethodWindow)GetValue(LauncherProperty);
+        get => (Window)GetValue(LauncherProperty);
         set => SetValue(LauncherProperty, value);
     }
     public PropertyCommandArgs()

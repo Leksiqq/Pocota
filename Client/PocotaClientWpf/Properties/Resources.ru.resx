@@ -132,11 +132,11 @@
   <data name="HIDE-NAMESPACE" xml:space="preserve">
     <value>Скрыть Namespace</value>
   </data>
-  <data name="MAIN_WINDOW_TITLE" xml:space="preserve">
-    <value>Главное окно: Методы коннекторов</value>
-  </data>
   <data name="METHOD" xml:space="preserve">
     <value>Метод</value>
+  </data>
+  <data name="METHODS_WINDOW_TITLE" xml:space="preserve">
+    <value>Методы коннекторов</value>
   </data>
   <data name="MODULE" xml:space="preserve">
     <value>Модуль</value>

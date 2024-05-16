@@ -1,16 +1,18 @@
 ﻿using System.Reflection;
 
 namespace Net.Leksi.Pocota.Client;
-public class PropertyInfoProperty(PropertyInfo info, object obj) : Property(info.Name, info.PropertyType)
+public class PropertyInfoProperty: Property
 {
+    private readonly PropertyInfo _info;
+    private readonly object _obj;
     public override object? Value 
     { 
-        get => info.GetValue(obj); 
+        get => _info.GetValue(_obj); 
         set
         {
-            if(info.GetValue(obj) != value)
+            if(_info.GetValue(_obj) != value)
             {
-                info.SetValue(obj, value);
+                _info.SetValue(_obj, value);
                 OnPropertyChanged();
             }
         }
@@ -19,12 +21,17 @@ public class PropertyInfoProperty(PropertyInfo info, object obj) : Property(info
     {
         get
         {
-            if(!info.CanWrite)
+            if(!_info.CanWrite)
             {
                 return true;
             }
-            return info.SetMethod!.ReturnParameter
+            return _info.SetMethod!.ReturnParameter
                 .GetRequiredCustomModifiers().Contains(typeof(System.Runtime.CompilerServices.IsExternalInit));
         }
+    }
+    internal PropertyInfoProperty(PropertyInfo info, object obj) : base(info.Name, info.PropertyType) 
+    {
+        _info = info;
+        _obj = obj;
     }
 }

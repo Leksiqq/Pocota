@@ -6,20 +6,33 @@ using System.Windows;
 using static Net.Leksi.Pocota.Client.Constants;
 
 namespace Net.Leksi.Pocota.Client;
-public partial class EditObject : Window, INotifyPropertyChanged
+public partial class EditObject : Window, INotifyPropertyChanged, IEditWindow, IWindowLauncher
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     private readonly IServiceProvider _services;
     private readonly PocotaContext _context;
+    private readonly Dictionary<string, WeakReference<EditObject>> _editWindows = [];
     private object? _value;
+    private Window? _launchedBy;
+    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     public ObservableCollection<Property> Properties { get; private init; } = [];
-    public bool IsReadonly { get; set; }
-    public bool KeysOnly { get; set; }
+    public bool IsReadonly { get; internal set; }
+    public bool KeysOnly { get; internal set; }
     public WindowsList Windows { get; private init; }
-    internal Window? Launcher { get; set; }
-    public string ParameterName { get; set; }
-    public string MethodName { get; set; }
-    internal object? Value 
+    public Window? LaunchedBy 
+    { 
+        get => _launchedBy; 
+        set
+        {
+            if(_launchedBy != value)
+            {
+                _launchedBy = value;
+                PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+            }
+        }
+    }
+    public EditWindowLauncher Launcher { get; private init; }
+    public object? Value 
     {  
         get => _value; 
         set
@@ -36,21 +49,21 @@ public partial class EditObject : Window, INotifyPropertyChanged
                 {
                     foreach (PropertyInfo pi in _value.GetType().GetProperties())
                     {
-                        Console.WriteLine($"{pi.Name}: {string.Join(',', pi.SetMethod!.ReturnParameter.GetRequiredCustomModifiers().Select(v => v.FullName))}");
-                        Property prop = new PropertyInfoProperty(pi, _value);
+                        Property prop = Property.Create(pi, _value)!;
                         Properties.Add(prop);
                     }
                 }
             }
         }
     }
-    public EditObject(string methodName, string parameterName)
+    public EditWindowCore EditWindowCore { get; private init; }
+    public EditObject(string path, Type type)
     {
         _services = (IServiceProvider)Application.Current.Resources[ServiceProvider];
         _context = _services.GetRequiredService<PocotaContext>();
         Windows = _services.GetRequiredService<WindowsList>();
-        MethodName = methodName;
-        ParameterName = parameterName;
+        EditWindowCore = new EditWindowCore(path, type);
+        Launcher = new EditWindowLauncher(EditWindowCore.Path, this);
         InitializeComponent();
         CalcColumnsWidth(PropertiesView.ActualWidth);
         Windows.Touch();
@@ -66,12 +79,11 @@ public partial class EditObject : Window, INotifyPropertyChanged
             CalcColumnsWidth(PropertiesView.ActualWidth);
         }
     }
-
     private void MenuItem_Click(object sender, RoutedEventArgs e)
     {
-        if(Launcher is { })
+        if(LaunchedBy is { })
         {
-            Launcher.Focus();
+            LaunchedBy.Focus();
         }
     }
 }

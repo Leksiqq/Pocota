@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
-
+using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
 
 public static class PocotaWpfAppExtension
@@ -28,14 +28,14 @@ public static class PocotaWpfAppExtension
         {
             services.AddKeyedTransient<Window>(
                 s_mainWindowServiceKey,
-                (s, o) => new DefaultMainWindow()
+                (s, o) => new MethodsWindow()
             );
         }
         services.AddScoped<Application>(
             s =>
             {
                 Application app = createApplication.Invoke(s);
-                app.Resources["ServiceProvider"] = s;
+                app.Resources[ServiceProvider] = s;
                 I18nConverter i18NConverter = new();
                 i18NConverter.AddResourceManager(Properties.Resources.ResourceManager);
                 app.Resources["I18nConverter"] = i18NConverter;

@@ -4,13 +4,13 @@ using System.Windows;
 using static Net.Leksi.Pocota.Client.Constants;
 
 namespace Net.Leksi.Pocota.Client;
-public partial class DefaultMainWindow : Window
+public partial class MethodsWindow : Window
 {
     private readonly IServiceProvider _services;
     public DataGridManager ConnectorsDataGridManager { get; private init; } = new();
     public RunMethodCommand RunCommand { get; private init; }
     public WindowsList Windows { get; private init; }
-    public DefaultMainWindow()
+    public MethodsWindow()
     {
         Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
         _services = (IServiceProvider)Application.Current.Resources[ServiceProvider];

@@ -2,7 +2,10 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
-    <Compile Update="Xaml\DefaultMainWindow.xaml.cs">
+    <Compile Update="Xaml\MethodsWindow.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Xaml\EditList.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Xaml\EditObject.xaml.cs">
@@ -22,6 +25,9 @@
     <Page Update="Xaml\Dictionaries\PropertyDataTemplate.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Xaml\EditList.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Xaml\EditObject.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -37,7 +43,7 @@
     <Page Update="Xaml\Dictionaries\DataGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Xaml\DefaultMainWindow.xaml">
+    <Page Update="Xaml\MethodsWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Xaml\Dictionaries\Dictionary1.xaml">

@@ -20,7 +20,7 @@ class Program
         IHost host = builder.Build();
         if (host.Services.GetRequiredService<Application>().Resources[Constants.I18nConverter] is I18nConverter conv)
         {
-            conv.AddResourceManager(WpfApp1.Properties.Resources.ResourceManager);
+            conv.AddResourceManager(Properties.Resources.ResourceManager);
         }
 
         host.Services.GetRequiredService<PizzaConnector>().BaseAddress = new Uri("http://localhost:5000/Pizza/");

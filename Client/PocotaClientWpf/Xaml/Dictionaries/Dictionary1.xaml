@@ -45,7 +45,7 @@
     <l:StyleCombiner TargetType="Button" x:Key="EditButtonStyle">
         <StaticResource ResourceKey="ActionButtonStyle"/>
         <Style TargetType="Button">
-            <Setter Property="Content" Value="🖉"/>
+            <Setter Property="Content" Value="👁"/>
             <Setter Property="ToolTip" Value="{Binding Source=EDIT, Converter={StaticResource I18nConverter}}"/>
         </Style>
     </l:StyleCombiner>

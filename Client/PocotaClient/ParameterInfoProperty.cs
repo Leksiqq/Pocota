@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 
 namespace Net.Leksi.Pocota.Client;
-public class ParameterInfoProperty(ParameterInfo info) : Property(info.Name!, info.ParameterType)
+public class ParameterInfoProperty: Property
 {
     private object? _value;
     public override object? Value
@@ -16,4 +16,5 @@ public class ParameterInfoProperty(ParameterInfo info) : Property(info.Name!, in
             }
         }
     }
+    internal ParameterInfoProperty(ParameterInfo info) : base(info.Name!, info.ParameterType) { }
 }

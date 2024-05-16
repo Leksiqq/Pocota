@@ -26,40 +26,49 @@ public class PropertyCommand : ICommand
     public bool CanExecute(object? parameter)
     {
         return parameter is PropertyCommandArgs args && args.Property is { }
-            && args.Launcher is { }
+            && args.Launcher is IWindowLauncher launcher
+            && launcher.Launcher.IsLaunched(args.Property.Name) is bool isLaunched
             && (
-                (args.Action is PropertyAction.Clear && args.Property.Value is { })
+                (args.Action is PropertyAction.Clear && args.Property.Value is { } && !isLaunched)
                 || (args.Action is PropertyAction.Edit && args.Property.Value is { })
-                || args.Action is PropertyAction.Create
-                || args.Action is PropertyAction.Find
+                || args.Action is PropertyAction.Create && args.Property.Value is null
+                || args.Action is PropertyAction.Find && args.Property.Value is null
             );
     }
     public void Execute(object? parameter)
     {
-        if(parameter is PropertyCommandArgs args && args.Property is { } && args.Launcher is { })
+        if(parameter is PropertyCommandArgs args && args.Property is { } && args.Launcher is IWindowLauncher launcher)
         {
-            EditObject editForm;
-            if(args.Action is PropertyAction.Create)
+            bool isLaunched = launcher.Launcher.IsLaunched(args.Property.Name);
+            if (args.Action is PropertyAction.Create)
             {
-                if (PocotaContext.IsEntityType(args.Property.Type))
+                if (args.Property.Value is null)
                 {
-                    args.Property.Value = _services.GetRequiredService<PocotaContext>().CreateEntity(args.Property.Type);
-                }
-                else
-                {
-                    args.Property.Value = Activator.CreateInstance(args.Property.Type);
+                    if (PocotaContext.IsEntityType(args.Property.Type))
+                    {
+                        args.Property.Value = _services.GetRequiredService<PocotaContext>().CreateEntity(args.Property.Type);
+                    }
+                    else
+                    {
+                        args.Property.Value = Activator.CreateInstance(args.Property.Type);
+                    }
                 }
             }
             switch (args.Action)
             {
                 case PropertyAction.Clear:
-                    args.Property.Value = null;
+                    if (!isLaunched)
+                    {
+                        args.Property.Value = null;
+                    }
                     break;
                 case PropertyAction.Edit or PropertyAction.Create:
-                    editForm = args.Launcher.Launch(args.Property.Name);
-                    editForm.Value = args.Property.Value!;
-                    editForm.Show();
-                    editForm.Focus();
+                    if(launcher.Launcher.Launch(args.Property.Name, args.Property) is Window editWindow)
+                    {
+                        ((IEditWindow)editWindow).Value = args.Property.Value!;
+                        editWindow.Show();
+                        editWindow.Focus();
+                    }
                     break;
             }
         }

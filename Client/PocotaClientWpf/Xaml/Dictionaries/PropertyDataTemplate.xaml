@@ -45,6 +45,18 @@
             </l:DataSwitch>
         </Style.Triggers>
     </Style>
+    <Style x:Key="ButtonVisibleIfNotNull" TargetType="ButtonBase">
+        <Style.Triggers>
+            <l:DataSwitch Binding="{Binding Value, Converter={StaticResource IsNullConverter}}">
+                <DataTrigger Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <DataTrigger Value="False">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </l:DataSwitch>
+        </Style.Triggers>
+    </Style>
     <DataTemplate x:Key="ListPropertyDataTemplate">
         <DockPanel LastChildFill="True">
             <Button 
@@ -71,7 +83,26 @@
                     </l:StyleCombiner>
                 </Button.Style>
             </Button>
-            <TextBlock HorizontalAlignment="Center" FontSize="12" FontWeight="Bold">LIST</TextBlock>
+            <TextBlock FontSize="12" FontWeight="Bold">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <l:DataSwitch Binding="{Binding Value, Converter={StaticResource IsNullConverter}}">
+                                <DataTrigger Value="True">
+                                    <Setter Property="Text" Value="∅"/>
+                                    <Setter Property="Foreground" Value="Red"/>
+                                    <Setter Property="ToolTip" Value="{Binding Source=IS_NOT_SET, Converter={StaticResource I18nConverter}}"/>
+                                </DataTrigger>
+                                <DataTrigger Value="False">
+                                    <Setter Property="Text" Value="LIST"/>
+                                    <Setter Property="Foreground" Value="Green"/>
+                                    <Setter Property="ToolTip" Value="{Binding Source=IS_SET, Converter={StaticResource I18nConverter}}"/>
+                                </DataTrigger>
+                            </l:DataSwitch>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
         </DockPanel>
     </DataTemplate>
     <DataTemplate x:Key="ClassPropertyDataTemplate">
@@ -96,7 +127,7 @@
                 <Button.Style>
                     <l:StyleCombiner>
                         <StaticResource ResourceKey="EditButtonStyle"/>
-                        <StaticResource ResourceKey="ButtonVisibleIfCanEditStyle"/>
+                        <StaticResource ResourceKey="ButtonVisibleIfNotNull"/>
                     </l:StyleCombiner>
                 </Button.Style>
             </Button>
@@ -141,7 +172,7 @@
                     </l:StyleCombiner>
                 </Button.Style>
             </Button>
-            <TextBlock HorizontalAlignment="Center" FontSize="12" FontWeight="Bold">
+            <TextBlock FontSize="12" FontWeight="Bold">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
                         <Style.Triggers>
@@ -173,7 +204,14 @@
                     <local:PropertyCommand/>
                 </Button.Command>
                 <Button.CommandParameter>
-                    <local:PropertyCommandArgs Action="Clear" Property="{Binding}"/>
+                    <local:PropertyCommandArgs Action="Clear" Property="{Binding}" Launcher="{
+                        Binding
+                        RelativeSource={
+                            RelativeSource 
+                            Mode=FindAncestor, 
+                            AncestorType=Window
+                            }
+                        }"/>
                 </Button.CommandParameter>
                 <Button.Style>
                     <l:StyleCombiner>
