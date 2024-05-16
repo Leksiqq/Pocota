@@ -2,7 +2,7 @@
 using System.Reflection;
 
 namespace Net.Leksi.Pocota.Client;
-public abstract class Property(string name, Type type) : INotifyPropertyChanged
+public class Property(string name, Type type) : INotifyPropertyChanged
 {
     private event PropertyChangedEventHandler? _propertyChanged;
     public event PropertyChangedEventHandler? PropertyChanged
@@ -17,9 +17,22 @@ public abstract class Property(string name, Type type) : INotifyPropertyChanged
         }
     }
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(nameof(Value));
+    protected object? _value;
+
     public string Name { get; private init; } = name;
     public Type Type { get; private init; } = type;
-    public abstract object? Value { get; set; }
+    public virtual object? Value
+    {
+        get => _value;
+        set
+        {
+            if (_value != value)
+            {
+                _value = value;
+                OnPropertyChanged();
+            }
+        }
+    }
     public virtual bool IsReadonly => false;
     public static Property? Create(object info, object? value = null)
     {
@@ -31,6 +44,10 @@ public abstract class Property(string name, Type type) : INotifyPropertyChanged
         else if (info is ParameterInfo par)
         {
             result = new ParameterInfoProperty(par);
+        }
+        else if(info is Type type)
+        {
+            result = new Property(string.Empty, type);
         }
         if(result is { })
         {

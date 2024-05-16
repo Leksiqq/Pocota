@@ -16,7 +16,7 @@ public partial class EditObject : Window, INotifyPropertyChanged, IEditWindow, I
     private Window? _launchedBy;
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     public ObservableCollection<Property> Properties { get; private init; } = [];
-    public bool IsReadonly { get; internal set; }
+    public bool IsReadonly { get; private set; }
     public bool KeysOnly { get; internal set; }
     public WindowsList Windows { get; private init; }
     public Window? LaunchedBy 
@@ -57,8 +57,9 @@ public partial class EditObject : Window, INotifyPropertyChanged, IEditWindow, I
         }
     }
     public EditWindowCore EditWindowCore { get; private init; }
-    public EditObject(string path, Type type)
+    public EditObject(string path, Type type, bool isReadonly = false)
     {
+        IsReadonly = false;
         _services = (IServiceProvider)Application.Current.Resources[ServiceProvider];
         _context = _services.GetRequiredService<PocotaContext>();
         Windows = _services.GetRequiredService<WindowsList>();

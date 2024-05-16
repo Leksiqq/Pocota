@@ -67,6 +67,30 @@
                     <local:PropertyCommand/>
                 </Button.Command>
                 <Button.CommandParameter>
+                    <local:PropertyCommandArgs Action="Edit" Property="{Binding}" Launcher="{
+                        Binding
+                        RelativeSource={
+                            RelativeSource 
+                            Mode=FindAncestor, 
+                            AncestorType=Window
+                            }
+                        }"/>
+                </Button.CommandParameter>
+                <Button.Style>
+                    <l:StyleCombiner>
+                        <StaticResource ResourceKey="EditButtonStyle"/>
+                        <StaticResource ResourceKey="ButtonVisibleIfNotNull"/>
+                    </l:StyleCombiner>
+                </Button.Style>
+            </Button>
+            <Button 
+                DockPanel.Dock="Right" 
+                Margin="0" 
+                >
+                <Button.Command>
+                    <local:PropertyCommand/>
+                </Button.Command>
+                <Button.CommandParameter>
                     <local:PropertyCommandArgs Action="Create" Property="{Binding}" Launcher="{
                         Binding
                         RelativeSource={

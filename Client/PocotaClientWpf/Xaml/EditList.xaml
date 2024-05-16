@@ -21,11 +21,26 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Xaml/Dictionaries/DataGrid.xaml" />
                 <ResourceDictionary Source="../Xaml/Dictionaries/Dictionary1.xaml" />
                 <ResourceDictionary Source="../Xaml/Dictionaries/PropertyDataTemplate.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
             <l:BindingProxy Value="{Binding Windows}" x:Key="Windows"/>
+            <l:XamlServiceProviderCatcher x:Key="SPC"/>
+            <l:BindingProxy x:Key="ItemsDataGridManager" Value="{Binding ItemsDataGridManager}"/>
+            <DataTemplate x:Key="Field" x:Shared="False">
+                <TextBox 
+                    Text="{Binding $field, Mode=OneWay}"
+                    Style="{StaticResource ReadonlyDataGridCellTextBoxStyle}"
+                    />
+            </DataTemplate>
+            <l:BindingProxy 
+                x:Key="SortHeader1" 
+                Value="{l:ParameterizedResource SortHeader, Replaces=$manager:ItemsDataGridManager}" 
+                x:Shared="False"
+                />
+            <local:EditListConverter Owner="{Binding}" x:Key="PositionConverter"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
@@ -48,5 +63,93 @@
             </MenuItem>
             <MenuItem Style="{l:ParameterizedResource WindowsMenuItemStyle, Replaces=$window:Window}"/>
         </Menu>
+        <Border DockPanel.Dock="Top" HorizontalAlignment="Left">
+            <DockPanel LastChildFill="True">
+                <Button 
+                    DockPanel.Dock="Left"
+                    Command="{Binding Value, Source={StaticResource Window}}"
+                    CommandParameter="{x:Static local:PropertyAction.Create}"
+                    Margin="10,10,10,10"
+                >
+                    <Button.Style>
+                        <l:StyleCombiner TargetType="ButtonBase">
+                            <StaticResource ResourceKey="CreateButtonStyle"/>
+                            <Style TargetType="ButtonBase">
+                                <Style.Triggers>
+                                    <l:DataSwitch Binding="{Binding Value.IsReadonly, Source={StaticResource Window}}">
+                                        <DataTrigger Value="False">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <DataTrigger Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </l:DataSwitch>
+                                </Style.Triggers>
+                            </Style>
+                        </l:StyleCombiner>
+                    </Button.Style>
+                </Button>
+            </DockPanel>
+        </Border>
+        <DataGrid 
+            x:Name="DataGrid"
+            ItemsSource="{Binding ItemsDataGridManager.ViewSource.View}" 
+            IsReadOnly="True"
+            AutoGenerateColumns="False"
+            CanUserSortColumns="False"
+            CanUserAddRows="False"
+            CanUserDeleteRows="False"
+            >
+            <DataGrid.Resources>
+                <ResourceDictionary>
+                    <ResourceDictionary.MergedDictionaries>
+                        <ResourceDictionary Source="../Xaml/Dictionaries/UnhighlightedDataGridSelection.xaml" />
+                    </ResourceDictionary.MergedDictionaries>
+                    <DataTemplate x:Key="Position">
+                        <TextBox 
+                            Text="{Binding Converter={StaticResource PositionConverter}, Mode=OneWay}"
+                            Style="{StaticResource ReadonlyDataGridCellTextBoxStyle}"
+                            />
+                    </DataTemplate>
+                    <DataTemplate x:Key="Actions">
+                        <DockPanel LastChildFill="True">
+                            <Button 
+                                DockPanel.Dock="Left"
+                                Style="{StaticResource EditButtonStyle}" 
+                                Command="{Binding Value, Source={StaticResource Window}}"
+                                CommandParameter="{x:Static local:PropertyAction.Edit}"
+                                >
+                            </Button>
+                            <Button 
+                                DockPanel.Dock="Left"
+                                Command="{Binding Value, Source={StaticResource Window}}"
+                                CommandParameter="{x:Static local:PropertyAction.Clear}"
+                                >
+                                <Button.Style>
+                                    <l:StyleCombiner TargetType="ButtonBase">
+                                        <StaticResource ResourceKey="ClearButtonStyle"/>
+                                        <Style TargetType="ButtonBase">
+                                            <Style.Triggers>
+                                                <l:DataSwitch Binding="{Binding Value.IsReadonly, Source={StaticResource Window}}">
+                                                    <DataTrigger Value="False">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </l:DataSwitch>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </l:StyleCombiner>
+                                </Button.Style>
+                            </Button>
+                        </DockPanel>
+                    </DataTemplate>
+                </ResourceDictionary>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <!--<DataGridTemplateColumn Header="{Binding Source=ACTIONS, Converter={StaticResource I18nConverter}}" CellTemplate="{StaticResource Actions}"/>-->
+            </DataGrid.Columns>
+        </DataGrid>
     </DockPanel>
 </Window>

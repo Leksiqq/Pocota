@@ -34,6 +34,10 @@
             ItemsSource="{Binding ConnectorsDataGridManager.ViewSource.View}" 
             IsReadOnly="True" 
             AutoGenerateColumns="False"
+            CanUserSortColumns="False"
+            CanUserAddRows="False"
+            CanUserReorderColumns="False"
+            CanUserDeleteRows="False"
             >
             <DataGrid.Resources>
                 <ResourceDictionary>
@@ -59,7 +63,7 @@
                             />
                     </DataTemplate>
                     <DataTemplate x:Key="Actions">
-                        <StackPanel Orientation="Horizontal" Margin="10">
+                        <StackPanel Orientation="Horizontal">
                             <Button 
                             Style="{StaticResource PlayButtonStyle}" 
                             Command="{Binding Value, Source={StaticResource RunCommand}}"
