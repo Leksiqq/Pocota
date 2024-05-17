@@ -79,6 +79,7 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
                 {
                     ItemType = itemType;
                     _value = value;
+                    IList list;
                     DataGrid.Columns.Clear();
                     DataGridTemplateColumn column;
                     column = new DataGridTemplateColumn();
@@ -115,10 +116,11 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
                         };
                         BindingOperations.SetBinding(column, DataGridTemplateColumn.HeaderTemplateProperty, binding);
                         DataGrid.Columns.Add(column);
+                        list = new Obse
                     }
                     else
                     {
-
+                        list = (IList)_value;
                     }
                     column = new DataGridTemplateColumn();
                     column.CellTemplate = DataGrid.Resources["Actions"] as DataTemplate;
@@ -126,7 +128,7 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
                     DataGrid.Columns.Add(column);
                     _indexMapping.Clear();
                     int i = 0;
-                    foreach (var item in (IList)_value)
+                    foreach (var item in list)
                     {
                         _indexMapping.AddOrUpdate(item, i);
                         ++i;
