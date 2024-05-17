@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Net.Leksi.WpfMarkup;
+using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Globalization;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,7 +11,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
-public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICommand
+public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICommand, IWindowLauncher
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler? CanExecuteChanged
@@ -27,13 +28,17 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
     private readonly ConditionalWeakTable<object, object> _indexMapping = [];
     private readonly IServiceProvider _services;
     private readonly PocotaContext _context;
+    private readonly Trans _trans;
     private object? _value;
     private Window? _launchedBy;
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
+    private readonly IServiceProvider _windowXamlServices;
+    private readonly IServiceProvider _dataGridXamlServices;
     public DataGridManager ItemsDataGridManager { get; private init; } = new();
     public WindowsList Windows { get; private init; }
     public bool IsReadonly { get; private init; }
-    public Type ItemType { get; private set; }
+    public bool IsDataGridReadonly => IsReadonly || ((ItemType?.IsClass ?? true) && ItemType != typeof(string));
+    public Type ItemType { get; private set; } = null!;
     public Window? LaunchedBy
     {
         get => _launchedBy;
@@ -47,6 +52,18 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
         }
     }
     public EditWindowCore EditWindowCore { get; private init; }
+    public EditWindowLauncher Launcher { get; private init; }
+    public string? StringValue
+    {
+        get => ItemsDataGridManager.ViewSource.View.CurrentItem?.ToString();
+        set
+        {
+            if (!IsReadonly && _indexMapping.TryGetValue(ItemsDataGridManager.ViewSource.View.CurrentItem, out object? index))
+            {
+                ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection)[(int)index] = value;
+            }
+        }
+    }
     public object? Value
     {
         get => _value;
@@ -66,17 +83,17 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
                     DataGridTemplateColumn column;
                     column = new DataGridTemplateColumn();
                     column.CellTemplate = DataGrid.Resources["Position"] as DataTemplate;
-                    column.Header = (Application.Current.Resources["I18nConverter"] as I18nConverter)?
-                        .Convert("POSITION", typeof(string), null!, CultureInfo.InvariantCulture);
+                    column.Header = _trans.Translate("POSITION");
                     DataGrid.Columns.Add(column);
-                    if (itemType == typeof(string) || !itemType.IsClass)
+                    if (!ItemType.IsClass || ItemType == typeof(string))
                     {
                         column = new DataGridTemplateColumn();
                         ParameterizedResourceExtension pre = new("Field")
                         {
-                            Replaces = new string[] { "$field:." }
+                            Replaces = new string[] { "$field:Value", "$converter:EditListConverter" }
                         };
-                        column.CellTemplate = pre.ProvideValue((FindResource("SPC") as XamlServiceProviderCatcher)!.ServiceProvider!) as DataTemplate;
+                        column.CellTemplate = pre.ProvideValue(_dataGridXamlServices) as DataTemplate;
+
                         DataGridConverter converter = new()
                         {
                             DataGridManager = ItemsDataGridManager,
@@ -88,11 +105,10 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
                             Replaces = new string[] {
                                 "$converter:ValueConverter",
                                 "$field:",
-                                $"$name:{(Application.Current.Resources["I18nConverter"] as I18nConverter)?
-                                    .Convert("VALUE", typeof(string), null!, CultureInfo.InvariantCulture)}"
+                                $"$name:{_trans.Translate("VALUE")}"
                             }
                         };
-                        BindingProxy bp = (pre.ProvideValue((FindResource("SPC") as XamlServiceProviderCatcher)!.ServiceProvider!) as BindingProxy)!;
+                        BindingProxy bp = (pre.ProvideValue(_windowXamlServices) as BindingProxy)!;
                         Binding binding = new("Value")
                         {
                             Source = bp
@@ -106,8 +122,7 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
                     }
                     column = new DataGridTemplateColumn();
                     column.CellTemplate = DataGrid.Resources["Actions"] as DataTemplate;
-                    column.Header = (Application.Current.Resources["I18nConverter"] as I18nConverter)?
-                        .Convert("ACTIONS", typeof(string), null!, CultureInfo.InvariantCulture);
+                    column.Header = _trans.Translate("ACTIONS");
                     DataGrid.Columns.Add(column);
                     _indexMapping.Clear();
                     int i = 0;
@@ -117,6 +132,8 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
                         ++i;
                     }
                     ItemsDataGridManager.ViewSource.Source = _value;
+                    PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+                    DataGrid.IsReadOnly = IsDataGridReadonly;
                 }
             }
         }
@@ -126,9 +143,13 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
         IsReadonly = isReadonly;
         _services = (IServiceProvider)Application.Current.Resources[ServiceProvider];
         _context = _services.GetRequiredService<PocotaContext>();
+        _trans = _services.GetRequiredService<Trans>();
         Windows = _services.GetRequiredService<WindowsList>();
         EditWindowCore = new EditWindowCore(path, type);
+        Launcher = new EditWindowLauncher(EditWindowCore.Path, this);
         InitializeComponent();
+        _windowXamlServices = (FindResource("WindowSP") as XamlServiceProviderCatcher)!.ServiceProvider!;
+        _dataGridXamlServices = (DataGrid.FindResource("DataGridSP") as XamlServiceProviderCatcher)!.ServiceProvider!;
         Windows.Touch();
     }
     public bool CanExecute(object? parameter)
@@ -141,35 +162,49 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
 
     public void Execute(object? parameter)
     {
-        if(parameter is PropertyAction action)
+        if (parameter is PropertyAction action)
         {
             if (action is PropertyAction.Edit || action is PropertyAction.Create)
             {
-                Property? property = null;
-                if (action is PropertyAction.Edit)
+                if (ItemType.IsClass && ItemType != typeof(string))
                 {
+                    Property? property = null;
+                    if (action is PropertyAction.Edit)
+                    {
 
-                }
-                else if (action is PropertyAction.Create)
-                {
-                    if (!IsReadonly)
+                    }
+                    else if (action is PropertyAction.Create)
                     {
-                        property = Property.Create(ItemType);
+                        if (!IsReadonly && _indexMapping.TryGetValue(ItemsDataGridManager.ViewSource.View.CurrentItem, out object? index))
+                        {
+                            property = Property.Create(new ParameterInfoCosplay($"<{_trans.Translate("NEW-ITEM")}>", ItemType));
+                        }
+                    }
+                    if (property is { })
+                    {
+                        PropertyCommand cmd = new();
+                        PropertyCommandArgs args = new()
+                        {
+                            Action = action,
+                            Property = property,
+                            Launcher = this
+                        };
+                        if (cmd.CanExecute(args))
+                        {
+                            cmd.Execute(args);
+                        }
                     }
                 }
-                if (property is { })
+                else
                 {
-                    PropertyCommand cmd = new();
-                    PropertyCommandArgs args = new()
+                    ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection).Add(ItemType != typeof(string) ? default : "");
+                    int i = 0;
+                    foreach (var item in ItemsDataGridManager.ViewSource.View.SourceCollection)
                     {
-                        Action = action,
-                        Property = property,
-                        Launcher = this
-                    };
-                    if (cmd.CanExecute(args))
-                    {
-                        cmd.Execute(args);
+                        _indexMapping.AddOrUpdate(item, i);
+                        ++i;
                     }
+                    ItemsDataGridManager.ViewSource.View.Refresh();
                 }
             }
             else if (parameter is PropertyAction.Clear)
@@ -191,7 +226,7 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
     }
     internal object? GetIndex(object item)
     {
-        if(_indexMapping.TryGetValue(item, out object? index))
+        if (_indexMapping.TryGetValue(item, out object? index))
         {
             return index;
         }

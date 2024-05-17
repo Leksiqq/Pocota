@@ -15,16 +15,26 @@ public class EditListConverter : Freezable, IValueConverter
     }
     public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (Owner?.GetIndex(value) is int index)
+        Console.WriteLine($"Convert: {value}, {parameter}, {targetType}");
+        if(parameter.ToString() == "Position")
         {
-            return index;
+            if (Owner?.GetIndex(value) is int index)
+            {
+                return index;
+            }
+            return null;
         }
-        return null;
+        if (parameter.ToString() == "Edit")
+        {
+            return value;
+        }
+        return value;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        throw new NotImplementedException();
+        Console.WriteLine($"ConvertBack: {value}, {parameter}, {targetType}");
+        return value;
     }
 
     protected override Freezable CreateInstanceCore()

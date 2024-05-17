@@ -43,6 +43,7 @@ public static class PocotaWpfAppExtension
             }
         );
         services.AddScoped<WindowsList>();
+        services.AddScoped<Trans>();
         return services;
     }
     public static IServiceCollection AddPocotaWpfApp<TApplication>(

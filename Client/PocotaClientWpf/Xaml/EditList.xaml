@@ -27,20 +27,14 @@
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
             <l:BindingProxy Value="{Binding Windows}" x:Key="Windows"/>
-            <l:XamlServiceProviderCatcher x:Key="SPC"/>
+            <l:XamlServiceProviderCatcher x:Key="WindowSP"/>
             <l:BindingProxy x:Key="ItemsDataGridManager" Value="{Binding ItemsDataGridManager}"/>
-            <DataTemplate x:Key="Field" x:Shared="False">
-                <TextBox 
-                    Text="{Binding $field, Mode=OneWay}"
-                    Style="{StaticResource ReadonlyDataGridCellTextBoxStyle}"
-                    />
-            </DataTemplate>
+            <local:EditListConverter Owner="{Binding}" x:Key="EditListConverter"/>
             <l:BindingProxy 
                 x:Key="SortHeader1" 
                 Value="{l:ParameterizedResource SortHeader, Replaces=$manager:ItemsDataGridManager}" 
                 x:Shared="False"
                 />
-            <local:EditListConverter Owner="{Binding}" x:Key="PositionConverter"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
@@ -94,7 +88,7 @@
         <DataGrid 
             x:Name="DataGrid"
             ItemsSource="{Binding ItemsDataGridManager.ViewSource.View}" 
-            IsReadOnly="True"
+            d:IsReadOnly="{Binding IsDataGridReadonly, Mode=OneWay}"
             AutoGenerateColumns="False"
             CanUserSortColumns="False"
             CanUserAddRows="False"
@@ -105,10 +99,17 @@
                     <ResourceDictionary.MergedDictionaries>
                         <ResourceDictionary Source="../Xaml/Dictionaries/UnhighlightedDataGridSelection.xaml" />
                     </ResourceDictionary.MergedDictionaries>
+                    <l:XamlServiceProviderCatcher x:Key="DataGridSP"/>
                     <DataTemplate x:Key="Position">
                         <TextBox 
-                            Text="{Binding Converter={StaticResource PositionConverter}, Mode=OneWay}"
+                            Text="{Binding Converter={StaticResource EditListConverter}, Mode=OneWay, ConverterParameter=Position}"
                             Style="{StaticResource ReadonlyDataGridCellTextBoxStyle}"
+                            />
+                    </DataTemplate>
+                    <DataTemplate x:Key="Field" x:Shared="False">
+                        <TextBox 
+                            Text="{Binding Path=$field, UpdateSourceTrigger=PropertyChanged, Converter={l:ParameterizedResource $converter}, ConverterParameter=Edit}"
+                            Style="{StaticResource DataGridCellTextBoxStyle}"
                             />
                     </DataTemplate>
                     <DataTemplate x:Key="Actions">
@@ -147,9 +148,6 @@
                     </DataTemplate>
                 </ResourceDictionary>
             </DataGrid.Resources>
-            <DataGrid.Columns>
-                <!--<DataGridTemplateColumn Header="{Binding Source=ACTIONS, Converter={StaticResource I18nConverter}}" CellTemplate="{StaticResource Actions}"/>-->
-            </DataGrid.Columns>
         </DataGrid>
     </DockPanel>
 </Window>

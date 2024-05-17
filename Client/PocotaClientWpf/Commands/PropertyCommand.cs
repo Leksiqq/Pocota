@@ -25,15 +25,28 @@ public class PropertyCommand : ICommand
     }
     public bool CanExecute(object? parameter)
     {
-        return parameter is PropertyCommandArgs args && args.Property is { }
-            && args.Launcher is IWindowLauncher launcher
-            && launcher.Launcher.IsLaunched(args.Property.Name) is bool isLaunched
-            && (
-                (args.Action is PropertyAction.Clear && args.Property.Value is { } && !isLaunched)
-                || (args.Action is PropertyAction.Edit && args.Property.Value is { })
-                || args.Action is PropertyAction.Create && args.Property.Value is null
-                || args.Action is PropertyAction.Find && args.Property.Value is null
-            );
+        if(parameter is PropertyCommandArgs args)
+        {
+            if(args.Property is { })
+            {
+                if(args.Launcher is IWindowLauncher launcher)
+                {
+                    if(launcher.Launcher.IsLaunched(args.Property.Name) is bool isLaunched)
+                    {
+                        if (
+                            (args.Action is PropertyAction.Clear && args.Property.Value is { } && !isLaunched)
+                            || (args.Action is PropertyAction.Edit && args.Property.Value is { })
+                            || args.Action is PropertyAction.Create && args.Property.Value is null
+                            || args.Action is PropertyAction.Find && args.Property.Value is null
+                        )
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
     public void Execute(object? parameter)
     {
@@ -48,7 +61,7 @@ public class PropertyCommand : ICommand
                     {
                         args.Property.Value = _services.GetRequiredService<PocotaContext>().CreateEntity(args.Property.Type);
                     }
-                    else
+                    else if(args.Property.Type.IsClass && args.Property.Type != typeof(string))
                     {
                         args.Property.Value = Activator.CreateInstance(args.Property.Type);
                     }
