@@ -2,6 +2,7 @@
 using Net.Leksi.WpfMarkup;
 using System;
 using System.Collections;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -116,7 +117,19 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
                         };
                         BindingOperations.SetBinding(column, DataGridTemplateColumn.HeaderTemplateProperty, binding);
                         DataGrid.Columns.Add(column);
-                        list = new Obse
+                        Type ItemHolderType = typeof(SimpleTypeHolder<>).MakeGenericType([ItemType]);
+                        Type ListType = typeof(ObservableCollection<>).MakeGenericType(ItemHolderType);
+                        list = (IList)Activator.CreateInstance(ListType)!;
+                        int pos = 0;
+                        PropertyInfo positionProperty = ItemHolderType.GetProperty(nameof(SimpleTypeHolder<object>.Position))!;
+                        PropertyInfo valueProperty = ItemHolderType.GetProperty(nameof(SimpleTypeHolder<object>.Value))!;
+                        foreach (object? item in (IList)_value)
+                        {
+                            object? holder = Activator.CreateInstance(ItemHolderType, _value);
+                            positionProperty.SetValue(holder, pos);
+                            list.Add(holder);
+                            ++pos;
+                        }
                     }
                     else
                     {
@@ -133,7 +146,7 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
                         _indexMapping.AddOrUpdate(item, i);
                         ++i;
                     }
-                    ItemsDataGridManager.ViewSource.Source = _value;
+                    ItemsDataGridManager.ViewSource.Source = list;
                     PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
                     DataGrid.IsReadOnly = IsDataGridReadonly;
                 }
