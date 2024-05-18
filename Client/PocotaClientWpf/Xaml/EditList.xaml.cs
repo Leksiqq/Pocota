@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Transactions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -35,10 +36,13 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private readonly IServiceProvider _windowXamlServices;
     private readonly IServiceProvider _dataGridXamlServices;
+    private Type? _itemHolderType = null;
+    private PropertyInfo? _positionProperty;
+    private PropertyInfo? _valueProperty;
     public DataGridManager ItemsDataGridManager { get; private init; } = new();
     public WindowsList Windows { get; private init; }
     public bool IsReadonly { get; private init; }
-    public bool IsDataGridReadonly => IsReadonly || ((ItemType?.IsClass ?? true) && ItemType != typeof(string));
+    public bool IsDataGridReadonly => IsReadonly || IsObject;
     public Type ItemType { get; private set; } = null!;
     public Window? LaunchedBy
     {
@@ -54,17 +58,8 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
     }
     public EditWindowCore EditWindowCore { get; private init; }
     public EditWindowLauncher Launcher { get; private init; }
-    public string? StringValue
-    {
-        get => ItemsDataGridManager.ViewSource.View.CurrentItem?.ToString();
-        set
-        {
-            if (!IsReadonly && _indexMapping.TryGetValue(ItemsDataGridManager.ViewSource.View.CurrentItem, out object? index))
-            {
-                ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection)[(int)index] = value;
-            }
-        }
-    }
+    public bool IsObject => (ItemType?.IsClass ?? false) && ItemType != typeof(string);
+    public object? MovedItem { get; private set; } = null;
     public object? Value
     {
         get => _value;
@@ -79,15 +74,19 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
                 )
                 {
                     ItemType = itemType;
+                    DataGrid.IsReadOnly = IsDataGridReadonly;
                     _value = value;
                     IList list;
                     DataGrid.Columns.Clear();
                     DataGridTemplateColumn column;
-                    column = new DataGridTemplateColumn();
-                    column.CellTemplate = DataGrid.Resources["Position"] as DataTemplate;
-                    column.Header = _trans.Translate("POSITION");
+                    column = new DataGridTemplateColumn
+                    {
+                        CellTemplate = DataGrid.Resources["Position"] as DataTemplate,
+                        Header = _trans.Translate("POSITION"),
+                        IsReadOnly = true
+                    };
                     DataGrid.Columns.Add(column);
-                    if (!ItemType.IsClass || ItemType == typeof(string))
+                    if (!IsObject)
                     {
                         column = new DataGridTemplateColumn();
                         ParameterizedResourceExtension pre = new("Field")
@@ -95,60 +94,63 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
                             Replaces = new string[] { "$field:Value", "$converter:EditListConverter" }
                         };
                         column.CellTemplate = pre.ProvideValue(_dataGridXamlServices) as DataTemplate;
+                        pre = new("EditField")
+                        {
+                            Replaces = new string[] { "$field:Value", "$converter:EditListConverter" }
+                        };
+                        column.CellEditingTemplate = pre.ProvideValue(_dataGridXamlServices) as DataTemplate;
 
                         DataGridConverter converter = new()
                         {
                             DataGridManager = ItemsDataGridManager,
-                            FieldName = string.Empty
+                            FieldName = "Value"
                         };
-                        Resources.Add("ValueConverter", converter);
+                        DataGrid.Resources.Add("ValueConverter", converter);
                         pre = new("SortHeader1")
                         {
                             Replaces = new string[] {
                                 "$converter:ValueConverter",
-                                "$field:",
+                                "$field:Value",
                                 $"$name:{_trans.Translate("VALUE")}"
                             }
                         };
-                        BindingProxy bp = (pre.ProvideValue(_windowXamlServices) as BindingProxy)!;
+                        BindingProxy bp = (pre.ProvideValue(_dataGridXamlServices) as BindingProxy)!;
                         Binding binding = new("Value")
                         {
                             Source = bp
                         };
                         BindingOperations.SetBinding(column, DataGridTemplateColumn.HeaderTemplateProperty, binding);
+                        
                         DataGrid.Columns.Add(column);
-                        Type ItemHolderType = typeof(SimpleTypeHolder<>).MakeGenericType([ItemType]);
-                        Type ListType = typeof(ObservableCollection<>).MakeGenericType(ItemHolderType);
+                        _itemHolderType = typeof(SimpleTypeHolder<>).MakeGenericType([ItemType]);
+                        _positionProperty = _itemHolderType.GetProperty(nameof(SimpleTypeHolder<object>.Position))!;
+                        _valueProperty = _itemHolderType.GetProperty(nameof(SimpleTypeHolder<object>.Value))!;
+                        Type ListType = typeof(ObservableCollection<>).MakeGenericType(_itemHolderType);
                         list = (IList)Activator.CreateInstance(ListType)!;
                         int pos = 0;
-                        PropertyInfo positionProperty = ItemHolderType.GetProperty(nameof(SimpleTypeHolder<object>.Position))!;
-                        PropertyInfo valueProperty = ItemHolderType.GetProperty(nameof(SimpleTypeHolder<object>.Value))!;
                         foreach (object? item in (IList)_value)
                         {
-                            object? holder = Activator.CreateInstance(ItemHolderType, _value);
-                            positionProperty.SetValue(holder, pos);
+                            object? holder = Activator.CreateInstance(_itemHolderType, _value);
                             list.Add(holder);
                             ++pos;
                         }
                     }
                     else
                     {
+                        _itemHolderType = null;
                         list = (IList)_value;
                     }
-                    column = new DataGridTemplateColumn();
-                    column.CellTemplate = DataGrid.Resources["Actions"] as DataTemplate;
-                    column.Header = _trans.Translate("ACTIONS");
+                    column = new DataGridTemplateColumn
+                    {
+                        CellTemplate = DataGrid.Resources["Actions"] as DataTemplate,
+                        Header = _trans.Translate("ACTIONS"),
+                        IsReadOnly = true
+                    };
                     DataGrid.Columns.Add(column);
                     _indexMapping.Clear();
-                    int i = 0;
-                    foreach (var item in list)
-                    {
-                        _indexMapping.AddOrUpdate(item, i);
-                        ++i;
-                    }
                     ItemsDataGridManager.ViewSource.Source = list;
+                    RenumberItems();
                     PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
-                    DataGrid.IsReadOnly = IsDataGridReadonly;
                 }
             }
         }
@@ -169,76 +171,152 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
     }
     public bool CanExecute(object? parameter)
     {
-        return parameter is PropertyAction action
-            && (action is PropertyAction.Edit
-            || (action is PropertyAction.Clear && !IsReadonly)
-            || (action is PropertyAction.Create && !IsReadonly));
+        return parameter is EditListCommandArgs args
+            && (args.Action is PropertyAction.Edit && IsObject && args.Item is { }
+            || (args.Action is PropertyAction.Clear && !IsReadonly && args.Item is { })
+            || (args.Action is PropertyAction.Create && !IsReadonly)
+            || (args.Action is PropertyAction.InsertBefore && !IsReadonly && args.Item is { })
+            || (args.Action is PropertyAction.Move && !IsReadonly && (args.Item is { } || MovedItem is { }) && ((IList)_value!).Count > 1));
     }
 
     public void Execute(object? parameter)
     {
-        if (parameter is PropertyAction action)
+        if (parameter is EditListCommandArgs args)
         {
-            if (action is PropertyAction.Edit || action is PropertyAction.Create)
+            if (
+                (args.Action is PropertyAction.Edit && IsObject && args.Item is { }) 
+                || (args.Action is PropertyAction.Create && !IsReadonly) 
+                || (args.Action is PropertyAction.InsertBefore && !IsReadonly && args.Item is { })
+            )
             {
-                if (ItemType.IsClass && ItemType != typeof(string))
+                if (IsObject)
                 {
-                    Property? property = null;
-                    if (action is PropertyAction.Edit)
-                    {
+                    //Property? property = null;
+                    //if (action is PropertyAction.Edit)
+                    //{
 
-                    }
-                    else if (action is PropertyAction.Create)
-                    {
-                        if (!IsReadonly && _indexMapping.TryGetValue(ItemsDataGridManager.ViewSource.View.CurrentItem, out object? index))
-                        {
-                            property = Property.Create(new ParameterInfoCosplay($"<{_trans.Translate("NEW-ITEM")}>", ItemType));
-                        }
-                    }
-                    if (property is { })
-                    {
-                        PropertyCommand cmd = new();
-                        PropertyCommandArgs args = new()
-                        {
-                            Action = action,
-                            Property = property,
-                            Launcher = this
-                        };
-                        if (cmd.CanExecute(args))
-                        {
-                            cmd.Execute(args);
-                        }
-                    }
+                    //}
+                    //else if (action is PropertyAction.Create)
+                    //{
+                    //    if (!IsReadonly && _indexMapping.TryGetValue(ItemsDataGridManager.ViewSource.View.CurrentItem, out object? index))
+                    //    {
+                    //        property = Property.Create(new ParameterInfoCosplay($"<{_trans.Translate("NEW-ITEM")}>", ItemType));
+                    //    }
+                    //}
+                    //if (property is { })
+                    //{
+                    //    PropertyCommand cmd = new();
+                    //    PropertyCommandArgs args = new()
+                    //    {
+                    //        Action = action,
+                    //        Property = property,
+                    //        Launcher = this
+                    //    };
+                    //    if (cmd.CanExecute(args))
+                    //    {
+                    //        cmd.Execute(args);
+                    //    }
+                    //}
                 }
                 else
                 {
-                    ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection).Add(ItemType != typeof(string) ? default : "");
-                    int i = 0;
-                    foreach (var item in ItemsDataGridManager.ViewSource.View.SourceCollection)
+                }
+                if (args.Action is PropertyAction.Edit)
+                {
+
+                }
+                else if (!IsReadonly)
+                {
+                    int insertPos = args.Action is PropertyAction.InsertBefore
+                        && args.Item is { }
+                        && _indexMapping.TryGetValue(args.Item, out object? index)
+                        ? (int)index! : ((IList)_value!).Count;
+                    object? item = null;
+                    if (!IsObject)
                     {
-                        _indexMapping.AddOrUpdate(item, i);
-                        ++i;
+                        ((IList)_value!).Insert(insertPos, default);
+                        item = Activator.CreateInstance(_itemHolderType!, _value);
                     }
+                    else
+                    {
+
+                    }
+                    ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection).Insert(insertPos, item);
+
+                    RenumberItems();
                     ItemsDataGridManager.ViewSource.View.Refresh();
                 }
             }
-            else if (parameter is PropertyAction.Clear)
+            else if (args.Action is PropertyAction.Clear)
             {
-                if (!IsReadonly && _indexMapping.TryGetValue(ItemsDataGridManager.ViewSource.View.CurrentItem, out object? index))
+                if (!IsReadonly && args.Item is { } && _indexMapping.TryGetValue(args.Item, out object? index))
                 {
-                    _indexMapping.Remove(ItemsDataGridManager.ViewSource.View.CurrentItem);
+                    _indexMapping.Remove(args.Item);
                     ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection).RemoveAt((int)index);
-                    int i = 0;
-                    foreach (var item in ItemsDataGridManager.ViewSource.View.SourceCollection)
+                    if (!IsObject)
                     {
-                        _indexMapping.AddOrUpdate(item, i);
-                        ++i;
+                        ((IList)_value!).RemoveAt((int)index);
                     }
+                    RenumberItems();
                     ItemsDataGridManager.ViewSource.View.Refresh();
+                }
+            }
+            else if(args.Action is PropertyAction.Move)
+            {
+                if(!IsReadonly && (args.Item is { } || MovedItem is { }) && ((IList)_value!).Count > 1) {
+                    if(MovedItem is null)
+                    {
+                        MovedItem = args.Item;
+                    }
+                    else if(MovedItem == args.Item)
+                    {
+                        MovedItem = null;
+                    }
+                    else
+                    {
+                        if (!IsReadonly && _indexMapping.TryGetValue(MovedItem, out object? index))
+                        {
+                            object? savedValue = _valueProperty?.GetValue(MovedItem);
+                            _indexMapping.Remove(MovedItem);
+                            ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection).RemoveAt((int)index);
+                            if (!IsObject)
+                            {
+                                ((IList)_value!).RemoveAt((int)index);
+                            }
+                            RenumberItems();
+                            int insertPos = args.Item is { } && _indexMapping.TryGetValue(args.Item, out object? index1)
+                                ? (int)index1! : ((IList)_value!).Count;
+                            if (!IsObject)
+                            {
+                                ((IList)_value!).Insert(insertPos, savedValue);
+                            }
+                            ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection).Insert(insertPos, MovedItem);
+
+                            RenumberItems();
+                            ItemsDataGridManager.ViewSource.View.Refresh();
+                        }
+                        MovedItem = null;
+                    }
+                    PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
                 }
             }
         }
     }
+
+    private void RenumberItems()
+    {
+        int i = 0;
+        foreach (var item in ItemsDataGridManager.ViewSource.View.SourceCollection)
+        {
+            _indexMapping.AddOrUpdate(item, i);
+            if (!IsObject)
+            {
+                _positionProperty!.SetValue(item, i);
+            }
+            ++i;
+        }
+    }
+
     internal object? GetIndex(object item)
     {
         if (_indexMapping.TryGetValue(item, out object? index))

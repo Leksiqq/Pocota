@@ -27,6 +27,7 @@
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
             <l:BindingProxy Value="{Binding Windows}" x:Key="Windows"/>
+            <l:BindingProxy Value="{Binding MovedItem}" x:Key="MovedItem"/>
             <l:XamlServiceProviderCatcher x:Key="WindowSP"/>
             <l:BindingProxy x:Key="ItemsDataGridManager" Value="{Binding ItemsDataGridManager}"/>
             <local:EditListConverter Owner="{Binding}" x:Key="EditListConverter"/>
@@ -35,6 +36,7 @@
                 Value="{l:ParameterizedResource SortHeader, Replaces=$manager:ItemsDataGridManager}" 
                 x:Shared="False"
                 />
+            <l:BoolExpressionConverter x:Key="BoolExpressionConverter"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
@@ -62,15 +64,54 @@
                 <Button 
                     DockPanel.Dock="Left"
                     Command="{Binding Value, Source={StaticResource Window}}"
-                    CommandParameter="{x:Static local:PropertyAction.Create}"
-                    Margin="10,10,10,10"
+                    Margin="10,10,0,10"
                 >
+                    <Button.CommandParameter>
+                        <local:EditListCommandArgs Action="Create"/>
+                    </Button.CommandParameter>
                     <Button.Style>
                         <l:StyleCombiner TargetType="ButtonBase">
                             <StaticResource ResourceKey="CreateButtonStyle"/>
                             <Style TargetType="ButtonBase">
                                 <Style.Triggers>
                                     <l:DataSwitch Binding="{Binding Value.IsReadonly, Source={StaticResource Window}}">
+                                        <DataTrigger Value="False">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <DataTrigger Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </l:DataSwitch>
+                                </Style.Triggers>
+                                <Setter Property="ToolTip" Value="{Binding Source=ADD, Converter={StaticResource I18nConverter}}"/>
+                            </Style>
+                        </l:StyleCombiner>
+                    </Button.Style>
+                </Button>
+                <Button 
+                    DockPanel.Dock="Left"
+                    Margin="0"
+                    Command="{Binding Value, Source={StaticResource Window}}"
+                    Foreground="Green"
+                    BorderBrush="Green"
+                    BorderThickness="1"
+                    ToolTip="{Binding Source=PLACE-LAST, Converter={StaticResource I18nConverter}}"
+                    >
+                    <Button.CommandParameter>
+                        <local:EditListCommandArgs Action="Move"/>
+                    </Button.CommandParameter>
+                    <Button.Style>
+                        <l:StyleCombiner TargetType="ButtonBase">
+                            <StaticResource ResourceKey="MoveButtonStyle"/>
+                            <Style TargetType="ButtonBase">
+                                <Style.Triggers>
+                                    <l:DataSwitch d:Binding="{Binding Value.IsReadonly, Source={StaticResource Window}}">
+                                        <l:DataSwitch.Binding>
+                                            <MultiBinding Converter="{StaticResource BoolExpressionConverter}" ConverterParameter="@0 | @1">
+                                                <Binding Path="Value.IsReadonly" Source="{StaticResource Window}"/>
+                                                <Binding Path="Value" Source="{StaticResource MovedItem}" Converter="{StaticResource IsNullConverter}"/>
+                                            </MultiBinding>
+                                        </l:DataSwitch.Binding>
                                         <DataTrigger Value="False">
                                             <Setter Property="Visibility" Value="Visible"/>
                                         </DataTrigger>
@@ -88,7 +129,6 @@
         <DataGrid 
             x:Name="DataGrid"
             ItemsSource="{Binding ItemsDataGridManager.ViewSource.View}" 
-            d:IsReadOnly="{Binding IsDataGridReadonly, Mode=OneWay}"
             AutoGenerateColumns="False"
             CanUserSortColumns="False"
             CanUserAddRows="False"
@@ -104,28 +144,86 @@
                         <TextBox 
                             Text="{Binding Converter={StaticResource EditListConverter}, Mode=OneWay, ConverterParameter=Position}"
                             Style="{StaticResource ReadonlyDataGridCellTextBoxStyle}"
+                            Margin="0"
                             />
                     </DataTemplate>
                     <DataTemplate x:Key="Field" x:Shared="False">
                         <TextBox 
+                            Text="{Binding Path=$field, Mode=OneWay, Converter={l:ParameterizedResource $converter}, ConverterParameter=Edit}"
+                            Style="{StaticResource ReadonlyDataGridCellTextBoxStyle}"
+                            Margin="0"
+                            />
+                    </DataTemplate>
+                    <DataTemplate x:Key="EditField" x:Shared="False">
+                        <TextBox 
                             Text="{Binding Path=$field, UpdateSourceTrigger=PropertyChanged, Converter={l:ParameterizedResource $converter}, ConverterParameter=Edit}"
                             Style="{StaticResource DataGridCellTextBoxStyle}"
+                            Margin="0"
                             />
                     </DataTemplate>
                     <DataTemplate x:Key="Actions">
                         <DockPanel LastChildFill="True">
                             <Button 
                                 DockPanel.Dock="Left"
-                                Style="{StaticResource EditButtonStyle}" 
                                 Command="{Binding Value, Source={StaticResource Window}}"
-                                CommandParameter="{x:Static local:PropertyAction.Edit}"
+                                Margin="0"
                                 >
+                                <Button.CommandParameter>
+                                    <local:EditListCommandArgs Action="Edit" Item="{Binding}"/>
+                                </Button.CommandParameter>
+                                <Button.Style>
+                                    <l:StyleCombiner TargetType="ButtonBase">
+                                        <StaticResource ResourceKey="EditButtonStyle"/>
+                                        <Style TargetType="ButtonBase">
+                                            <Style.Triggers>
+                                                <l:DataSwitch Binding="{Binding Value.IsObject, Source={StaticResource Window}}">
+                                                    <DataTrigger Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Value="False">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </l:DataSwitch>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </l:StyleCombiner>
+                                </Button.Style>
                             </Button>
                             <Button 
                                 DockPanel.Dock="Left"
                                 Command="{Binding Value, Source={StaticResource Window}}"
-                                CommandParameter="{x:Static local:PropertyAction.Clear}"
+                                Margin="0"
+                                Padding="5,-3"
                                 >
+                                <Button.CommandParameter>
+                                    <local:EditListCommandArgs Action="InsertBefore" Item="{Binding}"/>
+                                </Button.CommandParameter>
+                                <Button.Style>
+                                    <l:StyleCombiner TargetType="ButtonBase">
+                                        <StaticResource ResourceKey="InsertBeforeButtonStyle"/>
+                                        <Style TargetType="ButtonBase">
+                                            <Style.Triggers>
+                                                <l:DataSwitch Binding="{Binding Value.IsReadonly, Source={StaticResource Window}}">
+                                                    <DataTrigger Value="False">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </l:DataSwitch>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </l:StyleCombiner>
+                                </Button.Style>
+                            </Button>
+                            <Button 
+                                DockPanel.Dock="Left"
+                                Command="{Binding Value, Source={StaticResource Window}}"
+                                Margin="0"
+                                >
+                                <Button.CommandParameter>
+                                    <local:EditListCommandArgs Action="Clear" Item="{Binding}"/>
+                                </Button.CommandParameter>
                                 <Button.Style>
                                     <l:StyleCombiner TargetType="ButtonBase">
                                         <StaticResource ResourceKey="ClearButtonStyle"/>
@@ -139,6 +237,58 @@
                                                         <Setter Property="Visibility" Value="Collapsed"/>
                                                     </DataTrigger>
                                                 </l:DataSwitch>
+                                            </Style.Triggers>
+                                            <Setter Property="ToolTip" Value="{Binding Source=REMOVE, Converter={StaticResource I18nConverter}}"/>
+                                        </Style>
+                                    </l:StyleCombiner>
+                                </Button.Style>
+                            </Button>
+                            <Button 
+                                DockPanel.Dock="Left"
+                                Margin="0"
+                                Command="{Binding Value, Source={StaticResource Window}}"
+                                >
+                                <Button.CommandParameter>
+                                    <local:EditListCommandArgs Action="Move" Item="{Binding}"/>
+                                </Button.CommandParameter>
+                                <Button.Style>
+                                    <l:StyleCombiner TargetType="ButtonBase">
+                                        <StaticResource ResourceKey="MoveButtonStyle"/>
+                                        <Style TargetType="ButtonBase">
+                                            <Setter Property="ToolTip" Value="{Binding Source=MOVE, Converter={StaticResource I18nConverter}}"/>
+                                            <Style.Triggers>
+                                                <l:DataSwitch Binding="{Binding Value.IsReadonly, Source={StaticResource Window}}">
+                                                    <DataTrigger Value="False">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </l:DataSwitch>
+                                                <DataTrigger Value="True">
+                                                    <DataTrigger.Binding>
+                                                        <MultiBinding Converter="{StaticResource EditListConverter}" ConverterParameter="IsMovedItemSource">
+                                                            <Binding Path="."/>
+                                                            <Binding Path="Value" Source="{StaticResource MovedItem}"/>
+                                                        </MultiBinding>
+                                                    </DataTrigger.Binding>
+                                                    <Setter Property="Foreground" Value="Red"/>
+                                                    <Setter Property="BorderBrush" Value="Red"/>
+                                                    <Setter Property="BorderThickness" Value="1"/>
+                                                    <Setter Property="ToolTip" Value="{Binding Source=CANCEL-MOVE, Converter={StaticResource I18nConverter}}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Value="True">
+                                                    <DataTrigger.Binding>
+                                                        <MultiBinding Converter="{StaticResource EditListConverter}" ConverterParameter="IsMovedItemTarget">
+                                                            <Binding Path="."/>
+                                                            <Binding Path="Value" Source="{StaticResource MovedItem}"/>
+                                                        </MultiBinding>
+                                                    </DataTrigger.Binding>
+                                                    <Setter Property="Foreground" Value="Green"/>
+                                                    <Setter Property="BorderBrush" Value="Green"/>
+                                                    <Setter Property="ToolTip" Value="{Binding Source=PLACE-BEFORE, Converter={StaticResource I18nConverter}}"/>
+                                                    <Setter Property="BorderThickness" Value="1"/>
+                                                </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </l:StyleCombiner>

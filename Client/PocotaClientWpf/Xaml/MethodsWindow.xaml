@@ -48,22 +48,25 @@
                         <TextBox 
                             Text="{Binding Name, Mode=OneTime}" 
                             Style="{StaticResource ReadonlyDataGridCellTextBoxStyle}"
+                            Margin="0"
                             />
                     </DataTemplate>
                     <DataTemplate x:Key="Connector">
                         <TextBox 
                             Text="{Binding DeclaringType, Mode=OneTime}" 
                             Style="{StaticResource ReadonlyDataGridCellTextBoxStyle}"
+                            Margin="0"
                             />
                     </DataTemplate>
                     <DataTemplate x:Key="Module">
                         <TextBox 
                             Text="{Binding Module, Mode=OneTime}" 
                             Style="{StaticResource ReadonlyDataGridCellTextBoxStyle}"
+                            Margin="0"
                             />
                     </DataTemplate>
                     <DataTemplate x:Key="Actions">
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" Margin="0">
                             <Button 
                             Style="{StaticResource PlayButtonStyle}" 
                             Command="{Binding Value, Source={StaticResource RunCommand}}"

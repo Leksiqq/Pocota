@@ -47,8 +47,8 @@
         <DataTemplate.Resources>
             <l:BindingProxy x:Key="Field" Value="{l:ParameterizedResource $field, AsValueOfType=sys:String}"/>
         </DataTemplate.Resources>
-        <StackPanel Orientation="Horizontal">
-            <TextBlock Text="{Binding Source={l:ParameterizedResource $name, AsValueOfType={x:Type sys:String}}}" Margin="0,10"/>
+        <StackPanel Orientation="Horizontal" Margin="0">
+            <TextBlock Text="{Binding Source={l:ParameterizedResource $name, AsValueOfType={x:Type sys:String}}}" Margin="0"/>
             <Button 
                 Tag="{
                     Binding 

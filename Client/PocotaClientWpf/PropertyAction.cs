@@ -5,5 +5,7 @@ public enum PropertyAction
     Clear,
     Create,
     Find,
-    Edit
+    Edit,
+    InsertBefore,
+    Move
 }
