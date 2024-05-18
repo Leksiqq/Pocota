@@ -6,7 +6,7 @@ using System.Windows;
 using static Net.Leksi.Pocota.Client.Constants;
 
 namespace Net.Leksi.Pocota.Client;
-public partial class EditObject : Window, INotifyPropertyChanged, IEditWindow, IWindowLauncher
+public partial class EditObject : Window, IEditWindow, IWindowLauncher
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     private readonly IServiceProvider _services;
@@ -27,7 +27,7 @@ public partial class EditObject : Window, INotifyPropertyChanged, IEditWindow, I
             if(_launchedBy != value)
             {
                 _launchedBy = value;
-                PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+                NotifyPropertyChanged();
             }
         }
     }
@@ -68,6 +68,10 @@ public partial class EditObject : Window, INotifyPropertyChanged, IEditWindow, I
         InitializeComponent();
         CalcColumnsWidth(PropertiesView.ActualWidth);
         Windows.Touch();
+    }
+    private void NotifyPropertyChanged()
+    {
+        PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
     }
     private void CalcColumnsWidth(double width)
     {

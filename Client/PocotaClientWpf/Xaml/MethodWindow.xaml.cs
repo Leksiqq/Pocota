@@ -10,11 +10,12 @@ namespace Net.Leksi.Pocota.Client
     /// <summary>
     /// Логика взаимодействия для MethodWindow.xaml
     /// </summary>
-    public partial class MethodWindow : Window, INotifyPropertyChanged, IWindowLauncher
+    public partial class MethodWindow : Window, IWindowLauncher
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         private readonly MethodInfo _method;
         private readonly IServiceProvider _services;
+        private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
         public ObservableCollection<Property> Parameters { get; private init; } = [];
         public WindowsList Windows { get; private init; }
         public string MethodName => _method is { } ? $"{Util.BuildTypeName(_method.DeclaringType!)}.{_method.Name}" : string.Empty;
@@ -37,6 +38,7 @@ namespace Net.Leksi.Pocota.Client
             CalcColumnsWidth(ParametersView.ActualWidth);
             Windows.Touch();
         }
+
         protected override void OnClosed(EventArgs e)
         {
             Windows.Touch();

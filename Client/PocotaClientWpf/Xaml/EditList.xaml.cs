@@ -1,19 +1,17 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Net.Leksi.WpfMarkup;
-using System;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Transactions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
-public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICommand, IWindowLauncher
+public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler? CanExecuteChanged
@@ -89,15 +87,13 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
                     if (!IsObject)
                     {
                         column = new DataGridTemplateColumn();
-                        ParameterizedResourceExtension pre = new("Field")
+                        ParameterizedResourceExtension pre = new()
                         {
                             Replaces = new string[] { "$field:Value", "$converter:EditListConverter" }
                         };
+                        pre.ResourceKey = "Field";
                         column.CellTemplate = pre.ProvideValue(_dataGridXamlServices) as DataTemplate;
-                        pre = new("EditField")
-                        {
-                            Replaces = new string[] { "$field:Value", "$converter:EditListConverter" }
-                        };
+                        pre.ResourceKey = "EditField";
                         column.CellEditingTemplate = pre.ProvideValue(_dataGridXamlServices) as DataTemplate;
 
                         DataGridConverter converter = new()
@@ -178,7 +174,6 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
             || (args.Action is PropertyAction.InsertBefore && !IsReadonly && args.Item is { })
             || (args.Action is PropertyAction.Move && !IsReadonly && (args.Item is { } || MovedItem is { }) && ((IList)_value!).Count > 1));
     }
-
     public void Execute(object? parameter)
     {
         if (parameter is EditListCommandArgs args)
@@ -242,7 +237,7 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
 
                     }
                     ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection).Insert(insertPos, item);
-
+                    DataGrid.CommitEdit();
                     RenumberItems();
                     ItemsDataGridManager.ViewSource.View.Refresh();
                 }
@@ -302,7 +297,14 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
             }
         }
     }
-
+    internal object? GetIndex(object item)
+    {
+        if (_indexMapping.TryGetValue(item, out object? index))
+        {
+            return index;
+        }
+        return null;
+    }
     private void RenumberItems()
     {
         int i = 0;
@@ -316,20 +318,15 @@ public partial class EditList : Window, INotifyPropertyChanged, IEditWindow, ICo
             ++i;
         }
     }
-
-    internal object? GetIndex(object item)
-    {
-        if (_indexMapping.TryGetValue(item, out object? index))
-        {
-            return index;
-        }
-        return null;
-    }
     private void MenuItem_Click(object sender, RoutedEventArgs e)
     {
         if (LaunchedBy is { })
         {
             LaunchedBy.Focus();
         }
+    }
+    private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        DataGrid.BeginEdit();
     }
 }

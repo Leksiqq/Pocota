@@ -107,20 +107,28 @@
                     </l:StyleCombiner>
                 </Button.Style>
             </Button>
-            <TextBlock FontSize="12" FontWeight="Bold">
+            <TextBlock Margin="0, 2">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
                         <Style.Triggers>
                             <l:DataSwitch Binding="{Binding Value, Converter={StaticResource IsNullConverter}}">
                                 <DataTrigger Value="True">
                                     <Setter Property="Text" Value="∅"/>
+                                    <Setter Property="FontSize" Value="12"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
                                     <Setter Property="Foreground" Value="Red"/>
                                     <Setter Property="ToolTip" Value="{Binding Source=IS_NOT_SET, Converter={StaticResource I18nConverter}}"/>
                                 </DataTrigger>
                                 <DataTrigger Value="False">
-                                    <Setter Property="Text" Value="LIST"/>
-                                    <Setter Property="Foreground" Value="Green"/>
-                                    <Setter Property="ToolTip" Value="{Binding Source=IS_SET, Converter={StaticResource I18nConverter}}"/>
+                                    <Setter Property="Text">
+                                        <Setter.Value>
+                                            <MultiBinding StringFormat="[..], {0}: {1} ({2})">
+                                                <Binding Source="COUNT" Converter="{StaticResource I18nConverter}"/>
+                                                <Binding Path="Value.Count"/>
+                                                <Binding Path="Value"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
                                 </DataTrigger>
                             </l:DataSwitch>
                         </Style.Triggers>
