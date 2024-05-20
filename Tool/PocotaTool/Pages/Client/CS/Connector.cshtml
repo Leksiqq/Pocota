@@ -40,7 +40,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
             );
         @if(mm.IsEnumeration)
         {
-            <text>            await GetResponseAsyncEnumerable@{}@Html.Raw($"<{mm.Parameters.Last().ItemTypeName}>")@{}(@mm.Parameters.Last().Name, _request, _serializerOptions, cancellationToken);
+            <text>            await GetResponseAsyncEnumerable@{}@Html.Raw($"<{mm.Parameters.First().ItemTypeName}>")@{}(@mm.Parameters.First().Name, _request, _serializerOptions, cancellationToken);
 </text>
         }
         else {

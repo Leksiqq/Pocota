@@ -20,7 +20,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
                 if(Entity is {} && value is @Html.Raw(prop.TypeName) val && val != ((@Model.ClassName)Entity).@{}@prop.Name) 
                 {
                     ((@Model.ClassName)Entity).@{}@prop.Name = val;
-                    OnPropertyChanged();
+                    NotifyPropertyChanged();
                 }
             }
         }

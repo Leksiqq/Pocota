@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Options;
 using Net.Leksi.E6dWebApp;
 using Net.Leksi.Pocota.Contract;
 using Net.Leksi.Pocota.Server;
@@ -19,7 +20,7 @@ public class SourceGenerator : Runner, ICommand
     private readonly ILogger<SourceGenerator>? _logger;
     private readonly IConfiguration _configuration;
     private readonly string[] _serverFolders = ["db-contexts", "controllers", "services", "server-converters", "server-extensions", "access", "pocota-entities"];
-    private readonly string[] _clientFolders = ["connectors", "client-models", "client-converters", "client-extensions"];
+    private readonly string[] _clientFolders = ["connectors", "client-models", "client-envelopes", "client-converters", "client-extensions"];
     private readonly string _clientLanguage = s_cSharp;
     private readonly string _fileExtension = s_cs;
     internal IClientSourceGenerator? ClientSourceGenerator { get; private init; }
@@ -448,6 +449,9 @@ public class SourceGenerator : Runner, ICommand
         }
         if (ClientSourceGenerator is IClientSourceGenerator clientSourceGenerator)
         {
+            HashSet<Type> envelopes = [];
+            HashSet<Type> entities = [];
+            FindEnvelopes(contractType, envelopes, entities);
             if (_configuration["connectors"] is string connectorsFolder && !string.IsNullOrEmpty(connectorsFolder))
             {
                 if (!Directory.Exists(connectorsFolder))
@@ -467,16 +471,76 @@ public class SourceGenerator : Runner, ICommand
                     await clientSourceGenerator.GenerateModelAsync(connector, contractType, entityAttribute.EntityType, clientModelsFolder);
                 }
             }
-            if (_configuration["client-extensions"] is string clientExtensionsFolder && !string.IsNullOrEmpty(clientExtensionsFolder))
+            foreach(Type envelopeType in envelopes)
             {
-                if (!Directory.Exists(clientExtensionsFolder))
+                if (_configuration["client-envelopes"] is string clientEnvelopesFolder && !string.IsNullOrEmpty(clientEnvelopesFolder))
                 {
-                    Directory.CreateDirectory(clientExtensionsFolder);
+                    if (!Directory.Exists(clientEnvelopesFolder))
+                    {
+                        Directory.CreateDirectory(clientEnvelopesFolder);
+                    }
+                    await clientSourceGenerator.GenerateEnvelopeAsync(connector, contractType, envelopeType, clientEnvelopesFolder, envelopes, entities);
                 }
-                await clientSourceGenerator.GenerateExtensionsAsync(connector, contractType, clientExtensionsFolder, $"{name}Extensions");
             }
         }
     }
+
+    private void FindEnvelopes(Type contractType, HashSet<Type> envelopes, HashSet<Type> entities)
+    {
+        HashSet<Type> visited = [];
+        foreach (EntityAttribute attribute in contractType.GetCustomAttributes<EntityAttribute>())
+        {
+            entities.Add(attribute.EntityType);
+        }
+        foreach (MethodInfo mi in contractType.GetMethods())
+        {
+            Type returnType = mi.ReturnType.IsGenericType ? mi.ReturnType.GetGenericArguments()[0] : mi.ReturnType;
+            WalkDependencies(returnType, envelopes, entities, visited);
+            foreach (ParameterInfo pi in mi.GetParameters())
+            {
+                Type paramType = pi.ParameterType.IsGenericType ? pi.ParameterType.GetGenericArguments()[0] : pi.ParameterType;
+                WalkDependencies(paramType, envelopes, entities, visited);
+            }
+        }
+    }
+
+    private bool WalkDependencies(Type? type, HashSet<Type> envelopes, HashSet<Type> entities, HashSet<Type> visited)
+    {
+        if(type is null)
+        {
+            return false;
+        }
+        if(envelopes.Contains(type) || entities.Contains(type))
+        {
+            return true;
+        }
+        if (!visited.Add(type))
+        {
+            return false;
+        }
+        if (WalkDependencies(type.BaseType, envelopes, entities, visited))
+        {
+            if (!entities.Contains(type))
+            {
+                envelopes.Add(type);
+            }
+            return true;
+        }
+        foreach(PropertyInfo pi in type.GetProperties())
+        {
+            Type propertyType = pi.PropertyType.IsGenericType ? pi.PropertyType.GetGenericArguments()[0] : pi.PropertyType;
+            if (WalkDependencies(propertyType, envelopes, entities, visited))
+            {
+                if (!entities.Contains(type))
+                {
+                    envelopes.Add(type);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     private async Task GenerateModelPocotaEntityAsync(IConnector connector, Type contractType, Type entityType, string targetFolder, string name)
     {
         _logger?.LogInformation("Generating model's pocota {name} at {folder}.", name, targetFolder);

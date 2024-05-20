@@ -134,7 +134,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                     else
                     {
                         _itemHolderType = null;
-                        list = (IList)_property;
+                        list = (IList)_property.Value!;
                     }
                     column = new DataGridTemplateColumn
                     {
@@ -260,10 +260,28 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                         ((IList)_property!.Value!).Insert(insertPos, default);
                         item = Activator.CreateInstance(_itemHolderType!, _property.Value);
                     }
-                    ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection).Insert(insertPos, item);
-                    DataGrid.CommitEdit();
-                    RenumberItems();
-                    ItemsDataGridManager.ViewSource.View.Refresh();
+                    else
+                    {
+                        PropertyCommand cmd = new();
+                        PropertyCommandArgs commandArgs = new()
+                        {
+                            Action = args.Action,
+                            Property = Property.Create(ItemType),
+                            Launcher = this
+                        };
+                        if (cmd.CanExecute(commandArgs))
+                        {
+                            cmd.Execute(commandArgs);
+                            item = commandArgs.Property!.Value;
+                        }
+                    }
+                    if(item is { })
+                    {
+                        ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection).Insert(insertPos, item);
+                        DataGrid.CommitEdit();
+                        RenumberItems();
+                        ItemsDataGridManager.ViewSource.View.Refresh();
+                    }
                 }
             }
             else if (args.Action is PropertyAction.Clear)

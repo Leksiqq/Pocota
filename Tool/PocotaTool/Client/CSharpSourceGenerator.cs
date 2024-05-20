@@ -1,17 +1,27 @@
-﻿using Net.Leksi.E6dWebApp;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
+using Net.Leksi.E6dWebApp;
 using Net.Leksi.Pocota.Client;
 using Net.Leksi.Pocota.Contract;
 using Net.Leksi.Pocota.Tool.Pages.Client.CS;
 using Net.Leksi.Pocota.Tool.Pages.CS;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
+using System.Xml.Linq;
 
 namespace Net.Leksi.Pocota.Tool.Client;
 
 internal class CSharpSourceGenerator: IClientSourceGenerator
 {
+    private class EnvelopePageOptions: PageOptions
+    {
+        public HashSet<Type> Envelopes { get; set; }
+        public HashSet<Type> Entities { get; set; }
+    }
     private const string s_sourceFileExtention = ".cs";
     private const string s_dependencyInjectionNs = "Microsoft.Extensions.DependencyInjection";
     private readonly IServiceProvider _services;
@@ -95,18 +105,27 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         await Util.ProcessPageAsync(connector, options, "/Client/CS/Extensions", Util.BuildFilePath(targetFolder, name, s_sourceFileExtention));
         _logger?.LogInformation("Done.");
     }
-    public async Task GenerateExtensionsAsync(IConnector connector, Type contractType, string targetFolder, string name)
+    public async Task GenerateEnvelopeAsync(IConnector connector, Type contractType, Type envelopeType, string targetFolder, HashSet<Type> envelopes, HashSet<Type> entities)
     {
-        _logger?.LogInformation("Generating c# extensions {name} at {folder}.", name, targetFolder);
+        string name = Util.BuildTypeName(envelopeType);
+        _logger?.LogInformation("Generating c# envelope {type} at {folder}.", envelopeType, targetFolder);
+        EnvelopePageOptions options = new()
+        {
+            ContractType = contractType,
+            EntityType = envelopeType,
+            ClassName = Util.BuildResutTypeName(envelopeType, name),
+            Entities = entities,
+            Envelopes = envelopes
+        };
+        await Util.ProcessPageAsync(connector, options, "/Client/CS/Envelope", Util.BuildFilePath(targetFolder, name, s_sourceFileExtention));
         _logger?.LogInformation("Done.");
-        await Task.CompletedTask;
     }
     internal static void PopulateClientModel(ModelModel model)
     {
         PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
         model.ClassName = Util.GetTypeName(options.ClassName!);
-        model.NamespaceValue = $"{Util.GetNamespace(options.ClassName!)}.Client";
+        model.NamespaceValue = BuildClientNamespace(options.ClassName!);
         model.AddInheritance(typeof(Pocota.Client.PocotaEntity));
         model.AddInheritance($"I{model.ClassName}PocotaEntity");
         model.AddUsing(typeof(EntityProperty));
@@ -134,7 +153,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
     {
         PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
         model.ClassName = Util.GetTypeName(options.ClassName!);
-        model.NamespaceValue = $"{Util.GetNamespace(options.ClassName!)}.Client";
+        model.NamespaceValue = BuildClientNamespace(options.ClassName!);
         model.ContractName = options.ContractType!.GetCustomAttribute<PocotaContractAttribute>()!.ContractName!;
         model.JsonConverterFactoryClassName = $"{model.ContractName}JsonConverterFactory";
         model.AddInheritance(typeof(Connector));
@@ -152,23 +171,6 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 ReturnItemTypeName = Util.BuildTypeName(mi.ReturnType),
                 IsEnumeration = mi.ReturnType.IsGenericType,
             };
-            foreach (ParameterInfo pi in mi.GetParameters())
-            {
-                if (options.ContractType.GetCustomAttributes<EntityAttribute>().Where(a => a.EntityType.Name == pi.ParameterType.Name).FirstOrDefault() is null)
-                {
-                    model.AddUsing(pi.ParameterType);
-                }
-                else
-                {
-                    model.AddUsing($"{(string.IsNullOrEmpty(pi.ParameterType.Namespace) ? string.Empty : $"{pi.ParameterType.Namespace}.")}Client");
-                }
-                ParameterModel pm = new()
-                {
-                    Name = pi.Name!,
-                    TypeName = Util.BuildTypeName(pi.ParameterType),
-                };
-                mm.Parameters.Add(pm);
-            }
             if (mm.IsEnumeration)
             {
                 model.AddUsing(typeof(Task));
@@ -193,6 +195,23 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 mm.ReturnTypeName = mm.ReturnTypeName.Replace(">", "?>");
                 model.AddUsing(typeof(ValueTask));
             }
+            foreach (ParameterInfo pi in mi.GetParameters())
+            {
+                if (options.ContractType.GetCustomAttributes<EntityAttribute>().Where(a => a.EntityType.Name == pi.ParameterType.Name).FirstOrDefault() is null)
+                {
+                    model.AddUsing(pi.ParameterType);
+                }
+                else
+                {
+                    model.AddUsing($"{(string.IsNullOrEmpty(pi.ParameterType.Namespace) ? string.Empty : $"{pi.ParameterType.Namespace}.")}Client");
+                }
+                ParameterModel pm = new()
+                {
+                    Name = pi.Name!,
+                    TypeName = Util.BuildTypeName(pi.ParameterType),
+                };
+                mm.Parameters.Add(pm);
+            }
             model.Methods.Add(mm);
         }
     }
@@ -201,7 +220,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
         model.ClassName = Util.GetTypeName(options.ClassName!);
-        model.NamespaceValue = $"{Util.GetNamespace(options.ClassName!)}.Client";
+        model.NamespaceValue = BuildClientNamespace(options.ClassName!);
         model.AddUsing(typeof(HashSet<>));
         model.AddInheritance(typeof(JsonConverterFactory));
         model.AddUsing(typeof(JsonConverter));
@@ -219,7 +238,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
         model.ClassName = Util.GetTypeName(options.ClassName!);
-        model.NamespaceValue = $"{Util.GetNamespace(options.ClassName!)}.Client";
+        model.NamespaceValue = BuildClientNamespace(options.ClassName!);
         model.AddUsing(typeof(JsonConverter<>));
         model.AddUsing(typeof(JsonSerializer));
         model.AddUsing(typeof(PocotaContext));
@@ -248,7 +267,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
         model.ClassName = Util.GetTypeName(options.ClassName!);
-        model.NamespaceValue = $"{Util.GetNamespace(options.ClassName!)}.Client";
+        model.NamespaceValue = BuildClientNamespace(options.ClassName!);
         model.ContractName = options.ContractType!.GetCustomAttribute<PocotaContractAttribute>()!.ContractName!;
         model.AddInheritance(typeof(IPocotaEntity));
         model.AddUsing(typeof(EntityProperty));
@@ -270,7 +289,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
         model.ClassName = Util.GetTypeName(options.ClassName!);
-        model.NamespaceValue = $"{Util.GetNamespace(options.ClassName!)}.Client";
+        model.NamespaceValue = BuildClientNamespace(options.ClassName!);
         model.AddInheritance(typeof(PocotaContext));
         model.AddUsing(typeof(HashSet<>));
         foreach (EntityAttribute attribute in options.ContractType!.GetCustomAttributes<EntityAttribute>())
@@ -284,7 +303,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
         model.ClassName = Util.GetTypeName(options.ClassName!);
-        model.NamespaceValue = $"{Util.GetNamespace(options.ClassName!)}.Client";
+        model.NamespaceValue = BuildClientNamespace(options.ClassName!);
         model.ContractName = options.ContractType!.GetCustomAttribute<PocotaContractAttribute>()!.ContractName!;
         model.AddUsing(typeof(IServiceCollection));
         model.AddUsing(typeof(PocotaContext));
@@ -297,5 +316,64 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
             };
             model.Properties.Add(pm);
         }
+    }
+    internal static void PopulateClientEnvelope(EnvelopeModel model)
+    {
+        EnvelopePageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as EnvelopePageOptions)!;
+        model.Contract = Util.BuildTypeFullName(options.ContractType!);
+        model.ClassName = Util.GetTypeName(options.ClassName!);
+        model.NamespaceValue = BuildClientNamespace(options.ClassName!);
+        NullabilityInfoContext nullabilityInfoContext = new();
+        if(options.EntityType!.BaseType != typeof(object))
+        {
+            model.AddInheritance(BuildTypeName(options.EntityType!.BaseType!, options.Entities, options.Envelopes, model));
+        }
+        foreach(Type intf in options.EntityType!.GetInterfaces())
+        {
+            model.AddInheritance(intf);
+        }
+        foreach (PropertyInfo pi in options.EntityType!.GetProperties())
+        {
+            if (!pi.CanWrite || pi.SetMethod!.ReturnParameter.GetRequiredCustomModifiers().Contains(typeof(System.Runtime.CompilerServices.IsExternalInit)))
+            {
+                throw new Exception("Readonly property!");
+            }
+            model.AddUsing(pi.PropertyType);
+            PropertyModel pm = new()
+            {
+                Name = pi.Name,
+                TypeName = BuildTypeName(pi.PropertyType, options.Entities, options.Envelopes, model),
+                IsNullable = nullabilityInfoContext.Create(pi).ReadState is NullabilityState.Nullable,
+            };
+            model.Properties.Add(pm);
+        }
+    }
+    private static string BuildClientNamespace(string className)
+    {
+        string ns = Util.GetNamespace(className);
+        return $"{ns}{(string.IsNullOrEmpty(ns) ? string.Empty : ".")}Client";
+    }
+    private static string BuildTypeName(Type type, HashSet<Type> entities, HashSet<Type> envelopes, EnvelopeModel model)
+    {
+        StringBuilder sb = new();
+        if (type.IsGenericType)
+        {
+            model.AddUsing(type.GetGenericTypeDefinition());
+            sb.Append(type.GetGenericTypeDefinition().Name[..type.GetGenericTypeDefinition().Name.IndexOf('`')]).Append('<')
+                .Append(string.Join(',', type.GetGenericArguments().Select(t => BuildTypeName(t, entities, envelopes, model)))).Append('>');
+        }
+        else
+        {
+            if (envelopes.Contains(type) || entities.Contains(type))
+            {
+                model.AddUsing(BuildClientNamespace(Util.BuildTypeFullName(type)));
+            }
+            else
+            {
+                model.AddUsing(type);
+            }
+            sb.Append(type.Name);
+        }
+        return sb.ToString();
     }
 }

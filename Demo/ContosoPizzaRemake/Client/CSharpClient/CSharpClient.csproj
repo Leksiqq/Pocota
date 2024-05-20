@@ -8,7 +8,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Client\PocotaClient\PocotaClient.csproj" />
-    <ProjectReference Include="..\..\Contract\Contract.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Envelopes\" />
   </ItemGroup>
 
 </Project>

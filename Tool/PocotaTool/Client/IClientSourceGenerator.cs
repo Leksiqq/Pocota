@@ -6,5 +6,5 @@ internal interface IClientSourceGenerator
 {
     Task GenerateConnectorAsync(IConnector connector, Type contractType, string targetFolder, string name);
     Task GenerateModelAsync(IConnector connector, Type contractType, Type entityType, string targetFolder);
-    Task GenerateExtensionsAsync(IConnector connector, Type contractType, string targetFolder, string name);
+    Task GenerateEnvelopeAsync(IConnector connector, Type contractType, Type envelopeType, string targetFolder, HashSet<Type> envelopes, HashSet<Type> entities);
 }

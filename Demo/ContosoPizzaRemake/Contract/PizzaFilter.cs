@@ -4,8 +4,8 @@ namespace ContosoPizza;
 
 public class PizzaFilter
 {
-    public List<Topping> Toppings { get; private init; } = [];
-    public List<Sauce> Sauces { get; private init; } = [];
+    public List<Topping>? Toppings { get; set; }
+    public List<Sauce>? Sauces { get; set; }
     public string? NameRegex { get; set; }
-    public List<string>? Tags { get; set; } = ["foo", "bar"];
+    public List<string>? Tags { get; set; }
 }
