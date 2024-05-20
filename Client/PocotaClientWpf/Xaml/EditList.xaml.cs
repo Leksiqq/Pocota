@@ -135,6 +135,47 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                     {
                         _itemHolderType = null;
                         list = (IList)_property.Value!;
+                        if (PocotaContext.IsEntityType(ItemType))
+                        {
+                            var probe = (IPocotaEntity)(list.Count == 0 ? _context.CreateEntity(ItemType) : list[0])!;
+                            foreach(var prop in probe.Properties)
+                            {
+                                column = new DataGridTemplateColumn();
+                                ParameterizedResourceExtension pre = new()
+                                {
+                                    Replaces = new string[] { $"$field:Entity.{prop.Name}.Value", "$converter:EditListConverter" }
+                                };
+                                pre.ResourceKey = "Field";
+                                column.CellTemplate = pre.ProvideValue(_dataGridXamlServices) as DataTemplate;
+
+                                DataGridConverter converter = new()
+                                {
+                                    DataGridManager = ItemsDataGridManager,
+                                    FieldName = $"Entity.{prop.Name}.Value"
+                                };
+                                DataGrid.Resources.Add($"{prop.Name}ValueConverter", converter);
+                                pre = new("SortHeader1")
+                                {
+                                    Replaces = new string[] {
+                                        $"$converter:{prop.Name}ValueConverter",
+                                        $"$field:Entity.{prop.Name}.Value",
+                                        $"$name:{prop.Name}"
+                                    }
+                                };
+                                BindingProxy bp = (pre.ProvideValue(_dataGridXamlServices) as BindingProxy)!;
+                                Binding binding = new("Value")
+                                {
+                                    Source = bp
+                                };
+                                BindingOperations.SetBinding(column, DataGridTemplateColumn.HeaderTemplateProperty, binding);
+
+                                DataGrid.Columns.Add(column);
+                            }
+                        }
+                        else
+                        {
+
+                        }
                     }
                     column = new DataGridTemplateColumn
                     {
@@ -212,41 +253,22 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                 || (args.Action is PropertyAction.InsertBefore && !IsReadonly && args.Item is { })
             )
             {
-                if (IsObject)
-                {
-                    //Property? property = null;
-                    //if (action is PropertyAction.Edit)
-                    //{
-
-                    //}
-                    //else if (action is PropertyAction.Create)
-                    //{
-                    //    if (!IsReadonly && _indexMapping.TryGetValue(ItemsDataGridManager.ViewSource.View.CurrentItem, out object? index))
-                    //    {
-                    //        property = Property.Create(new ParameterInfoCosplay($"<{_trans.Translate("NEW-ITEM")}>", ItemType));
-                    //    }
-                    //}
-                    //if (property is { })
-                    //{
-                    //    PropertyCommand cmd = new();
-                    //    PropertyCommandArgs args = new()
-                    //    {
-                    //        Action = action,
-                    //        Property = property,
-                    //        Launcher = this
-                    //    };
-                    //    if (cmd.CanExecute(args))
-                    //    {
-                    //        cmd.Execute(args);
-                    //    }
-                    //}
-                }
-                else
-                {
-                }
                 if (args.Action is PropertyAction.Edit)
                 {
-
+                    if (IsObject)
+                    {
+                        PropertyCommand cmd = new();
+                        PropertyCommandArgs commandArgs = new()
+                        {
+                            Action = args.Action,
+                            Property = Property.Create(ItemType, args.Item),
+                            Launcher = this
+                        };
+                        if (cmd.CanExecute(commandArgs))
+                        {
+                            cmd.Execute(commandArgs);
+                        }
+                    }
                 }
                 else if (!IsReadonly)
                 {
@@ -255,12 +277,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                         && _indexMapping.TryGetValue(args.Item, out object? index)
                         ? (int)index! : ((IList)_property!.Value!).Count;
                     object? item = null;
-                    if (!IsObject)
-                    {
-                        ((IList)_property!.Value!).Insert(insertPos, default);
-                        item = Activator.CreateInstance(_itemHolderType!, _property.Value);
-                    }
-                    else
+                    if (IsObject)
                     {
                         PropertyCommand cmd = new();
                         PropertyCommandArgs commandArgs = new()
@@ -275,7 +292,12 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                             item = commandArgs.Property!.Value;
                         }
                     }
-                    if(item is { })
+                    else
+                    {
+                        ((IList)_property!.Value!).Insert(insertPos, default);
+                        item = Activator.CreateInstance(_itemHolderType!, _property.Value);
+                    }
+                    if (item is { })
                     {
                         ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection).Insert(insertPos, item);
                         DataGrid.CommitEdit();

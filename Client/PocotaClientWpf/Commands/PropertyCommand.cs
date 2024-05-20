@@ -31,7 +31,7 @@ public class PropertyCommand : ICommand
             {
                 if(args.Launcher is IWindowLauncher launcher)
                 {
-                    if(launcher.Launcher.IsLaunched(args.Property.Name) is bool isLaunched)
+                    if(launcher.Launcher.IsLaunched(args.Property) is bool isLaunched)
                     {
                         if (
                             (args.Action is PropertyAction.Clear && args.Property.Value is { } && !isLaunched)
@@ -52,7 +52,7 @@ public class PropertyCommand : ICommand
     {
         if(parameter is PropertyCommandArgs args && args.Property is { } && args.Launcher is IWindowLauncher launcher)
         {
-            bool isLaunched = launcher.Launcher.IsLaunched(args.Property.Name);
+            bool isLaunched = launcher.Launcher.IsLaunched(args.Property);
             if (args.Action is PropertyAction.Create)
             {
                 if (args.Property.Value is null)
@@ -76,7 +76,7 @@ public class PropertyCommand : ICommand
                     }
                     break;
                 case PropertyAction.Edit or PropertyAction.Create:
-                    if(launcher.Launcher.Launch(args.Property.Name, args.Property) is Window editWindow)
+                    if(launcher.Launcher.Launch(args.Property) is Window editWindow)
                     {
                         ((IEditWindow)editWindow).Property = args.Property;
                         editWindow.Show();

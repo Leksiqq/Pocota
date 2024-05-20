@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Sauce                        //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-20T15:57:53.                                 //
+// at 2024-05-20T17:10:07.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -11,7 +11,7 @@ using System;
 namespace ContosoPizza.Models.Client;
 
 
-public class Sauce: PocotaEntity, ISaucePocotaEntity
+public class Sauce: PocotaEntity
 {
     private class IdProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
@@ -69,6 +69,19 @@ public class Sauce: PocotaEntity, ISaucePocotaEntity
             }
         }
     }
+    private class SaucePocotaEntity(Sauce owner) : ISaucePocotaEntity
+    {
+        public EntityProperty Id => owner._IdEntityProperty;
+        public EntityProperty Id1 => owner._Id1EntityProperty;
+        public EntityProperty Name => owner._NameEntityProperty;
+        public EntityProperty IsVegan => owner._IsVeganEntityProperty;
+        public ulong PocotaId => ((IPocotaEntity)owner).PocotaId;
+
+        public EntityState State => ((IPocotaEntity)owner).State;
+
+        public IEnumerable<EntityProperty> Properties => ((IPocotaEntity)owner).Properties;
+        public IPocotaEntity Entity => this;
+    }
     private const string s_Id = "Id";
     private const string s_Id1 = "Id1";
     private const string s_Name = "Name";
@@ -81,16 +94,13 @@ public class Sauce: PocotaEntity, ISaucePocotaEntity
     public Int32 Id1 { get; set; }
     public String? Name { get; set; }
     public Boolean IsVegan { get; set; }
-    EntityProperty ISaucePocotaEntity.Id => _IdEntityProperty;
-    EntityProperty ISaucePocotaEntity.Id1 => _Id1EntityProperty;
-    EntityProperty ISaucePocotaEntity.Name => _NameEntityProperty;
-    EntityProperty ISaucePocotaEntity.IsVegan => _IsVeganEntityProperty;
     internal Sauce(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
     {
         _IdEntityProperty = new IdProperty(this, s_Id, typeof(Int32));
         _Id1EntityProperty = new Id1Property(this, s_Id1, typeof(Int32));
         _NameEntityProperty = new NameProperty(this, s_Name, typeof(String));
         _IsVeganEntityProperty = new IsVeganProperty(this, s_IsVegan, typeof(Boolean));
+        _entity = new SaucePocotaEntity(this);
     }
     protected override IEnumerable<EntityProperty> GetProperties()
     {

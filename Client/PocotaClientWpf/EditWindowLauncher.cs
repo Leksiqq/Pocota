@@ -28,9 +28,9 @@ public class EditWindowLauncher
         }
     }
 
-    public IEditWindow Launch(string parameterName, Property property)
+    public IEditWindow Launch(Property property)
     {
-        if (_editWindows.TryGetValue(parameterName, out WeakReference<IEditWindow>? wr))
+        if (_editWindows.TryGetValue(property.Name, out WeakReference<IEditWindow>? wr))
         {
             if (
                 wr.TryGetTarget(out IEditWindow? editWindow)
@@ -39,24 +39,24 @@ public class EditWindowLauncher
             {
                 return editWindow;
             }
-            _editWindows.Remove(parameterName);
+            _editWindows.Remove(property.Name);
         }
         IEditWindow result;
         if (property is ListProperty)
         {
-            result = new EditList($"{_path}/{parameterName}", property.Type);
+            result = new EditList($"{_path}/{property.Name}", property.Type);
         }
         else
         {
-            result = new EditObject($"{_path}/{parameterName}", property.Type);
+            result = new EditObject($"{_path}/{property.Name}", property.Type);
         }
         result.LaunchedBy = _owner;
-        _editWindows.Add(parameterName, new WeakReference<IEditWindow>(result));
+        _editWindows.Add(property.Name, new WeakReference<IEditWindow>(result));
         return result;
     }
-    public bool IsLaunched(string parameterName)
+    public bool IsLaunched(Property property)
     {
-        if (_editWindows.TryGetValue(parameterName, out WeakReference<IEditWindow>? wr))
+        if (_editWindows.TryGetValue(property.Name, out WeakReference<IEditWindow>? wr))
         {
             if (
                 wr.TryGetTarget(out IEditWindow? editWindow)
@@ -65,7 +65,7 @@ public class EditWindowLauncher
             {
                 return true;
             }
-            _editWindows.Remove(parameterName);
+            _editWindows.Remove(property.Name);
         }
         return false;
     }

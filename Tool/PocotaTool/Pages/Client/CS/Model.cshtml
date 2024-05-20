@@ -27,6 +27,20 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
     }
 </text>
 }
+    private class @Model.ClassName@{}PocotaEntity(@Model.ClassName owner) : I@{}@Model.ClassName@{}PocotaEntity
+    {
+@foreach (PropertyModel prop in Model.Properties)
+{
+    <text>        public @nameof(EntityProperty) @prop.Name => owner._@prop.Name@{}EntityProperty;
+</text>
+}
+        public ulong PocotaId => ((IPocotaEntity)owner).PocotaId;
+
+        public EntityState State => ((IPocotaEntity)owner).State;
+
+        public IEnumerable<EntityProperty> Properties => ((IPocotaEntity)owner).Properties;
+        public IPocotaEntity Entity => this;
+    }
 @foreach (PropertyModel prop in Model.Properties)
 {
     <text>    private const string s_@{}@prop.Name = "@prop.Name";
@@ -42,11 +56,6 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
     <text>    public @Html.Raw(prop.TypeName)@(prop.IsNullable ? "?" : string.Empty) @prop.Name { get; set; }
 </text>
 }
-@foreach (PropertyModel prop in Model.Properties)
-{
-    <text>    @nameof(EntityProperty) I@{}@Model.ClassName@{}PocotaEntity.@{}@prop.Name => _@prop.Name@{}EntityProperty;
-</text>
-}
     internal @Model.ClassName@{}(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
     {
 @foreach (PropertyModel prop in Model.Properties)
@@ -54,6 +63,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
     <text>        _@prop.Name@{}EntityProperty = new @prop.Name@{}Property@{}(this, s_@{}@prop.Name, typeof(@Html.Raw(prop.TypeName)));
 </text>
 }
+        _entity = new @Model.ClassName@{}PocotaEntity(this);
     }
     protected override IEnumerable<EntityProperty> GetProperties()
     {

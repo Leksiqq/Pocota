@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Topping                      //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-20T15:57:53.                                 //
+// at 2024-05-20T17:10:07.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -13,7 +13,7 @@ using System.Collections.Generic;
 namespace ContosoPizza.Models.Client;
 
 
-public class Topping: PocotaEntity, IToppingPocotaEntity
+public class Topping: PocotaEntity
 {
     private class IdProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
@@ -71,6 +71,19 @@ public class Topping: PocotaEntity, IToppingPocotaEntity
             }
         }
     }
+    private class ToppingPocotaEntity(Topping owner) : IToppingPocotaEntity
+    {
+        public EntityProperty Id => owner._IdEntityProperty;
+        public EntityProperty Name => owner._NameEntityProperty;
+        public EntityProperty Calories => owner._CaloriesEntityProperty;
+        public EntityProperty Pizzas => owner._PizzasEntityProperty;
+        public ulong PocotaId => ((IPocotaEntity)owner).PocotaId;
+
+        public EntityState State => ((IPocotaEntity)owner).State;
+
+        public IEnumerable<EntityProperty> Properties => ((IPocotaEntity)owner).Properties;
+        public IPocotaEntity Entity => this;
+    }
     private const string s_Id = "Id";
     private const string s_Name = "Name";
     private const string s_Calories = "Calories";
@@ -83,16 +96,13 @@ public class Topping: PocotaEntity, IToppingPocotaEntity
     public String? Name { get; set; }
     public Decimal Calories { get; set; }
     public ICollection<Pizza>? Pizzas { get; set; }
-    EntityProperty IToppingPocotaEntity.Id => _IdEntityProperty;
-    EntityProperty IToppingPocotaEntity.Name => _NameEntityProperty;
-    EntityProperty IToppingPocotaEntity.Calories => _CaloriesEntityProperty;
-    EntityProperty IToppingPocotaEntity.Pizzas => _PizzasEntityProperty;
     internal Topping(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
     {
         _IdEntityProperty = new IdProperty(this, s_Id, typeof(Int32));
         _NameEntityProperty = new NameProperty(this, s_Name, typeof(String));
         _CaloriesEntityProperty = new CaloriesProperty(this, s_Calories, typeof(Decimal));
         _PizzasEntityProperty = new PizzasProperty(this, s_Pizzas, typeof(ICollection<Pizza>));
+        _entity = new ToppingPocotaEntity(this);
     }
     protected override IEnumerable<EntityProperty> GetProperties()
     {

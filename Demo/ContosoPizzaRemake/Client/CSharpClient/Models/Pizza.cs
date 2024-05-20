@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Pizza                        //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-20T15:57:53.                                 //
+// at 2024-05-20T17:10:07.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -13,7 +13,7 @@ using System.Collections.Generic;
 namespace ContosoPizza.Models.Client;
 
 
-public class Pizza: PocotaEntity, IPizzaPocotaEntity
+public class Pizza: PocotaEntity
 {
     private class IdProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
@@ -71,6 +71,19 @@ public class Pizza: PocotaEntity, IPizzaPocotaEntity
             }
         }
     }
+    private class PizzaPocotaEntity(Pizza owner) : IPizzaPocotaEntity
+    {
+        public EntityProperty Id => owner._IdEntityProperty;
+        public EntityProperty Name => owner._NameEntityProperty;
+        public EntityProperty Sauce => owner._SauceEntityProperty;
+        public EntityProperty Toppings => owner._ToppingsEntityProperty;
+        public ulong PocotaId => ((IPocotaEntity)owner).PocotaId;
+
+        public EntityState State => ((IPocotaEntity)owner).State;
+
+        public IEnumerable<EntityProperty> Properties => ((IPocotaEntity)owner).Properties;
+        public IPocotaEntity Entity => this;
+    }
     private const string s_Id = "Id";
     private const string s_Name = "Name";
     private const string s_Sauce = "Sauce";
@@ -83,16 +96,13 @@ public class Pizza: PocotaEntity, IPizzaPocotaEntity
     public String? Name { get; set; }
     public Sauce? Sauce { get; set; }
     public ICollection<Topping>? Toppings { get; set; }
-    EntityProperty IPizzaPocotaEntity.Id => _IdEntityProperty;
-    EntityProperty IPizzaPocotaEntity.Name => _NameEntityProperty;
-    EntityProperty IPizzaPocotaEntity.Sauce => _SauceEntityProperty;
-    EntityProperty IPizzaPocotaEntity.Toppings => _ToppingsEntityProperty;
     internal Pizza(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
     {
         _IdEntityProperty = new IdProperty(this, s_Id, typeof(Int32));
         _NameEntityProperty = new NameProperty(this, s_Name, typeof(String));
         _SauceEntityProperty = new SauceProperty(this, s_Sauce, typeof(Sauce));
         _ToppingsEntityProperty = new ToppingsProperty(this, s_Toppings, typeof(ICollection<Topping>));
+        _entity = new PizzaPocotaEntity(this);
     }
     protected override IEnumerable<EntityProperty> GetProperties()
     {

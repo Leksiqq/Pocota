@@ -39,7 +39,7 @@ public class PocotaContext
     {
         if(s_entityCreators.ContainsKey(typeof(T)))
         {
-            return entity as T;
+            return ((IPocotaEntity)entity).Entity as T;
         }
         return null;
     }

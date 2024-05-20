@@ -43,7 +43,10 @@ public partial class EditObject : Window, IEditWindow, IWindowLauncher
                 Properties.Clear();
                 if (PocotaContext.IsEntityType(_property.Type))
                 {
-
+                    foreach (Property prop in ((IPocotaEntity)_property.Value!).Properties)
+                    {
+                        Properties.Add(prop);
+                    }
                 }
                 else
                 {
