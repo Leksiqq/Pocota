@@ -22,7 +22,7 @@ public class Sauce: PocotaEntity, ISaucePocotaEntity
                 if(Entity is {} && value is Int32 val && val != ((Sauce)Entity).Id) 
                 {
                     ((Sauce)Entity).Id = val;
-                    OnPropertyChanged();
+                    NotifyPropertyChanged();
                 }
             }
         }
@@ -36,7 +36,7 @@ public class Sauce: PocotaEntity, ISaucePocotaEntity
                 if(Entity is {} && value is Int32 val && val != ((Sauce)Entity).Id1) 
                 {
                     ((Sauce)Entity).Id1 = val;
-                    OnPropertyChanged();
+                    NotifyPropertyChanged();
                 }
             }
         }
@@ -50,7 +50,7 @@ public class Sauce: PocotaEntity, ISaucePocotaEntity
                 if(Entity is {} && value is String val && val != ((Sauce)Entity).Name) 
                 {
                     ((Sauce)Entity).Name = val;
-                    OnPropertyChanged();
+                    NotifyPropertyChanged();
                 }
             }
         }
@@ -64,7 +64,7 @@ public class Sauce: PocotaEntity, ISaucePocotaEntity
                 if(Entity is {} && value is Boolean val && val != ((Sauce)Entity).IsVegan) 
                 {
                     ((Sauce)Entity).IsVegan = val;
-                    OnPropertyChanged();
+                    NotifyPropertyChanged();
                 }
             }
         }

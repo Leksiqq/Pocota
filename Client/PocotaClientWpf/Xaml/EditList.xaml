@@ -134,6 +134,7 @@
             CanUserAddRows="False"
             CanUserDeleteRows="False"
             MouseDoubleClick="DataGrid_MouseDoubleClick"
+            
             >
             <DataGrid.Resources>
                 <ResourceDictionary>

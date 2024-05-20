@@ -26,6 +26,6 @@ public class ListProperty : Property
 
     private void _source_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        OnPropertyChanged();
+        NotifyPropertyChanged();
     }
 }

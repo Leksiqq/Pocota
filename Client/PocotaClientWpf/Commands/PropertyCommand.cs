@@ -78,7 +78,7 @@ public class PropertyCommand : ICommand
                 case PropertyAction.Edit or PropertyAction.Create:
                     if(launcher.Launcher.Launch(args.Property.Name, args.Property) is Window editWindow)
                     {
-                        ((IEditWindow)editWindow).Value = args.Property.Value!;
+                        ((IEditWindow)editWindow).Property = args.Property;
                         editWindow.Show();
                         editWindow.Focus();
                     }

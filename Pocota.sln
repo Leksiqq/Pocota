@@ -37,6 +37,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PocotaClientWpf", "Client\P
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6F7B5E12-9F91-40C8-B0C2-492F878EEC96}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfMarkupExtension", "..\WPF\WpfMarkupExtension\WpfMarkupExtension\WpfMarkupExtension.csproj", "{05D38184-AB0F-480C-8A4B-F371D4E46588}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,10 @@ Global
 		{3299B6B5-FF05-4C71-B165-BC62824B1D7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3299B6B5-FF05-4C71-B165-BC62824B1D7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3299B6B5-FF05-4C71-B165-BC62824B1D7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05D38184-AB0F-480C-8A4B-F371D4E46588}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05D38184-AB0F-480C-8A4B-F371D4E46588}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05D38184-AB0F-480C-8A4B-F371D4E46588}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05D38184-AB0F-480C-8A4B-F371D4E46588}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

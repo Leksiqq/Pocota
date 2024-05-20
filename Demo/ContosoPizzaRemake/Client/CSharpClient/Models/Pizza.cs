@@ -24,7 +24,7 @@ public class Pizza: PocotaEntity, IPizzaPocotaEntity
                 if(Entity is {} && value is Int32 val && val != ((Pizza)Entity).Id) 
                 {
                     ((Pizza)Entity).Id = val;
-                    OnPropertyChanged();
+                    NotifyPropertyChanged();
                 }
             }
         }
@@ -38,7 +38,7 @@ public class Pizza: PocotaEntity, IPizzaPocotaEntity
                 if(Entity is {} && value is String val && val != ((Pizza)Entity).Name) 
                 {
                     ((Pizza)Entity).Name = val;
-                    OnPropertyChanged();
+                    NotifyPropertyChanged();
                 }
             }
         }
@@ -52,7 +52,7 @@ public class Pizza: PocotaEntity, IPizzaPocotaEntity
                 if(Entity is {} && value is Sauce val && val != ((Pizza)Entity).Sauce) 
                 {
                     ((Pizza)Entity).Sauce = val;
-                    OnPropertyChanged();
+                    NotifyPropertyChanged();
                 }
             }
         }
@@ -66,7 +66,7 @@ public class Pizza: PocotaEntity, IPizzaPocotaEntity
                 if(Entity is {} && value is ICollection<Topping> val && val != ((Pizza)Entity).Toppings) 
                 {
                     ((Pizza)Entity).Toppings = val;
-                    OnPropertyChanged();
+                    NotifyPropertyChanged();
                 }
             }
         }

@@ -13,7 +13,7 @@ public class PropertyInfoProperty: Property
             if(_info.GetValue(_obj) != value)
             {
                 _info.SetValue(_obj, value);
-                OnPropertyChanged();
+                NotifyPropertyChanged();
             }
         }
     }

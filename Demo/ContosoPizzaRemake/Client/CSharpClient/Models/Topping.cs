@@ -24,7 +24,7 @@ public class Topping: PocotaEntity, IToppingPocotaEntity
                 if(Entity is {} && value is Int32 val && val != ((Topping)Entity).Id) 
                 {
                     ((Topping)Entity).Id = val;
-                    OnPropertyChanged();
+                    NotifyPropertyChanged();
                 }
             }
         }
@@ -38,7 +38,7 @@ public class Topping: PocotaEntity, IToppingPocotaEntity
                 if(Entity is {} && value is String val && val != ((Topping)Entity).Name) 
                 {
                     ((Topping)Entity).Name = val;
-                    OnPropertyChanged();
+                    NotifyPropertyChanged();
                 }
             }
         }
@@ -52,7 +52,7 @@ public class Topping: PocotaEntity, IToppingPocotaEntity
                 if(Entity is {} && value is Decimal val && val != ((Topping)Entity).Calories) 
                 {
                     ((Topping)Entity).Calories = val;
-                    OnPropertyChanged();
+                    NotifyPropertyChanged();
                 }
             }
         }
@@ -66,7 +66,7 @@ public class Topping: PocotaEntity, IToppingPocotaEntity
                 if(Entity is {} && value is ICollection<Pizza> val && val != ((Topping)Entity).Pizzas) 
                 {
                     ((Topping)Entity).Pizzas = val;
-                    OnPropertyChanged();
+                    NotifyPropertyChanged();
                 }
             }
         }

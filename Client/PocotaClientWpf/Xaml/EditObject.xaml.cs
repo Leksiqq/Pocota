@@ -12,7 +12,7 @@ public partial class EditObject : Window, IEditWindow, IWindowLauncher
     private readonly IServiceProvider _services;
     private readonly PocotaContext _context;
     private readonly Dictionary<string, WeakReference<EditObject>> _editWindows = [];
-    private object? _value;
+    private Property? _property;
     private Window? _launchedBy;
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     public ObservableCollection<Property> Properties { get; private init; } = [];
@@ -32,24 +32,24 @@ public partial class EditObject : Window, IEditWindow, IWindowLauncher
         }
     }
     public EditWindowLauncher Launcher { get; private init; }
-    public object? Value 
+    public Property? Property
     {  
-        get => _value; 
+        get => _property; 
         set
         {
-            if(_value != value && value is { })
+            if(_property != value && value is { })
             {
-                _value = value;
+                _property = value;
                 Properties.Clear();
-                if (PocotaContext.IsEntityType(_value.GetType()))
+                if (PocotaContext.IsEntityType(_property.Type))
                 {
 
                 }
                 else
                 {
-                    foreach (PropertyInfo pi in _value.GetType().GetProperties())
+                    foreach (PropertyInfo pi in _property.Type.GetProperties())
                     {
-                        Property prop = Property.Create(pi, _value)!;
+                        Property prop = Property.Create(pi, _property.Value)!;
                         Properties.Add(prop);
                     }
                 }

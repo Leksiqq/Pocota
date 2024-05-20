@@ -38,7 +38,6 @@ namespace Net.Leksi.Pocota.Client
             CalcColumnsWidth(ParametersView.ActualWidth);
             Windows.Touch();
         }
-
         protected override void OnClosed(EventArgs e)
         {
             Windows.Touch();

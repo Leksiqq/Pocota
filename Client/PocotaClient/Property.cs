@@ -29,7 +29,7 @@ public class Property(string name, Type type) : INotifyPropertyChanged
             if (_value != value)
             {
                 _value = value;
-                OnPropertyChanged();
+                NotifyPropertyChanged();
             }
         }
     }
@@ -61,11 +61,8 @@ public class Property(string name, Type type) : INotifyPropertyChanged
         }
         return result;
     }
-    protected void OnPropertyChanged()
+    public void NotifyPropertyChanged()
     {
-        if (_propertyChanged is { })
-        {
-            _propertyChanged.Invoke(this, _propertyChangedEventArgs);
-        }
+        _propertyChanged?.Invoke(this, _propertyChangedEventArgs);
     }
 }

@@ -122,10 +122,9 @@
                                 <DataTrigger Value="False">
                                     <Setter Property="Text">
                                         <Setter.Value>
-                                            <MultiBinding StringFormat="[..], {0}: {1} ({2})">
+                                            <MultiBinding StringFormat="[..], {0}: {1}">
                                                 <Binding Source="COUNT" Converter="{StaticResource I18nConverter}"/>
                                                 <Binding Path="Value.Count"/>
-                                                <Binding Path="Value"/>
                                             </MultiBinding>
                                         </Setter.Value>
                                     </Setter>
