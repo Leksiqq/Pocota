@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Data;
 using static Net.Leksi.Pocota.Client.Constants;
 
 namespace Net.Leksi.Pocota.Client;
@@ -16,6 +17,7 @@ public partial class EditObject : Window, IEditWindow, IWindowLauncher
     private Window? _launchedBy;
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     public ObservableCollection<Property> Properties { get; private init; } = [];
+    public CollectionViewSource PropertiesViewSource { get; private init; } = new();
     public bool IsReadonly { get; private set; }
     public bool KeysOnly { get; internal set; }
     public WindowsList Windows { get; private init; }
@@ -45,7 +47,7 @@ public partial class EditObject : Window, IEditWindow, IWindowLauncher
                 {
                     foreach (Property prop in ((IPocotaEntity)_property.Value!).Properties)
                     {
-                        Properties.Add(prop);
+                        Properties.Add(Property.Create(prop)!);
                     }
                 }
                 else
@@ -62,6 +64,7 @@ public partial class EditObject : Window, IEditWindow, IWindowLauncher
     public EditWindowCore EditWindowCore { get; private init; }
     public EditObject(string path, Type type, bool isReadonly = false)
     {
+        PropertiesViewSource.Source = Properties;
         IsReadonly = false;
         _services = (IServiceProvider)Application.Current.Resources[ServiceProvider];
         _context = _services.GetRequiredService<PocotaContext>();

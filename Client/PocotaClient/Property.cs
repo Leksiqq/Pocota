@@ -49,11 +49,18 @@ public class Property(string name, Type type) : INotifyPropertyChanged
         {
             result = new Property(string.Empty, type);
         }
+        else if(info is Property property)
+        {
+            result = property;
+        }
         if(result is { })
         {
             if (
-                result.Type.IsGenericType && typeof(IList<>)
-                        .MakeGenericType([result.Type.GetGenericArguments()[0]]).IsAssignableFrom(result.Type)
+                result.Type.IsGenericType 
+                && (
+                    typeof(IList<>).MakeGenericType([result.Type.GetGenericArguments()[0]]).IsAssignableFrom(result.Type)
+                    || typeof(ICollection<>).MakeGenericType([result.Type.GetGenericArguments()[0]]).IsAssignableFrom(result.Type)
+                )
             )
             {
                 result = new ListProperty(result);

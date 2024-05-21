@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Topping                      //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-21T10:35:18.                                 //
+// at 2024-05-21T11:07:45.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -89,7 +89,7 @@ public class Topping: PocotaEntity
             set {
                 if(Entity is {}) 
                 {
-                    if(value is ICollection<Pizza> val && val != ((Topping)Entity).Pizzas)
+                    if(value is IList<Pizza> val && val != ((Topping)Entity).Pizzas)
                     {
                         ((Topping)Entity).Pizzas = val;
                         NotifyPropertyChanged();
@@ -127,13 +127,13 @@ public class Topping: PocotaEntity
     public Int32 Id { get; set; }
     public String? Name { get; set; }
     public Decimal Calories { get; set; }
-    public ICollection<Pizza>? Pizzas { get; set; }
+    public IList<Pizza>? Pizzas { get; set; }
     internal Topping(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
     {
         _IdEntityProperty = new IdProperty(this, s_Id, typeof(Int32));
         _NameEntityProperty = new NameProperty(this, s_Name, typeof(String));
         _CaloriesEntityProperty = new CaloriesProperty(this, s_Calories, typeof(Decimal));
-        _PizzasEntityProperty = new PizzasProperty(this, s_Pizzas, typeof(ICollection<Pizza>));
+        _PizzasEntityProperty = new PizzasProperty(this, s_Pizzas, typeof(IList<Pizza>));
         _entity = new ToppingPocotaEntity(this);
     }
     protected override IEnumerable<EntityProperty> GetProperties()

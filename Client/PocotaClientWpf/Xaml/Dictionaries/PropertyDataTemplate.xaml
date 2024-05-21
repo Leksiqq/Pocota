@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -10,9 +11,6 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Dictionary1.xaml" />
     </ResourceDictionary.MergedDictionaries>
-    <DataTemplate x:Key="DefaultPropertyDataTemplate" >
-        <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsReadonly}"/>
-    </DataTemplate>
     <local:IsNullConverter x:Key="IsNullConverter"/>
     <l:BoolExpressionConverter x:Key="BoolExpressionConverter"/>
     <Style x:Key="ButtonVisibleIfCanEditStyle" TargetType="ButtonBase">
@@ -225,7 +223,7 @@
             </TextBlock>
         </DockPanel>
     </DataTemplate>
-    <DataTemplate x:Key="ValueTemplate">
+    <DataTemplate x:Key="DefaultPropertyDataTemplate" x:Shared="False">
         <DockPanel LastChildFill="True">
             <Button 
                 DockPanel.Dock="Right" 
@@ -251,27 +249,30 @@
                     </l:StyleCombiner>
                 </Button.Style>
             </Button>
-            <ContentControl 
-                Content="{
+            <TextBox 
+                d:Text="{
                     Binding 
-                    RelativeSource={
-                        RelativeSource 
-                        Mode=FindAncestor, 
-                        AncestorType=DockPanel
-                        }, 
-                    Path=DataContext
-                    }"
+                    Path=$path, 
+                    Mode=TwoWay, 
+                    UpdateSourceTrigger=PropertyChanged, 
+                    Converter={l:ParameterizedResource $converter}
+                    }" 
+                IsReadOnly="{Binding IsReadonly}"
                 >
-                <ContentControl.ContentTemplateSelector>
-                    <local:PropertyTemplateSelector 
-                        Default="{StaticResource DefaultPropertyDataTemplate}"
-                        Class="{StaticResource ClassPropertyDataTemplate}"
-                        List="{StaticResource ListPropertyDataTemplate}"
-                        />
-                </ContentControl.ContentTemplateSelector>
-            </ContentControl>
+                <TextBox.Text>
+                    <MultiBinding Converter="{l:ParameterizedResource $converter}" UpdateSourceTrigger="PropertyChanged">
+                        <Binding Path="$path" Mode="TwoWay"/>
+                        <Binding Path="$property" Mode="OneTime"/>
+                    </MultiBinding>
+                </TextBox.Text>
+            </TextBox>
         </DockPanel>
     </DataTemplate>
+    <local:PropertyTemplateSelector x:Key="PropertyTemplateSelector" x:Shared="False"
+        DefaultKey="DefaultPropertyDataTemplate"
+        Class="{StaticResource ClassPropertyDataTemplate}"
+        List="{StaticResource ListPropertyDataTemplate}"
+        />
     <DataTemplate x:Key="NameTemplate">
         <DockPanel LastChildFill="True">
             <TextBlock Text="{Binding Name}" TextAlignment="Right" Margin="0,0,10,0" FontWeight="Bold" FontSize="12"/>

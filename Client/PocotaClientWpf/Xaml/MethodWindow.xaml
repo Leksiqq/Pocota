@@ -26,6 +26,7 @@
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
             <l:BindingProxy Value="{Binding Windows}" x:Key="Windows"/>
+            <local:SimpleDataConverter x:Key="SimpleDataConverter"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
@@ -58,8 +59,18 @@
                     <GridViewColumn
                         x:Name="ParameterValueColumn"
                         Header="{Binding Source=VALUE, Converter={StaticResource I18nConverter}}"
-                        CellTemplate="{StaticResource ValueTemplate}"
                         >
+                        <GridViewColumn.CellTemplateSelector>
+                            <l:ParameterizedResource ResourceKey="PropertyTemplateSelector">
+                                <l:ParameterizedResource.Replaces>
+                                    <x:Array Type="sys:Object">
+                                        <sys:String>$path:Value</sys:String>
+                                        <sys:String>$property:.</sys:String>
+                                        <sys:String>$converter:SimpleDataConverter</sys:String>
+                                    </x:Array>
+                                </l:ParameterizedResource.Replaces>
+                            </l:ParameterizedResource>
+                        </GridViewColumn.CellTemplateSelector>
                     </GridViewColumn>
                 </GridView>
             </ListView.View>

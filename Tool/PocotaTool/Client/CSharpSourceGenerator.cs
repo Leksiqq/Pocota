@@ -144,6 +144,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 Type itemType = pi.PropertyType.GetGenericArguments()[0];
                 model.AddUsing(itemType);
                 pm.ItemTypeName = Util.BuildTypeName(itemType);
+                pm.TypeName = Util.BuildTypeName(typeof(IList<>).MakeGenericType([itemType]));
             }
             model.Properties.Add(pm);
         }

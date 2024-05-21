@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
     mc:Ignorable="d"
@@ -26,6 +27,7 @@
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
             <l:BindingProxy Value="{Binding Windows}" x:Key="Windows"/>
+            <local:SimpleDataConverter x:Key="SimpleDataConverter"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
@@ -48,7 +50,7 @@
             </MenuItem>
             <MenuItem Style="{l:ParameterizedResource WindowsMenuItemStyle, Replaces=$window:Window}"/>
         </Menu>
-        <ListView DockPanel.Dock="Top" x:Name="PropertiesView" ItemsSource="{Binding Properties}" SizeChanged="PropertiesView_SizeChanged">
+        <ListView DockPanel.Dock="Top" x:Name="PropertiesView" ItemsSource="{Binding PropertiesViewSource.View}" SizeChanged="PropertiesView_SizeChanged">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -66,8 +68,20 @@
                     <GridViewColumn
                         x:Name="PropertyValueColumn"
                         Header="{Binding Source=VALUE, Converter={StaticResource I18nConverter}}"
-                        CellTemplate="{StaticResource ValueTemplate}"
-                        />
+                        d:CellTemplateSelector="{l:ParameterizedResource PropertyTemplateSelector, Replaces=$path:Value|$converter:SimpleDataConverter}"
+                        >
+                        <GridViewColumn.CellTemplateSelector>
+                            <l:ParameterizedResource ResourceKey="PropertyTemplateSelector">
+                                <l:ParameterizedResource.Replaces>
+                                    <x:Array Type="sys:Object">
+                                        <sys:String>$path:Value</sys:String>
+                                        <sys:String>$property:.</sys:String>
+                                        <sys:String>$converter:SimpleDataConverter</sys:String>
+                                    </x:Array>
+                                </l:ParameterizedResource.Replaces>
+                            </l:ParameterizedResource>
+                        </GridViewColumn.CellTemplateSelector>
+                    </GridViewColumn>
                 </GridView>
             </ListView.View>
         </ListView>

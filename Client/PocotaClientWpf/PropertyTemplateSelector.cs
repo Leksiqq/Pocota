@@ -6,9 +6,10 @@ using System.Windows.Media;
 namespace Net.Leksi.Pocota.Client;
 public class PropertyTemplateSelector: DataTemplateSelector
 {
-    public DataTemplate Default { get; set; } = null!;
+    public object DefaultKey { get; set; } = null!;
     public DataTemplate Class { get; set; } = null!;
     public DataTemplate List { get; set; } = null!;
+    private DataTemplate? Default = null;
     public override DataTemplate? SelectTemplate(object item, DependencyObject container)
     {
         DataTemplate? result = null;
@@ -17,6 +18,7 @@ public class PropertyTemplateSelector: DataTemplateSelector
         {
             if(dob is FrameworkElement fe && fe.DataContext is Property mp)
             {
+                Default = fe.FindResource(DefaultKey) as DataTemplate;
                 value = mp;
                 break;
             }
@@ -29,6 +31,7 @@ public class PropertyTemplateSelector: DataTemplateSelector
             }
             else if(value.Type == typeof(string))
             {
+                Console.WriteLine($"{value.Name}, {Default.GetHashCode()}");
                 result = Default;
             }
             else if (value.Type.IsClass)
@@ -37,6 +40,7 @@ public class PropertyTemplateSelector: DataTemplateSelector
             }
             else
             {
+                Console.WriteLine($"{value.Name}, {Default.GetHashCode()}");
                 result = Default;
             }
         }
