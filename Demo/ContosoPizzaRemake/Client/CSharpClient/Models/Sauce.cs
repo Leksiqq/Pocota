@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Sauce                        //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-20T17:10:07.                                 //
+// at 2024-05-21T10:35:18.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -19,10 +19,18 @@ public class Sauce: PocotaEntity
         {
             get => ((Sauce)Entity)?.Id;
             set {
-                if(Entity is {} && value is Int32 val && val != ((Sauce)Entity).Id) 
+                if(Entity is {}) 
                 {
-                    ((Sauce)Entity).Id = val;
-                    NotifyPropertyChanged();
+                    if(value is Int32 val && val != ((Sauce)Entity).Id)
+                    {
+                        ((Sauce)Entity).Id = val;
+                        NotifyPropertyChanged();
+                    }
+                    else if(value == default && ((Sauce)Entity).Id != default)
+                    {
+                        ((Sauce)Entity).Id = default;
+                        NotifyPropertyChanged();
+                    }
                 }
             }
         }
@@ -33,10 +41,18 @@ public class Sauce: PocotaEntity
         {
             get => ((Sauce)Entity)?.Id1;
             set {
-                if(Entity is {} && value is Int32 val && val != ((Sauce)Entity).Id1) 
+                if(Entity is {}) 
                 {
-                    ((Sauce)Entity).Id1 = val;
-                    NotifyPropertyChanged();
+                    if(value is Int32 val && val != ((Sauce)Entity).Id1)
+                    {
+                        ((Sauce)Entity).Id1 = val;
+                        NotifyPropertyChanged();
+                    }
+                    else if(value == default && ((Sauce)Entity).Id1 != default)
+                    {
+                        ((Sauce)Entity).Id1 = default;
+                        NotifyPropertyChanged();
+                    }
                 }
             }
         }
@@ -47,10 +63,18 @@ public class Sauce: PocotaEntity
         {
             get => ((Sauce)Entity)?.Name;
             set {
-                if(Entity is {} && value is String val && val != ((Sauce)Entity).Name) 
+                if(Entity is {}) 
                 {
-                    ((Sauce)Entity).Name = val;
-                    NotifyPropertyChanged();
+                    if(value is String val && val != ((Sauce)Entity).Name)
+                    {
+                        ((Sauce)Entity).Name = val;
+                        NotifyPropertyChanged();
+                    }
+                    else if(value == default && ((Sauce)Entity).Name != default)
+                    {
+                        ((Sauce)Entity).Name = default;
+                        NotifyPropertyChanged();
+                    }
                 }
             }
         }
@@ -61,10 +85,18 @@ public class Sauce: PocotaEntity
         {
             get => ((Sauce)Entity)?.IsVegan;
             set {
-                if(Entity is {} && value is Boolean val && val != ((Sauce)Entity).IsVegan) 
+                if(Entity is {}) 
                 {
-                    ((Sauce)Entity).IsVegan = val;
-                    NotifyPropertyChanged();
+                    if(value is Boolean val && val != ((Sauce)Entity).IsVegan)
+                    {
+                        ((Sauce)Entity).IsVegan = val;
+                        NotifyPropertyChanged();
+                    }
+                    else if(value == default && ((Sauce)Entity).IsVegan != default)
+                    {
+                        ((Sauce)Entity).IsVegan = default;
+                        NotifyPropertyChanged();
+                    }
                 }
             }
         }

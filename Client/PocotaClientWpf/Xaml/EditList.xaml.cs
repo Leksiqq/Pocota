@@ -34,6 +34,10 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private readonly IServiceProvider _windowXamlServices;
     private readonly IServiceProvider _dataGridXamlServices;
+    private readonly PropertyCommand _propertyCommand = new();
+    private PropertyCommandArgs? _editPropertyCommandArgs;
+    private PropertyCommandArgs? _createPropertyCommandArgs;
+    private PropertyCommandArgs? _clearPropertyCommandArgs;
     private Type? _itemHolderType = null;
     private PropertyInfo? _positionProperty;
     private PropertyInfo? _valueProperty;
@@ -72,6 +76,26 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                 )
                 {
                     ItemType = itemType;
+                    _createPropertyCommandArgs = new PropertyCommandArgs
+                    {
+                        Action = PropertyAction.Create,
+                        Property = Property.Create(ItemType),
+                        Launcher = this,
+                        AltName = "[]",
+                    };
+                    _editPropertyCommandArgs = new PropertyCommandArgs
+                    {
+                        Action = PropertyAction.Edit,
+                        Property = Property.Create(ItemType),
+                        Launcher = this,
+                        AltName = "[]",
+                    };
+                    _clearPropertyCommandArgs = new PropertyCommandArgs
+                    {
+                        Action = PropertyAction.Clear,
+                        Property = Property.Create(ItemType),
+                        Launcher = this,
+                    };
                     DataGrid.IsReadOnly = IsDataGridReadonly;
                     _property = value;
                     IList list;
@@ -216,21 +240,29 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                 (
                     args.Action is PropertyAction.Edit 
                     && IsObject 
-                    && args.Item is { }
+                    && (_editPropertyCommandArgs!.Property!.Value = args.Item) is { }
+                    && _propertyCommand.CanExecute(_editPropertyCommandArgs)
                 )
                 || (
                     args.Action is PropertyAction.Clear 
                     && !IsReadonly 
-                    && args.Item is { }
+                    && (_clearPropertyCommandArgs!.Property!.Value = args.Item) is { }
+                    && _propertyCommand.CanExecute(_clearPropertyCommandArgs)
                 )
                 || (
                     args.Action is PropertyAction.Create 
                     && !IsReadonly
+                    && (
+                        _createPropertyCommandArgs is null
+                        || (_createPropertyCommandArgs!.Property!.Value = null) is null
+                    )
+                    && _propertyCommand.CanExecute(_createPropertyCommandArgs)
                 )
                 || (
                     args.Action is PropertyAction.InsertBefore 
                     && !IsReadonly 
                     && args.Item is { }
+                    && _propertyCommand.CanExecute(_createPropertyCommandArgs)
                 )
                 || (
                     args.Action is PropertyAction.Move 
@@ -257,16 +289,10 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                 {
                     if (IsObject)
                     {
-                        PropertyCommand cmd = new();
-                        PropertyCommandArgs commandArgs = new()
+                        _editPropertyCommandArgs!.Property!.Value = args.Item;
+                        if (_propertyCommand.CanExecute(_editPropertyCommandArgs))
                         {
-                            Action = args.Action,
-                            Property = Property.Create(ItemType, args.Item),
-                            Launcher = this
-                        };
-                        if (cmd.CanExecute(commandArgs))
-                        {
-                            cmd.Execute(commandArgs);
+                            _propertyCommand.Execute(_editPropertyCommandArgs);
                         }
                     }
                 }
@@ -279,17 +305,10 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                     object? item = null;
                     if (IsObject)
                     {
-                        PropertyCommand cmd = new();
-                        PropertyCommandArgs commandArgs = new()
+                        if (_propertyCommand.CanExecute(_createPropertyCommandArgs))
                         {
-                            Action = args.Action,
-                            Property = Property.Create(ItemType),
-                            Launcher = this
-                        };
-                        if (cmd.CanExecute(commandArgs))
-                        {
-                            cmd.Execute(commandArgs);
-                            item = commandArgs.Property!.Value;
+                            _propertyCommand.Execute(_createPropertyCommandArgs);
+                            item = _createPropertyCommandArgs!.Property!.Value;
                         }
                     }
                     else

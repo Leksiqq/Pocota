@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Pizza                        //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-20T17:10:07.                                 //
+// at 2024-05-21T10:35:17.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -21,10 +21,18 @@ public class Pizza: PocotaEntity
         {
             get => ((Pizza)Entity)?.Id;
             set {
-                if(Entity is {} && value is Int32 val && val != ((Pizza)Entity).Id) 
+                if(Entity is {}) 
                 {
-                    ((Pizza)Entity).Id = val;
-                    NotifyPropertyChanged();
+                    if(value is Int32 val && val != ((Pizza)Entity).Id)
+                    {
+                        ((Pizza)Entity).Id = val;
+                        NotifyPropertyChanged();
+                    }
+                    else if(value == default && ((Pizza)Entity).Id != default)
+                    {
+                        ((Pizza)Entity).Id = default;
+                        NotifyPropertyChanged();
+                    }
                 }
             }
         }
@@ -35,10 +43,18 @@ public class Pizza: PocotaEntity
         {
             get => ((Pizza)Entity)?.Name;
             set {
-                if(Entity is {} && value is String val && val != ((Pizza)Entity).Name) 
+                if(Entity is {}) 
                 {
-                    ((Pizza)Entity).Name = val;
-                    NotifyPropertyChanged();
+                    if(value is String val && val != ((Pizza)Entity).Name)
+                    {
+                        ((Pizza)Entity).Name = val;
+                        NotifyPropertyChanged();
+                    }
+                    else if(value == default && ((Pizza)Entity).Name != default)
+                    {
+                        ((Pizza)Entity).Name = default;
+                        NotifyPropertyChanged();
+                    }
                 }
             }
         }
@@ -49,10 +65,18 @@ public class Pizza: PocotaEntity
         {
             get => ((Pizza)Entity)?.Sauce;
             set {
-                if(Entity is {} && value is Sauce val && val != ((Pizza)Entity).Sauce) 
+                if(Entity is {}) 
                 {
-                    ((Pizza)Entity).Sauce = val;
-                    NotifyPropertyChanged();
+                    if(value is Sauce val && val != ((Pizza)Entity).Sauce)
+                    {
+                        ((Pizza)Entity).Sauce = val;
+                        NotifyPropertyChanged();
+                    }
+                    else if(value == default && ((Pizza)Entity).Sauce != default)
+                    {
+                        ((Pizza)Entity).Sauce = default;
+                        NotifyPropertyChanged();
+                    }
                 }
             }
         }
@@ -63,10 +87,18 @@ public class Pizza: PocotaEntity
         {
             get => ((Pizza)Entity)?.Toppings;
             set {
-                if(Entity is {} && value is ICollection<Topping> val && val != ((Pizza)Entity).Toppings) 
+                if(Entity is {}) 
                 {
-                    ((Pizza)Entity).Toppings = val;
-                    NotifyPropertyChanged();
+                    if(value is ICollection<Topping> val && val != ((Pizza)Entity).Toppings)
+                    {
+                        ((Pizza)Entity).Toppings = val;
+                        NotifyPropertyChanged();
+                    }
+                    else if(value == default && ((Pizza)Entity).Toppings != default)
+                    {
+                        ((Pizza)Entity).Toppings = default;
+                        NotifyPropertyChanged();
+                    }
                 }
             }
         }

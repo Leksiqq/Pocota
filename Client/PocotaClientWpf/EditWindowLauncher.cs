@@ -4,7 +4,7 @@ namespace Net.Leksi.Pocota.Client;
 
 public class EditWindowLauncher
 {
-    private readonly Dictionary<string, WeakReference<IEditWindow>> _editWindows = [];
+    private readonly Dictionary<object, WeakReference<IEditWindow>> _editWindows = [];
     private readonly string _path;
     private readonly Window _owner;
     public EditWindowLauncher(string path, Window owner)
@@ -28,35 +28,39 @@ public class EditWindowLauncher
         }
     }
 
-    public IEditWindow Launch(Property property)
+    public IEditWindow? Launch(Property property, string? altName = null)
     {
-        if (_editWindows.TryGetValue(property.Name, out WeakReference<IEditWindow>? wr))
+        IEditWindow? result = null;
+        if (property?.Value is { })
         {
-            if (
-                wr.TryGetTarget(out IEditWindow? editWindow)
-                && Application.Current.Windows.OfType<IEditWindow>().Any(w => w == editWindow)
-            )
+            if (_editWindows.TryGetValue(property.Value, out WeakReference<IEditWindow>? wr))
             {
-                return editWindow;
+                if (
+                    wr.TryGetTarget(out IEditWindow? editWindow)
+                    && Application.Current.Windows.OfType<IEditWindow>().Any(w => w == editWindow)
+                )
+                {
+                    return editWindow;
+                }
+                _editWindows.Remove(property.Value);
             }
-            _editWindows.Remove(property.Name);
+            string name = !string.IsNullOrEmpty(altName) ? altName : property.Name;
+            if (property is ListProperty)
+            {
+                result = new EditList($"{_path}/{name}", property.Type);
+            }
+            else
+            {
+                result = new EditObject($"{_path}/{name}", property.Type);
+            }
+            result.LaunchedBy = _owner;
+            _editWindows.Add(property.Value, new WeakReference<IEditWindow>(result));
         }
-        IEditWindow result;
-        if (property is ListProperty)
-        {
-            result = new EditList($"{_path}/{property.Name}", property.Type);
-        }
-        else
-        {
-            result = new EditObject($"{_path}/{property.Name}", property.Type);
-        }
-        result.LaunchedBy = _owner;
-        _editWindows.Add(property.Name, new WeakReference<IEditWindow>(result));
         return result;
     }
     public bool IsLaunched(Property property)
     {
-        if (_editWindows.TryGetValue(property.Name, out WeakReference<IEditWindow>? wr))
+        if (property?.Value is { } && _editWindows.TryGetValue(property.Value!, out WeakReference<IEditWindow>? wr))
         {
             if (
                 wr.TryGetTarget(out IEditWindow? editWindow)
@@ -65,7 +69,7 @@ public class EditWindowLauncher
             {
                 return true;
             }
-            _editWindows.Remove(property.Name);
+            _editWindows.Remove(property.Value);
         }
         return false;
     }

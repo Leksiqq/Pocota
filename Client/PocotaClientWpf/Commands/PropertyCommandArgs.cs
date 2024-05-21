@@ -31,6 +31,7 @@ public class PropertyCommandArgs: Freezable
         get => (Window)GetValue(LauncherProperty);
         set => SetValue(LauncherProperty, value);
     }
+    public string? AltName { get; set; } = null;
     public PropertyCommandArgs()
     {
         Launcher = null;

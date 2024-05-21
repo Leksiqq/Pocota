@@ -76,7 +76,7 @@ public class PropertyCommand : ICommand
                     }
                     break;
                 case PropertyAction.Edit or PropertyAction.Create:
-                    if(launcher.Launcher.Launch(args.Property) is Window editWindow)
+                    if(launcher.Launcher.Launch(args.Property, args.AltName) is Window editWindow)
                     {
                         ((IEditWindow)editWindow).Property = args.Property;
                         editWindow.Show();

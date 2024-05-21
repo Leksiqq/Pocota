@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Topping                      //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-20T17:10:07.                                 //
+// at 2024-05-21T10:35:18.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -21,10 +21,18 @@ public class Topping: PocotaEntity
         {
             get => ((Topping)Entity)?.Id;
             set {
-                if(Entity is {} && value is Int32 val && val != ((Topping)Entity).Id) 
+                if(Entity is {}) 
                 {
-                    ((Topping)Entity).Id = val;
-                    NotifyPropertyChanged();
+                    if(value is Int32 val && val != ((Topping)Entity).Id)
+                    {
+                        ((Topping)Entity).Id = val;
+                        NotifyPropertyChanged();
+                    }
+                    else if(value == default && ((Topping)Entity).Id != default)
+                    {
+                        ((Topping)Entity).Id = default;
+                        NotifyPropertyChanged();
+                    }
                 }
             }
         }
@@ -35,10 +43,18 @@ public class Topping: PocotaEntity
         {
             get => ((Topping)Entity)?.Name;
             set {
-                if(Entity is {} && value is String val && val != ((Topping)Entity).Name) 
+                if(Entity is {}) 
                 {
-                    ((Topping)Entity).Name = val;
-                    NotifyPropertyChanged();
+                    if(value is String val && val != ((Topping)Entity).Name)
+                    {
+                        ((Topping)Entity).Name = val;
+                        NotifyPropertyChanged();
+                    }
+                    else if(value == default && ((Topping)Entity).Name != default)
+                    {
+                        ((Topping)Entity).Name = default;
+                        NotifyPropertyChanged();
+                    }
                 }
             }
         }
@@ -49,10 +65,18 @@ public class Topping: PocotaEntity
         {
             get => ((Topping)Entity)?.Calories;
             set {
-                if(Entity is {} && value is Decimal val && val != ((Topping)Entity).Calories) 
+                if(Entity is {}) 
                 {
-                    ((Topping)Entity).Calories = val;
-                    NotifyPropertyChanged();
+                    if(value is Decimal val && val != ((Topping)Entity).Calories)
+                    {
+                        ((Topping)Entity).Calories = val;
+                        NotifyPropertyChanged();
+                    }
+                    else if(value == default && ((Topping)Entity).Calories != default)
+                    {
+                        ((Topping)Entity).Calories = default;
+                        NotifyPropertyChanged();
+                    }
                 }
             }
         }
@@ -63,10 +87,18 @@ public class Topping: PocotaEntity
         {
             get => ((Topping)Entity)?.Pizzas;
             set {
-                if(Entity is {} && value is ICollection<Pizza> val && val != ((Topping)Entity).Pizzas) 
+                if(Entity is {}) 
                 {
-                    ((Topping)Entity).Pizzas = val;
-                    NotifyPropertyChanged();
+                    if(value is ICollection<Pizza> val && val != ((Topping)Entity).Pizzas)
+                    {
+                        ((Topping)Entity).Pizzas = val;
+                        NotifyPropertyChanged();
+                    }
+                    else if(value == default && ((Topping)Entity).Pizzas != default)
+                    {
+                        ((Topping)Entity).Pizzas = default;
+                        NotifyPropertyChanged();
+                    }
                 }
             }
         }

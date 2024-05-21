@@ -17,10 +17,18 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
         {
             get => ((@Model.ClassName)Entity)?.@{}@prop.Name;
             set {
-                if(Entity is {} && value is @Html.Raw(prop.TypeName) val && val != ((@Model.ClassName)Entity).@{}@prop.Name) 
+                if(Entity is {}) 
                 {
-                    ((@Model.ClassName)Entity).@{}@prop.Name = val;
-                    NotifyPropertyChanged();
+                    if(value is @Html.Raw(prop.TypeName) val && val != ((@Model.ClassName)Entity).@{}@prop.Name)
+                    {
+                        ((@Model.ClassName)Entity).@{}@prop.Name = val;
+                        NotifyPropertyChanged();
+                    }
+                    else if(value == default && ((@Model.ClassName)Entity).@{}@prop.Name != default)
+                    {
+                        ((@Model.ClassName)Entity).@{}@prop.Name = default;
+                        NotifyPropertyChanged();
+                    }
                 }
             }
         }
