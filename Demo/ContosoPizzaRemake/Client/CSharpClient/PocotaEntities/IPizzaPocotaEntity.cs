@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.IPizzaPocotaEntity           //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-21T11:07:45.                                 //
+// at 2024-05-22T16:52:43.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 

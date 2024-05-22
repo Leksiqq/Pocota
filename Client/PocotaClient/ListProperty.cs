@@ -11,6 +11,7 @@ public class ListProperty : Property
         set => _source.Value = value; 
     }
     public override bool IsReadonly => _source.IsReadonly;
+    public override bool IsNullable => _source.IsNullable;
     public int Count
     {
         get

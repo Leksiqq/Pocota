@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Topping                      //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-21T11:07:45.                                 //
+// at 2024-05-22T16:52:43.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -36,6 +36,7 @@ public class Topping: PocotaEntity
                 }
             }
         }
+        public override bool IsNullable => false;
     }
     private class NameProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
@@ -58,6 +59,7 @@ public class Topping: PocotaEntity
                 }
             }
         }
+        public override bool IsNullable => true;
     }
     private class CaloriesProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
@@ -80,6 +82,7 @@ public class Topping: PocotaEntity
                 }
             }
         }
+        public override bool IsNullable => true;
     }
     private class PizzasProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
@@ -102,6 +105,7 @@ public class Topping: PocotaEntity
                 }
             }
         }
+        public override bool IsNullable => true;
     }
     private class ToppingPocotaEntity(Topping owner) : IToppingPocotaEntity
     {
@@ -126,7 +130,7 @@ public class Topping: PocotaEntity
     private readonly PizzasProperty _PizzasEntityProperty;
     public Int32 Id { get; set; }
     public String? Name { get; set; }
-    public Decimal Calories { get; set; }
+    public Decimal? Calories { get; set; }
     public IList<Pizza>? Pizzas { get; set; }
     internal Topping(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
     {

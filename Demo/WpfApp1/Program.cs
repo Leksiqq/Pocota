@@ -3,6 +3,7 @@ using ContosoPizza.Models.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Net.Leksi.Pocota.Client;
+using System.Globalization;
 using System.Windows;
 
 namespace WpfApp1;
@@ -12,6 +13,7 @@ static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
         builder.Services.AddPocotaWpfApp<App>(touch: typeof(Pizza));
         builder.Services.AddPizza();

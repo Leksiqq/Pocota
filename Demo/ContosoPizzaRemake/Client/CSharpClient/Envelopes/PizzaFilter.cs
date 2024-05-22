@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaFilter                         //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-21T11:07:45.                                 //
+// at 2024-05-22T16:52:43.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -18,4 +18,5 @@ public class PizzaFilter
     public List<Sauce>? Sauces { get; set; }
     public String? NameRegex { get; set; }
     public List<String>? Tags { get; set; }
+    public List<Decimal>? decs { get; set; }
 }

@@ -27,7 +27,7 @@
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
             <l:BindingProxy Value="{Binding Windows}" x:Key="Windows"/>
-            <local:SimpleDataConverter x:Key="SimpleDataConverter"/>
+            <l:XamlServiceProviderCatcher x:Key="WindowSP"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
@@ -54,6 +54,7 @@
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="VerticalContentAlignment" Value="Top"/>
                     <Setter Property="Margin" Value="0"/>
                     <EventSetter Event="SizeChanged" Handler="PropertiesView_SizeChanged"/>
                 </Style>
@@ -68,19 +69,8 @@
                     <GridViewColumn
                         x:Name="PropertyValueColumn"
                         Header="{Binding Source=VALUE, Converter={StaticResource I18nConverter}}"
-                        d:CellTemplateSelector="{l:ParameterizedResource PropertyTemplateSelector, Replaces=$path:Value|$converter:SimpleDataConverter}"
+                        CellTemplateSelector="{l:ParameterizedResource PropertyTemplateSelector, Replaces=$serviceProviderCatcher:WindowSP}"
                         >
-                        <GridViewColumn.CellTemplateSelector>
-                            <l:ParameterizedResource ResourceKey="PropertyTemplateSelector">
-                                <l:ParameterizedResource.Replaces>
-                                    <x:Array Type="sys:Object">
-                                        <sys:String>$path:Value</sys:String>
-                                        <sys:String>$property:.</sys:String>
-                                        <sys:String>$converter:SimpleDataConverter</sys:String>
-                                    </x:Array>
-                                </l:ParameterizedResource.Replaces>
-                            </l:ParameterizedResource>
-                        </GridViewColumn.CellTemplateSelector>
                     </GridViewColumn>
                 </GridView>
             </ListView.View>

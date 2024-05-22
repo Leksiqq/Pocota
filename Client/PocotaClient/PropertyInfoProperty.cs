@@ -5,6 +5,7 @@ public class PropertyInfoProperty: Property
 {
     private readonly PropertyInfo _info;
     private readonly object _obj;
+    private readonly bool _isNullable;
     public override object? Value 
     { 
         get => _info.GetValue(_obj); 
@@ -29,9 +30,12 @@ public class PropertyInfoProperty: Property
                 .GetRequiredCustomModifiers().Contains(typeof(System.Runtime.CompilerServices.IsExternalInit));
         }
     }
+    public override bool IsNullable => _isNullable;
     internal PropertyInfoProperty(PropertyInfo info, object obj) : base(info.Name, info.PropertyType) 
     {
         _info = info;
         _obj = obj;
+        NullabilityInfoContext nic = new();
+        _isNullable = nic.Create(info).ReadState is NullabilityState.Nullable;
     }
 }

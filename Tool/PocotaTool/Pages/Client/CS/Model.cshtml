@@ -32,6 +32,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
                 }
             }
         }
+        public override bool IsNullable => @(prop.IsNullable ? "true" : "false");
     }
 </text>
 }

@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Globalization;
 using System.Windows;
+using System.Windows.Markup;
 using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
 
@@ -12,10 +14,20 @@ public static class PocotaWpfAppExtension
         Func<IServiceProvider,Application> createApplication, 
         Type? mainWindowType = null,
 #pragma warning disable IDE0060 // Удалите неиспользуемый параметр
-        Type? touch = null
+        Type? touch = null,
 #pragma warning restore IDE0060 // Удалите неиспользуемый параметр
+        bool showLabels = false
     )
     {
+        #region https://serialseb.com/blog/2007/04/03/wpf-tips-1-have-all-your-dates-times/
+        FrameworkElement.LanguageProperty.OverrideMetadata(
+            typeof(FrameworkElement),
+            new FrameworkPropertyMetadata(
+                XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)
+            )
+        );
+        #endregion
+        services.AddLocalization();
         services.AddHostedService<Starter>();
         if(mainWindowType is { })
         {
@@ -36,14 +48,20 @@ public static class PocotaWpfAppExtension
             {
                 Application app = createApplication.Invoke(s);
                 app.Resources[ServiceProvider] = s;
-                I18nConverter i18NConverter = new();
+                I18nConverter i18NConverter = s.GetRequiredService<I18nConverter>();
+                if(showLabels is { })
+                {
+                    i18NConverter.ShowLabels = showLabels;
+                }
                 i18NConverter.AddResourceManager(Properties.Resources.ResourceManager);
                 app.Resources["I18nConverter"] = i18NConverter;
                 return app;
             }
         );
+        services.AddScoped<I18nConverter>();
         services.AddScoped<WindowsList>();
         services.AddScoped<Trans>();
+
         return services;
     }
     public static IServiceCollection AddPocotaWpfApp<TApplication>(

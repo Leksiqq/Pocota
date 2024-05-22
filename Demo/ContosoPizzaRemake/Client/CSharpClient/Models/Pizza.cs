@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Pizza                        //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-21T11:07:45.                                 //
+// at 2024-05-22T16:52:43.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -36,6 +36,7 @@ public class Pizza: PocotaEntity
                 }
             }
         }
+        public override bool IsNullable => false;
     }
     private class NameProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
@@ -58,6 +59,7 @@ public class Pizza: PocotaEntity
                 }
             }
         }
+        public override bool IsNullable => true;
     }
     private class SauceProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
@@ -80,6 +82,7 @@ public class Pizza: PocotaEntity
                 }
             }
         }
+        public override bool IsNullable => true;
     }
     private class ToppingsProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
@@ -102,6 +105,7 @@ public class Pizza: PocotaEntity
                 }
             }
         }
+        public override bool IsNullable => true;
     }
     private class PizzaPocotaEntity(Pizza owner) : IPizzaPocotaEntity
     {

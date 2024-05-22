@@ -59,14 +59,5 @@ namespace WpfApp1.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Windowsssss.
-        /// </summary>
-        internal static string WINDOWS {
-            get {
-                return ResourceManager.GetString("WINDOWS", resourceCulture);
-            }
-        }
     }
 }

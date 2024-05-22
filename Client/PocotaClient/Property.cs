@@ -34,6 +34,7 @@ public class Property(string name, Type type) : INotifyPropertyChanged
         }
     }
     public virtual bool IsReadonly => false;
+    public virtual bool IsNullable => false;
     public static Property? Create(object info, object? value = null)
     {
         Property? result = null;

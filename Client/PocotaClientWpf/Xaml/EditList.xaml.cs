@@ -38,9 +38,6 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
     private PropertyCommandArgs? _editPropertyCommandArgs;
     private PropertyCommandArgs? _createPropertyCommandArgs;
     private PropertyCommandArgs? _clearPropertyCommandArgs;
-    private Type? _itemHolderType = null;
-    private PropertyInfo? _positionProperty;
-    private PropertyInfo? _valueProperty;
     public DataGridManager ItemsDataGridManager { get; private init; } = new();
     public WindowsList Windows { get; private init; }
     public bool IsReadonly { get; private init; }
@@ -142,22 +139,16 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                         BindingOperations.SetBinding(column, DataGridTemplateColumn.HeaderTemplateProperty, binding);
                         
                         DataGrid.Columns.Add(column);
-                        _itemHolderType = typeof(SimpleTypeHolder<>).MakeGenericType([ItemType]);
-                        _positionProperty = _itemHolderType.GetProperty(nameof(SimpleTypeHolder<object>.Position))!;
-                        _valueProperty = _itemHolderType.GetProperty(nameof(SimpleTypeHolder<object>.Value))!;
-                        Type ListType = typeof(ObservableCollection<>).MakeGenericType(_itemHolderType);
-                        list = (IList)Activator.CreateInstance(ListType)!;
+                        list = new ObservableCollection<SimpleListItemProperty>();
                         int pos = 0;
                         foreach (object? item in (IList)_property.Value!)
                         {
-                            object? holder = Activator.CreateInstance(_itemHolderType, _property.Value);
-                            list.Add(holder);
+                            list.Add(new SimpleListItemProperty((IList)_property.Value, itemType));
                             ++pos;
                         }
                     }
                     else
                     {
-                        _itemHolderType = null;
                         list = (IList)_property.Value!;
                         if (PocotaContext.IsEntityType(ItemType))
                         {
@@ -210,12 +201,14 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                     DataGrid.Columns.Add(column);
                     _indexMapping.Clear();
                     ItemsDataGridManager.ViewSource.Source = list;
+                    ItemsDataGridManager.ViewSource.View.CurrentChanged += View_CurrentChanged;
                     RenumberItems();
                     PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
                 }
             }
         }
     }
+    public Property? CurrentProperty => ItemsDataGridManager.ViewSource.View?.CurrentItem as Property;
     public EditList(string path, Type type, bool isReadonly = false)
     {
         IsReadonly = isReadonly;
@@ -232,6 +225,12 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
         _dataGridXamlServices = (DataGrid.FindResource("DataGridSP") as XamlServiceProviderCatcher)!.ServiceProvider!;
         Windows.Touch();
     }
+
+    private void View_CurrentChanged(object? sender, EventArgs e)
+    {
+        PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+    }
+
     public bool CanExecute(object? parameter)
     {
         return 
@@ -313,8 +312,9 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                     }
                     else
                     {
-                        ((IList)_property!.Value!).Insert(insertPos, default);
-                        item = Activator.CreateInstance(_itemHolderType!, _property.Value);
+                        ((IList)_property!.Value!).Insert(insertPos, ItemType == typeof(string) ? null : Activator.CreateInstance(ItemType));
+                        //item = Activator.CreateInstance(_itemHolderType!, _property.Value);
+                        item = new SimpleListItemProperty((IList)_property.Value, ItemType);
                     }
                     if (item is { })
                     {
@@ -354,7 +354,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                     {
                         if (!IsReadonly && _indexMapping.TryGetValue(MovedItem, out object? index))
                         {
-                            object? savedValue = _valueProperty?.GetValue(MovedItem);
+                            object? savedValue = IsObject ? MovedItem : ((SimpleListItemProperty)MovedItem).Value;
                             _indexMapping.Remove(MovedItem);
                             ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection).RemoveAt((int)index);
                             if (!IsObject)
@@ -397,7 +397,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
             _indexMapping.AddOrUpdate(item, i);
             if (!IsObject)
             {
-                _positionProperty!.SetValue(item, i);
+                ((SimpleListItemProperty)item).Position = i;
             }
             ++i;
         }

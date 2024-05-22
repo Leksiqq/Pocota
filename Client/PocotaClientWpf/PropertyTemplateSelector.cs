@@ -1,24 +1,30 @@
-﻿using System.Collections;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Net.Leksi.WpfMarkup;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Markup;
+using System.Xaml;
 
 namespace Net.Leksi.Pocota.Client;
 public class PropertyTemplateSelector: DataTemplateSelector
 {
-    public object DefaultKey { get; set; } = null!;
-    public DataTemplate Class { get; set; } = null!;
-    public DataTemplate List { get; set; } = null!;
-    private DataTemplate? Default = null;
+    public string DefaultDataTemplateKey { get; set; } = null!;
+    public XamlServiceProviderCatcher ServiceProviderCatcher { get; set; } = null!;
+    public DataTemplate ClassDataTemplate { get; set; } = null!;
+    public DataTemplate ListDataTemplate { get; set; } = null!;
+
     public override DataTemplate? SelectTemplate(object item, DependencyObject container)
     {
         DataTemplate? result = null;
         Property? value = null;
+        FrameworkElement? frameworkElement = null;
         for (DependencyObject dob = container; dob is { }; dob = VisualTreeHelper.GetParent(dob))
         {
             if(dob is FrameworkElement fe && fe.DataContext is Property mp)
             {
-                Default = fe.FindResource(DefaultKey) as DataTemplate;
+                frameworkElement = fe;
                 value = mp;
                 break;
             }
@@ -27,21 +33,22 @@ public class PropertyTemplateSelector: DataTemplateSelector
         {
             if(value is ListProperty)
             {
-                result = List;
+                result = ListDataTemplate;
             }
-            else if(value.Type == typeof(string))
+            else if (value.Type.IsClass && value.Type != typeof(string))
             {
-                Console.WriteLine($"{value.Name}, {Default.GetHashCode()}");
-                result = Default;
-            }
-            else if (value.Type.IsClass)
-            {
-                result = Class;
+                result = ClassDataTemplate;
             }
             else
             {
-                Console.WriteLine($"{value.Name}, {Default.GetHashCode()}");
-                result = Default;
+                IServiceProvider sp = ServiceProviderCatcher.ServiceProvider!;
+                IRootObjectProvider rop = sp.GetRequiredService<IRootObjectProvider>();
+                string converterKey = $"{value.Name}Converter{Guid.NewGuid()}";
+                (rop.RootObject as Window)!.Resources[converterKey] = new PropertyConverter { Property = value };
+                ParameterizedResourceExtension pre = new(DefaultDataTemplateKey);
+                pre.Replaces = new string[] { $"$converter:{converterKey}" };
+                result = pre.ProvideValue(sp) as DataTemplate;
+                (rop.RootObject as Window)!.Resources.Remove(converterKey);
             }
         }
         return result;

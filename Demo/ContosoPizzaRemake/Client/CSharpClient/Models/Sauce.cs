@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Sauce                        //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-21T11:07:45.                                 //
+// at 2024-05-22T16:52:43.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -34,6 +34,7 @@ public class Sauce: PocotaEntity
                 }
             }
         }
+        public override bool IsNullable => false;
     }
     private class Id1Property(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
@@ -56,6 +57,7 @@ public class Sauce: PocotaEntity
                 }
             }
         }
+        public override bool IsNullable => false;
     }
     private class NameProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
@@ -78,6 +80,7 @@ public class Sauce: PocotaEntity
                 }
             }
         }
+        public override bool IsNullable => true;
     }
     private class IsVeganProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
@@ -100,6 +103,7 @@ public class Sauce: PocotaEntity
                 }
             }
         }
+        public override bool IsNullable => false;
     }
     private class SaucePocotaEntity(Sauce owner) : ISaucePocotaEntity
     {

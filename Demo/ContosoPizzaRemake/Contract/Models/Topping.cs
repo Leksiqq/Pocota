@@ -9,6 +9,6 @@ public class Topping
     [Required]
     [MaxLength(100)]
     public string? Name { get; set; }
-    public decimal Calories { get; set; }
+    public decimal? Calories { get; set; }
     public ICollection<Pizza>? Pizzas { get; set; }
 }
