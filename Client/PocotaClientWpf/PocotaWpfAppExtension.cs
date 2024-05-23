@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Localization;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;
@@ -27,8 +29,7 @@ public static class PocotaWpfAppExtension
             )
         );
         #endregion
-        services.AddLocalization();
-        services.AddHostedService<Starter>();
+        services.AddLocalization(op => op.ResourcesPath = "Properties");
         if(mainWindowType is { })
         {
             services.AddKeyedTransient(
@@ -53,14 +54,18 @@ public static class PocotaWpfAppExtension
                 {
                     i18NConverter.ShowLabels = showLabels;
                 }
-                i18NConverter.AddResourceManager(Properties.Resources.ResourceManager);
+                //i18NConverter.AddResourceSelector(typeof(I18nConverter));
+                //i18NConverter.AddResourceManager(Properties.Resources.ResourceManager);
+                i18NConverter.AddLocalizerFinder(s => (IStringLocalizer)s.GetRequiredService(typeof(IStringLocalizer<I18nConverter>)));
                 app.Resources["I18nConverter"] = i18NConverter;
+                app.Resources["Localizer"] = s.GetRequiredService<Localizer>();
                 return app;
             }
         );
         services.AddScoped<I18nConverter>();
         services.AddScoped<WindowsList>();
         services.AddScoped<Trans>();
+        services.AddSingleton<Localizer>();
 
         return services;
     }
@@ -81,5 +86,10 @@ public static class PocotaWpfAppExtension
         where TWindow: Window, new()
     {
         return AddPocotaWpfApp(services, s => new TApplication(), typeof(TWindow), touch);
+    }
+    public static void RunPocotaWpfApp(this IHost host)
+    {
+        Application app = host.Services.GetRequiredService<Application>();
+        app.Run(host.Services.GetRequiredKeyedService<Window>(s_mainWindowServiceKey));
     }
 }

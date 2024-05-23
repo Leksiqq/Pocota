@@ -4,28 +4,32 @@ using System.Resources;
 using System.Windows;
 using System.Windows.Data;
 
+[assembly: RootNamespace("Net.Leksi.Pocota.Client")]
+
 namespace Net.Leksi.Pocota.Client;
 
-public class I18nConverter(IStringLocalizer<I18nConverter> sl) : Freezable, IValueConverter
+public class I18nConverter(IServiceProvider services) : Freezable, IValueConverter
 {
-    private readonly List<ResourceManager> _resourceManagers = [];
+    private readonly List<Func<IServiceProvider, IStringLocalizer>> _localizerFinders = [];
     private readonly Dictionary<string, string?> _cache = [];
     public bool ShowLabels { get; set; } = false;
-    public void AddResourceManager(ResourceManager resourceManager)
+    public void AddLocalizerFinder(Func<IServiceProvider, IStringLocalizer> finder)
     {
-        _resourceManagers.Add(resourceManager);
+        _localizerFinders.Add(finder);
     }
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         string ask = value.ToString()!;
-        Console.WriteLine(sl.GetString(ask));
         if (!_cache.TryGetValue(ask, out string? ans))
         {
-            foreach (ResourceManager rm in _resourceManagers)
+            foreach (Func<IServiceProvider, IStringLocalizer> finder in _localizerFinders)
             {
-                if (rm.GetString(ask) is string s)
+                IStringLocalizer localizer = finder(services);
+                LocalizedString ls = localizer.GetString(ask);
+                Console.WriteLine($"{ask}: {ls}");
+                if (!ls.ResourceNotFound)
                 {
-                    ans = s;
+                    ans = ls.Value;
                 }
             }
             _cache[ask] = ans;
