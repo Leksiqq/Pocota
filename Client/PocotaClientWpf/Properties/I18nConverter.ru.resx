@@ -117,19 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ACTIONS" xml:space="preserve">
+  <data name="Actions" xml:space="preserve">
     <value>Действия</value>
   </data>
-  <data name="ASCENDING" xml:space="preserve">
+  <data name="Ascending" xml:space="preserve">
     <value>По возрастанию</value>
   </data>
   <data name="Connector" xml:space="preserve">
     <value>Коннектор</value>
   </data>
-  <data name="DESCENDING" xml:space="preserve">
+  <data name="Descending" xml:space="preserve">
     <value>По убыванию</value>
   </data>
-  <data name="HIDE-NAMESPACE" xml:space="preserve">
+  <data name="HideNamespace" xml:space="preserve">
     <value>Скрыть Namespace</value>
   </data>
   <data name="Method" xml:space="preserve">
@@ -138,22 +138,22 @@
   <data name="MethodsWindowTitle" xml:space="preserve">
     <value>Методы коннекторов</value>
   </data>
-  <data name="MODULE" xml:space="preserve">
+  <data name="Module" xml:space="preserve">
     <value>Модуль</value>
   </data>
-  <data name="SHOW-NAMESPACE" xml:space="preserve">
+  <data name="ShowNamespace" xml:space="preserve">
     <value>Показать Namespace</value>
   </data>
-  <data name="SORT_POSITION" xml:space="preserve">
+  <data name="SortPosition" xml:space="preserve">
     <value>Порядок сортировки</value>
   </data>
-  <data name="UNSORT" xml:space="preserve">
+  <data name="Unsort" xml:space="preserve">
     <value>Сбросить сортировку</value>
   </data>
-  <data name="UNSORTED" xml:space="preserve">
+  <data name="Unsorted" xml:space="preserve">
     <value>Не сортировано</value>
   </data>
-  <data name="WINDOWS" xml:space="preserve">
+  <data name="Windows" xml:space="preserve">
     <value>Окна</value>
   </data>
 </root>

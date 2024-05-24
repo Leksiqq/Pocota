@@ -28,7 +28,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
     private readonly ConditionalWeakTable<object, object> _indexMapping = [];
     private readonly IServiceProvider _services;
     private readonly PocotaContext _context;
-    private readonly Trans _trans;
+    private readonly Localizer _localizer;
     private Property? _property;
     private Window? _launchedBy;
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
@@ -101,7 +101,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                     column = new DataGridTemplateColumn
                     {
                         CellTemplate = DataGrid.Resources["Position"] as DataTemplate,
-                        Header = _trans.Translate("POSITION"),
+                        Header = _localizer.Position,
                         IsReadOnly = true
                     };
                     DataGrid.Columns.Add(column);
@@ -128,7 +128,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                             Replaces = new string[] {
                                 "$converter:ValueConverter",
                                 "$field:Value",
-                                $"$name:{_trans.Translate("VALUE")}"
+                                $"$name:{_localizer.Value}"
                             }
                         };
                         BindingProxy bp = (pre.ProvideValue(_dataGridXamlServices) as BindingProxy)!;
@@ -195,7 +195,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                     column = new DataGridTemplateColumn
                     {
                         CellTemplate = DataGrid.Resources["Actions"] as DataTemplate,
-                        Header = _trans.Translate("ACTIONS"),
+                        Header = _localizer.Actions,
                         IsReadOnly = true
                     };
                     DataGrid.Columns.Add(column);
@@ -214,7 +214,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
         IsReadonly = isReadonly;
         _services = (IServiceProvider)Application.Current.Resources[ServiceProvider];
         _context = _services.GetRequiredService<PocotaContext>();
-        _trans = _services.GetRequiredService<Trans>();
+        _localizer = _services.GetRequiredService<Localizer>();
         Windows = _services.GetRequiredService<WindowsList>();
         EditWindowCore = new EditWindowCore(path, type);
         Launcher = new EditWindowLauncher(EditWindowCore.Path, this);

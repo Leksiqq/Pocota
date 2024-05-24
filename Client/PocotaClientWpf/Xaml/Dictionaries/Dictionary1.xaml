@@ -32,28 +32,28 @@
         <StaticResource ResourceKey="ActionButtonStyle"/>
         <Style TargetType="Button">
             <Setter Property="Content" Value="▶"/>
-            <Setter Property="ToolTip" Value="{Binding Source=CALL, Converter={StaticResource I18nConverter}}"/>
+            <Setter Property="ToolTip" Value="{Binding Call, Source={local:Localizer}}"/>
         </Style>
     </l:StyleCombiner>
     <l:StyleCombiner TargetType="Button" x:Key="ClearButtonStyle">
         <StaticResource ResourceKey="ActionButtonStyle"/>
         <Style TargetType="Button">
             <Setter Property="Content" Value="➖"/>
-            <Setter Property="ToolTip" Value="{Binding Source=CLEAR, Converter={StaticResource I18nConverter}}"/>
+            <Setter Property="ToolTip" Value="{Binding Clear, Source={local:Localizer}}"/>
         </Style>
     </l:StyleCombiner>
     <l:StyleCombiner TargetType="Button" x:Key="EditButtonStyle">
         <StaticResource ResourceKey="ActionButtonStyle"/>
         <Style TargetType="Button">
             <Setter Property="Content" Value="👁"/>
-            <Setter Property="ToolTip" Value="{Binding Source=EDIT, Converter={StaticResource I18nConverter}}"/>
+            <Setter Property="ToolTip" Value="{Binding Edit, Source={local:Localizer}}"/>
         </Style>
     </l:StyleCombiner>
     <l:StyleCombiner TargetType="Button" x:Key="CreateButtonStyle">
         <StaticResource ResourceKey="ActionButtonStyle"/>
         <Style TargetType="Button">
             <Setter Property="Content" Value="➕"/>
-            <Setter Property="ToolTip" Value="{Binding Source=CREATE, Converter={StaticResource I18nConverter}}"/>
+            <Setter Property="ToolTip" Value="{Binding Create, Source={local:Localizer}}"/>
         </Style>
     </l:StyleCombiner>
     <l:StyleCombiner TargetType="Button" x:Key="InsertBeforeButtonStyle">
@@ -61,25 +61,25 @@
         <Style TargetType="Button">
             <Setter Property="Content" Value="⤉"/>
             <Setter Property="FontSize" Value="20"/>
-            <Setter Property="ToolTip" Value="{Binding Source=INSERT-BEFORE, Converter={StaticResource I18nConverter}}"/>
+            <Setter Property="ToolTip" Value="{Binding InsertBefore, Source={local:Localizer}}"/>
         </Style>
     </l:StyleCombiner>
     <l:StyleCombiner TargetType="Button" x:Key="MoveButtonStyle">
         <StaticResource ResourceKey="ActionButtonStyle"/>
         <Style TargetType="Button">
             <Setter Property="Content" Value="≡"/>
-            <Setter Property="ToolTip" Value="{Binding Source=MOVE, Converter={StaticResource I18nConverter}}"/>
+            <Setter Property="ToolTip" Value="{Binding Move, Source={local:Localizer}}"/>
         </Style>
     </l:StyleCombiner>
     <l:StyleCombiner TargetType="Button" x:Key="FindButtonStyle">
         <StaticResource ResourceKey="ActionButtonStyle"/>
         <Style TargetType="Button">
             <Setter Property="Content" Value="🔍"/>
-            <Setter Property="ToolTip" Value="{Binding Source=FIND, Converter={StaticResource I18nConverter}}"/>
+            <Setter Property="ToolTip" Value="{Binding Find, Source={local:Localizer}}"/>
         </Style>
     </l:StyleCombiner>
     <Style TargetType="MenuItem" x:Key="WindowsMenuItemStyle" x:Shared="True">
-        <Setter Property="Header" Value="{Binding Source=WINDOWS, Converter={StaticResource I18nConverter}}"/>
+        <Setter Property="Header" Value="{Binding Windows, Source={local:Localizer}}"/>
         <Setter Property="ItemsSource" Value="{Binding Value.Windows, Source={l:ParameterizedResource $window}}"/>
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
@@ -98,7 +98,7 @@
         </Setter>
     </Style>
     <Style TargetType="local:TypeChip" x:Key="TypeChipStyle" x:Shared="True">
-        <Setter Property="ExpandCaption" Value="{Binding Source=SHOW-NAMESPACE, Converter={StaticResource I18nConverter}}"/>
-        <Setter Property="CollapseCaption" Value="{Binding Source=HIDE-NAMESPACE, Converter={StaticResource I18nConverter}}"/>
+        <Setter Property="ExpandCaption" Value="{Binding ShowNamespace, Source={local:Localizer}}"/>
+        <Setter Property="CollapseCaption" Value="{Binding HideNamespace, Source={local:Localizer}}"/>
     </Style>
 </ResourceDictionary>

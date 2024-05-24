@@ -13,7 +13,6 @@ public class LocalizerExtension : MarkupExtension
     }
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
-        Console.WriteLine($"_localizer: {_localizer}");
         return _localizer;
     }
 }

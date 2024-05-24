@@ -18,11 +18,12 @@ static class Program
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
         builder.Services.AddPocotaWpfApp<App>(touch: typeof(Pizza));
         builder.Services.AddPizza();
-        IHost host = builder.Build();
-        if (host.Services.GetRequiredService<Application>().Resources[Constants.I18nConverter] is I18nConverter conv)
+        if(builder.Services.Where(sd => sd.ServiceType == typeof(Localizer)).FirstOrDefault() is ServiceDescriptor sd)
         {
-            conv.AddLocalizerFinder(s => (IStringLocalizer)s.GetRequiredService(typeof(IStringLocalizer<I18nConverter>)));
+            builder.Services.Remove(sd);
         }
+        builder.Services.AddSingleton<Localizer, MyLocalizer>();
+        IHost host = builder.Build();
         host.Services.GetRequiredService<PizzaConnector>().BaseAddress = new Uri("http://localhost:5000/Pizza/");
         host.Services.GetRequiredService<PizzaConnector>().GetPocotaConfigAsync(CancellationToken.None).Wait();
         host.RunPocotaWpfApp();

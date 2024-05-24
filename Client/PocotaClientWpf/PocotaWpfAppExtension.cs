@@ -49,22 +49,11 @@ public static class PocotaWpfAppExtension
             {
                 Application app = createApplication.Invoke(s);
                 app.Resources[ServiceProvider] = s;
-                I18nConverter i18NConverter = s.GetRequiredService<I18nConverter>();
-                if(showLabels is { })
-                {
-                    i18NConverter.ShowLabels = showLabels;
-                }
-                //i18NConverter.AddResourceSelector(typeof(I18nConverter));
-                //i18NConverter.AddResourceManager(Properties.Resources.ResourceManager);
-                i18NConverter.AddLocalizerFinder(s => (IStringLocalizer)s.GetRequiredService(typeof(IStringLocalizer<I18nConverter>)));
-                app.Resources["I18nConverter"] = i18NConverter;
                 app.Resources["Localizer"] = s.GetRequiredService<Localizer>();
                 return app;
             }
         );
-        services.AddScoped<I18nConverter>();
         services.AddScoped<WindowsList>();
-        services.AddScoped<Trans>();
         services.AddSingleton<Localizer>();
 
         return services;
