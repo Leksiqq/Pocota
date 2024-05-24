@@ -225,12 +225,15 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
         _dataGridXamlServices = (DataGrid.FindResource("DataGridSP") as XamlServiceProviderCatcher)!.ServiceProvider!;
         Windows.Touch();
     }
-
+    //protected override void OnClosed(EventArgs e)
+    //{
+    //    _launchedBy?.Activate();
+    //    base.OnClosed(e);
+    //}
     private void View_CurrentChanged(object? sender, EventArgs e)
     {
         PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
     }
-
     public bool CanExecute(object? parameter)
     {
         return 

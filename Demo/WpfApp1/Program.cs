@@ -22,10 +22,15 @@ static class Program
         {
             builder.Services.Remove(sd);
         }
-        builder.Services.AddSingleton<Localizer, MyLocalizer>();
+        builder.Services.AddSingleton<MyLocalizer>();
+        builder.Services.AddSingleton<Localizer>(s => s.GetRequiredService<MyLocalizer>());
         IHost host = builder.Build();
         host.Services.GetRequiredService<PizzaConnector>().BaseAddress = new Uri("http://localhost:5000/Pizza/");
         host.Services.GetRequiredService<PizzaConnector>().GetPocotaConfigAsync(CancellationToken.None).Wait();
+        foreach(var info in host.Services.GetRequiredService<MyLocalizer>().GetResourceInfo())
+        {
+            Console.WriteLine($"{info.Name}: {info.ReturnType.Name}, {info.Value}, {info.BaseName ?? "N/A"}, {info.DeclaringType}");
+        }
         host.RunPocotaWpfApp();
     }
 }

@@ -54,10 +54,17 @@ public class EditWindowLauncher
                 result = new EditObject($"{_path}/{name}", property.Type);
             }
             result.LaunchedBy = _owner;
+            ((Window)result).Closed += (s, e) => _owner.Activate();
             _editWindows.Add(property.Value, new WeakReference<IEditWindow>(result));
         }
         return result;
     }
+
+    private void EditWindowLauncher_Closed(object? sender, EventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
     public bool IsLaunched(Property property)
     {
         if (property?.Value is { } && _editWindows.TryGetValue(property.Value!, out WeakReference<IEditWindow>? wr))
