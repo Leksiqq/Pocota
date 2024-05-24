@@ -41,6 +41,7 @@ namespace Net.Leksi.Pocota.Client
         protected override void OnClosed(EventArgs e)
         {
             Windows.Touch();
+            Application.Current.MainWindow.Activate();
             base.OnClosed(e);
         }
         private void ListView_SizeChanged(object sender, SizeChangedEventArgs e)

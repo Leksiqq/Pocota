@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Net.Leksi.WpfMarkup;
+using System.ComponentModel;
+using System.Reflection;
 using System.Windows;
 using static Net.Leksi.Pocota.Client.Constants;
 

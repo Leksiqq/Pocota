@@ -75,6 +75,12 @@ public partial class EditObject : Window, IEditWindow, IWindowLauncher
         CalcColumnsWidth(PropertiesView.ActualWidth);
         Windows.Touch();
     }
+    protected override void OnClosed(EventArgs e)
+    {
+        Windows.Touch();
+        _launchedBy?.Activate();
+        base.OnClosed(e);
+    }
     private void NotifyPropertyChanged()
     {
         PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
