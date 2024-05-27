@@ -14,7 +14,7 @@ static class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("en-US");
+        //CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("en-US");
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
         builder.Services.AddPocotaWpfApp<App>(touch: typeof(Pizza));
         builder.Services.AddPizza();
@@ -24,13 +24,9 @@ static class Program
         }
         builder.Services.AddSingleton<MyLocalizer>();
         builder.Services.AddSingleton<Localizer>(s => s.GetRequiredService<MyLocalizer>());
-        IHost host = builder.Build();
+        using IHost host = builder.Build();
         host.Services.GetRequiredService<PizzaConnector>().BaseAddress = new Uri("http://localhost:5000/Pizza/");
         host.Services.GetRequiredService<PizzaConnector>().GetPocotaConfigAsync(CancellationToken.None).Wait();
-        foreach(var info in host.Services.GetRequiredService<MyLocalizer>().GetResourceInfo())
-        {
-            Console.WriteLine($"{info.Name}: {info.ReturnType.Name}, {info.Value ?? "<null>"}, {(info.BaseName is { } ? $"{info.BaseName}{(string.IsNullOrEmpty(info.Culture!.Name) ? string.Empty : $".{info.Culture.Name}")}" : "<not specified>")}, {info.DeclaringType}");
-        }
         host.RunPocotaWpfApp();
     }
 }

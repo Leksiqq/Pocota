@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
     mc:Ignorable="d"
-    Title="{Binding MethodsWindowTitle, Source={local:Localizer}}" 
+    Title="{Binding MethodsWindowTitle, Source={StaticResource Localizer}}" 
     Height="450" 
     Width="800" 
     DataContext="{Binding RelativeSource={RelativeSource Self}}" 
@@ -106,7 +106,7 @@
                                         <x:Array Type="sys:Object">
                                             <sys:String>$converter:NameConverter</sys:String>
                                             <sys:String>$field:Name</sys:String>
-                                            <l:BindingProxy Name="$name" Value="{Binding Method, Source={local:Localizer}}"/>
+                                            <l:BindingProxy Name="$name" Value="{Binding Method, Source={StaticResource Localizer}}"/>
                                         </x:Array>
                                     </l:ParameterizedResource.Replaces>
                                 </l:ParameterizedResource>
@@ -123,7 +123,7 @@
                                         <x:Array Type="sys:Object">
                                             <sys:String>$converter:DeclaringTypeConverter</sys:String>
                                             <sys:String>$field:DeclaringType</sys:String>
-                                            <l:BindingProxy Name="$name" Value="{Binding Connector, Source={local:Localizer}}"/>
+                                            <l:BindingProxy Name="$name" Value="{Binding Connector, Source={StaticResource Localizer}}"/>
                                         </x:Array>
                                     </l:ParameterizedResource.Replaces>
                                 </l:ParameterizedResource>
@@ -140,7 +140,7 @@
                                         <x:Array Type="sys:Object">
                                             <sys:String>$converter:ModuleConverter</sys:String>
                                             <sys:String>$field:Module</sys:String>
-                                            <l:BindingProxy Name="$name" Value="{Binding Module, Source={local:Localizer}}"/>
+                                            <l:BindingProxy Name="$name" Value="{Binding Module, Source={StaticResource Localizer}}"/>
                                         </x:Array>
                                     </l:ParameterizedResource.Replaces>
                                 </l:ParameterizedResource>
@@ -148,7 +148,7 @@
                         </Binding>
                     </DataGridTemplateColumn.HeaderTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="{Binding Actions, Source={local:Localizer}}" CellTemplate="{StaticResource Actions}"/>
+                <DataGridTemplateColumn Header="{Binding Actions, Source={StaticResource Localizer}}" CellTemplate="{StaticResource Actions}"/>
             </DataGrid.Columns>
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">

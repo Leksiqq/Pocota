@@ -14,7 +14,7 @@
     >
     <Window.Title>
         <MultiBinding StringFormat="{}{0}: {1} {2}">
-            <Binding Path="Edit" Source="{local:Localizer}"/>
+            <Binding Path="Edit" Source="{StaticResource Localizer}"/>
             <Binding Path="EditWindowCore.ObjectType"/>
             <Binding Path="EditWindowCore.Path"/>
         </MultiBinding>
@@ -32,7 +32,7 @@
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="{Binding GoToLauncher, Source={local:Localizer}}" Click="MenuItem_Click">
+            <MenuItem Header="{Binding GoToLauncher, Source={StaticResource Localizer}}" Click="MenuItem_Click">
                 <MenuItem.Style>
                     <Style TargetType="MenuItem">
                         <Style.Triggers>
@@ -63,12 +63,12 @@
                 <GridView AllowsColumnReorder="False">
                     <GridViewColumn 
                         x:Name="PropertyNameColumn"
-                        Header="{Binding Property, Source={local:Localizer}}"
+                        Header="{Binding Property, Source={StaticResource Localizer}}"
                         CellTemplate="{StaticResource NameTemplate}"
                         />
                     <GridViewColumn
                         x:Name="PropertyValueColumn"
-                        Header="{Binding Value, Source={local:Localizer}}"
+                        Header="{Binding Value, Source={StaticResource Localizer}}"
                         CellTemplateSelector="{l:ParameterizedResource PropertyTemplateSelector, Replaces=$serviceProviderCatcher:WindowSP}"
                         >
                     </GridViewColumn>

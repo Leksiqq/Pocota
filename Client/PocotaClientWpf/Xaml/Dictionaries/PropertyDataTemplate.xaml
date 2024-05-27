@@ -158,13 +158,13 @@
                                     <Setter Property="FontSize" Value="12"/>
                                     <Setter Property="FontWeight" Value="Bold"/>
                                     <Setter Property="Foreground" Value="Red"/>
-                                    <Setter Property="ToolTip" Value="{Binding IsNotSet, Source={local:Localizer}}"/>
+                                    <Setter Property="ToolTip" Value="{Binding IsNotSet, Source={StaticResource Localizer}}"/>
                                 </DataTrigger>
                                 <DataTrigger Value="False">
                                     <Setter Property="Text">
                                         <Setter.Value>
                                             <MultiBinding StringFormat="[..], {0}: {1}">
-                                                <Binding Path="Count" Source="{local:Localizer}"/>
+                                                <Binding Path="Count" Source="{StaticResource Localizer}"/>
                                                 <Binding Path="Value.Count"/>
                                             </MultiBinding>
                                         </Setter.Value>
@@ -276,12 +276,12 @@
                                 <DataTrigger Value="True">
                                     <Setter Property="Text" Value="∅"/>
                                     <Setter Property="Foreground" Value="Red"/>
-                                    <Setter Property="ToolTip" Value="{Binding IsNotSet, Source={local:Localizer}}"/>
+                                    <Setter Property="ToolTip" Value="{Binding IsNotSet, Source={StaticResource Localizer}}"/>
                                 </DataTrigger>
                                 <DataTrigger Value="False">
                                     <Setter Property="Text" Value="✓"/>
                                     <Setter Property="Foreground" Value="Green"/>
-                                    <Setter Property="ToolTip" Value="{Binding IsSet, Source={local:Localizer}}"/>
+                                    <Setter Property="ToolTip" Value="{Binding IsSet, Source={StaticResource Localizer}}"/>
                                 </DataTrigger>
                             </l:DataSwitch>
                         </Style.Triggers>

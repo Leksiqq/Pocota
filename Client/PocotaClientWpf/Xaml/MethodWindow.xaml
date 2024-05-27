@@ -14,7 +14,7 @@
     >
     <Window.Title>
         <MultiBinding StringFormat="{}{0}: {1}">
-            <Binding Path="Method" Source="{local:Localizer}"/>
+            <Binding Path="Method" Source="{StaticResource Localizer}"/>
             <Binding Path="MethodName"/>
         </MultiBinding>
     </Window.Title>
@@ -53,12 +53,12 @@
                 <GridView AllowsColumnReorder="False">
                     <GridViewColumn 
                         x:Name="ParameterNameColumn"
-                        Header="{Binding Parameter, Source={local:Localizer}}"
+                        Header="{Binding Parameter, Source={StaticResource Localizer}}"
                         CellTemplate="{StaticResource NameTemplate}"
                         />
                     <GridViewColumn
                         x:Name="ParameterValueColumn"
-                        Header="{Binding Value, Source={local:Localizer}}"
+                        Header="{Binding Value, Source={StaticResource Localizer}}"
                         CellTemplateSelector="{l:ParameterizedResource PropertyTemplateSelector, Replaces=$serviceProviderCatcher:WindowSP}"
                         />
 

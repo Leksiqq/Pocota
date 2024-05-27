@@ -13,7 +13,7 @@
     >
     <Window.Title>
         <MultiBinding StringFormat="{}{0}: {1} {2}">
-            <Binding Path="Edit" Source="{local:Localizer}"/>
+            <Binding Path="Edit" Source="{StaticResource Localizer}"/>
             <Binding Path="EditWindowCore.ObjectType"/>
             <Binding Path="EditWindowCore.Path"/>
         </MultiBinding>
@@ -41,7 +41,7 @@
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="{Binding GoToLauncher, Source={local:Localizer}}" Click="MenuItem_Click">
+            <MenuItem Header="{Binding GoToLauncher, Source={StaticResource Localizer}}" Click="MenuItem_Click">
                 <MenuItem.Style>
                     <Style TargetType="MenuItem">
                         <Style.Triggers>
@@ -83,7 +83,7 @@
                                         </DataTrigger>
                                     </l:DataSwitch>
                                 </Style.Triggers>
-                                <Setter Property="ToolTip" Value="{Binding Add, Source={local:Localizer}}"/>
+                                <Setter Property="ToolTip" Value="{Binding Add, Source={StaticResource Localizer}}"/>
                             </Style>
                         </l:StyleCombiner>
                     </Button.Style>
@@ -95,7 +95,7 @@
                     Foreground="Green"
                     BorderBrush="Green"
                     BorderThickness="1"
-                    ToolTip="{Binding PlaceLast, Source={local:Localizer}}"
+                    ToolTip="{Binding PlaceLast, Source={StaticResource Localizer}}"
                     >
                     <Button.CommandParameter>
                         <local:EditListCommandArgs Action="Move"/>
@@ -240,7 +240,7 @@
                                                     </DataTrigger>
                                                 </l:DataSwitch>
                                             </Style.Triggers>
-                                            <Setter Property="ToolTip" Value="{Binding Remove, Source={local:Localizer}}"/>
+                                            <Setter Property="ToolTip" Value="{Binding Remove, Source={StaticResource Localizer}}"/>
                                         </Style>
                                     </l:StyleCombiner>
                                 </Button.Style>
@@ -257,7 +257,7 @@
                                     <l:StyleCombiner TargetType="ButtonBase">
                                         <StaticResource ResourceKey="MoveButtonStyle"/>
                                         <Style TargetType="ButtonBase">
-                                            <Setter Property="ToolTip" Value="{Binding Move, Source={local:Localizer}}"/>
+                                            <Setter Property="ToolTip" Value="{Binding Move, Source={StaticResource Localizer}}"/>
                                             <Style.Triggers>
                                                 <l:DataSwitch Binding="{Binding Value.IsReadonly, Source={StaticResource Window}}">
                                                     <DataTrigger Value="False">
@@ -277,7 +277,7 @@
                                                     <Setter Property="Foreground" Value="Red"/>
                                                     <Setter Property="BorderBrush" Value="Red"/>
                                                     <Setter Property="BorderThickness" Value="1"/>
-                                                    <Setter Property="ToolTip" Value="{Binding CancelMove, Source={local:Localizer}}"/>
+                                                    <Setter Property="ToolTip" Value="{Binding CancelMove, Source={StaticResource Localizer}}"/>
                                                 </DataTrigger>
                                                 <DataTrigger Value="True">
                                                     <DataTrigger.Binding>
@@ -288,7 +288,7 @@
                                                     </DataTrigger.Binding>
                                                     <Setter Property="Foreground" Value="Green"/>
                                                     <Setter Property="BorderBrush" Value="Green"/>
-                                                    <Setter Property="ToolTip" Value="{Binding PlaceBefore, Source={local:Localizer}}"/>
+                                                    <Setter Property="ToolTip" Value="{Binding PlaceBefore, Source={StaticResource Localizer}}"/>
                                                     <Setter Property="BorderThickness" Value="1"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
