@@ -11,6 +11,7 @@ namespace Net.Leksi.Pocota.Client;
 public class PropertyTemplateSelector: DataTemplateSelector
 {
     public string DefaultDataTemplateKey { get; set; } = null!;
+    public string EnumDataTemplateKey { get; set; } = null!;
     public XamlServiceProviderCatcher ServiceProviderCatcher { get; set; } = null!;
     public DataTemplate ClassDataTemplate { get; set; } = null!;
     public DataTemplate ListDataTemplate { get; set; } = null!;
@@ -38,6 +39,24 @@ public class PropertyTemplateSelector: DataTemplateSelector
             else if (value.Type.IsClass && value.Type != typeof(string))
             {
                 result = ClassDataTemplate;
+            }
+            else if (
+                (value.Type.IsEnum || value.Type == typeof(bool))
+                || (
+                    value.Type.IsGenericType 
+                    && value.Type.GetGenericTypeDefinition() == typeof(Nullable<>)
+                    && (value.Type.GetGenericArguments()[0].IsEnum || value.Type.GetGenericArguments()[0] == typeof(bool))
+                )
+            )
+            {
+                IServiceProvider sp = ServiceProviderCatcher.ServiceProvider!;
+                IRootObjectProvider rop = sp.GetRequiredService<IRootObjectProvider>();
+                string converterKey = $"{value.Name}Converter{Guid.NewGuid()}";
+                (rop.RootObject as Window)!.Resources[converterKey] = new PropertyConverter { Property = value };
+                ParameterizedResourceExtension pre = new(EnumDataTemplateKey);
+                pre.Replaces = new string[] { $"$converter:{converterKey}" };
+                result = pre.ProvideValue(sp) as DataTemplate;
+                (rop.RootObject as Window)!.Resources.Remove(converterKey);
             }
             else
             {

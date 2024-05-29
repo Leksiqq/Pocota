@@ -1,13 +1,14 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaController                            //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-23T20:59:30.                                 //
+// at 2024-05-29T18:20:46.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
 using ContosoPizza.Models;
 using Microsoft.AspNetCore.Mvc;
 using Net.Leksi.Pocota.Server;
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -46,17 +47,18 @@ public class PizzaController: ControllerBase
         );
 
     }
-    [HttpGet("FindPizzas/{filter}")]
-    public async Task FindPizzas(string filter)
+    [HttpGet("FindPizzas/{filter}/{stage}")]
+    public async Task FindPizzas(string filter, string stage)
     {
         PizzaServiceBase _storageService = HttpContext.RequestServices.GetRequiredService<PizzaServiceBase>();
         IAccessCalculator accessCalculator = HttpContext.RequestServices.GetRequiredKeyedService<IAccessCalculator>(typeof(Pizza));
         JsonSerializerOptions _serializerOptions = GetJsonSerializerOptions(HttpContext.RequestServices);
         HttpContext.Response.ContentType = "application/json";
         PizzaFilter _filterFilter = JsonSerializer.Deserialize<PizzaFilter>(filter, _serializerOptions)!;
+        Int32 _stageFilter = JsonSerializer.Deserialize<Int32>(stage, _serializerOptions)!;
         await JsonSerializer.SerializeAsync(
             HttpContext.Response.Body, 
-            PocotaContext.ProcessEntitiesAsync<Pizza>(accessCalculator, _storageService.FindPizzasAsync(_filterFilter)), 
+            PocotaContext.ProcessEntitiesAsync<Pizza>(accessCalculator, _storageService.FindPizzasAsync(_filterFilter, _stageFilter)), 
             _serializerOptions
         );
 

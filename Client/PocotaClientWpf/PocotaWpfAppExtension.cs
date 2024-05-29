@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Localization;
+using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;

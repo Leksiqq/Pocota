@@ -358,6 +358,10 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         StringBuilder sb = new();
         if (type.IsGenericType)
         {
+            if(type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                return BuildTypeName(type.GetGenericArguments()[0], entities, envelopes, model);
+            }
             model.AddUsing(type.GetGenericTypeDefinition());
             sb.Append(type.GetGenericTypeDefinition().Name[..type.GetGenericTypeDefinition().Name.IndexOf('`')]).Append('<')
                 .Append(string.Join(',', type.GetGenericArguments().Select(t => BuildTypeName(t, entities, envelopes, model)))).Append('>');

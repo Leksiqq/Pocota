@@ -1,11 +1,12 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaFilter                         //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-23T20:59:30.                                 //
+// at 2024-05-29T18:20:46.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
 using ContosoPizza.Models.Client;
+using Net.Leksi.Pocota.Contract;
 using System;
 using System.Collections.Generic;
 
@@ -18,5 +19,11 @@ public class PizzaFilter
     public List<Sauce>? Sauces { get; set; }
     public String? NameRegex { get; set; }
     public List<String>? Tags { get; set; }
-    public List<Decimal>? decs { get; set; }
+    public List<Decimal>? Decs { get; set; }
+    public DateTime? DateTime { get; set; }
+    public DateOnly? DateOnly { get; set; }
+    public TimeOnly? TimeOnly { get; set; }
+    public AccessKind? AccessKind { get; set; }
+    public Boolean? CanSing { get; set; }
+    public List<Boolean>? Bools { get; set; }
 }

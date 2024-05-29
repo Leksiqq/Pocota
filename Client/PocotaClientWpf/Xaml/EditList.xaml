@@ -37,6 +37,20 @@
                 x:Shared="False"
                 />
             <l:BoolExpressionConverter x:Key="BoolExpressionConverter"/>
+            <DataTemplate x:Key="EditField" x:Shared="False">
+                <TextBox 
+                    Text="{Binding Path=$field, UpdateSourceTrigger=LostFocus, Converter={l:ParameterizedResource $converter}, ConverterParameter=Edit}"
+                    Style="{l:ParameterizedResource DefaultTextBoxStyle}"
+                    Margin="0"
+                    />
+            </DataTemplate>
+            <local:PropertyTemplateSelector 
+                x:Key="PropertyTemplateSelector1" 
+                x:Shared="False"
+                ServiceProviderCatcher="{l:ParameterizedResource $serviceProviderCatcher}"
+                DefaultDataTemplateKey="EditField"
+                EnumDataTemplateKey="EnumPropertyDataTemplate"
+                />
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
@@ -152,19 +166,23 @@
                     <DataTemplate x:Key="Field" x:Shared="False">
                         <TextBox 
                             Text="{Binding Path=$field, Mode=OneWay, Converter={l:ParameterizedResource $converter}, ConverterParameter=Edit}"
-                            Style="{StaticResource ReadonlyDataGridCellTextBoxStyle}"
-                            Margin="0"
-                            />
-                    </DataTemplate>
-                    <DataTemplate x:Key="EditField" x:Shared="False">
-                        <TextBox 
-                            Text="{Binding Path=$field, UpdateSourceTrigger=PropertyChanged, Converter={l:ParameterizedResource $converter}, ConverterParameter=Edit}"
-                            Style="{StaticResource DataGridCellTextBoxStyle}"
+                            Style="{l:ParameterizedResource DefaultReadonlyTextBoxStyle}"
                             Margin="0"
                             />
                     </DataTemplate>
                     <DataTemplate x:Key="Actions">
                         <DockPanel LastChildFill="True">
+                            <Button 
+                                DockPanel.Dock="Left" 
+                                Margin="0" 
+                                >
+                                <Button.Style>
+                                    <l:StyleCombiner>
+                                        <StaticResource ResourceKey="CheckButtonStyle"/>
+                                        <StaticResource ResourceKey="ButtonVisibleIfNotReadonly"/>
+                                    </l:StyleCombiner>
+                                </Button.Style>
+                            </Button>
                             <Button 
                                 DockPanel.Dock="Left"
                                 Command="{Binding Value, Source={StaticResource Window}}"

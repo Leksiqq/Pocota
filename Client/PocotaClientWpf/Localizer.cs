@@ -1,4 +1,5 @@
 ﻿using Net.Leksi.Localization;
+using System.Diagnostics;
 
 namespace Net.Leksi.Pocota.Client;
 
@@ -38,4 +39,8 @@ public class Localizer: LocalizationBase
     public string Actions => GetString();
     public string Position => GetString();
     public string Parameter => GetString();
+    public string Check => GetString();
+    public Localizer()
+    {
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Data;
 
 namespace Net.Leksi.Pocota.Client;
 

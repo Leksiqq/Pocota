@@ -1,11 +1,12 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaServiceBase                           //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-23T20:59:30.                                 //
+// at 2024-05-29T18:20:46.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
 using ContosoPizza.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace ContosoPizza;
 public abstract class PizzaServiceBase
 {
     public abstract IAsyncEnumerable<Pizza> GetAllPizzasAsync();
-    public abstract IAsyncEnumerable<Pizza> FindPizzasAsync(PizzaFilter filter);
+    public abstract IAsyncEnumerable<Pizza> FindPizzasAsync(PizzaFilter filter, Int32 stage);
     public abstract ValueTask<Pizza?> GetPizzaAsync(Pizza pizza);
     public abstract IAsyncEnumerable<Sauce> GetAllSaucesAsync();
     public abstract ValueTask<Sauce?> GetSauceAsync(Sauce sauce);

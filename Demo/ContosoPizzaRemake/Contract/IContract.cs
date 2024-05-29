@@ -10,7 +10,7 @@ namespace ContosoPizza;
 public interface IContract
 {
     IEnumerable<Pizza> GetAllPizzas();
-    IEnumerable<Pizza> FindPizzas(PizzaFilter filter);
+    IEnumerable<Pizza> FindPizzas(PizzaFilter filter, int stage);
     Pizza GetPizza(Pizza pizza);
     IEnumerable<Sauce> GetAllSauces();
     Sauce GetSauce(Sauce sauce);

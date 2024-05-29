@@ -14,21 +14,6 @@ public class EditListConverter : Freezable, IValueConverter, IMultiValueConverte
     {
         get => (EditList)GetValue(OwnerProperty);
         set => SetValue(OwnerProperty, value);
-
-        //{
-        //    if (value != Owner)
-        //    {
-        //        if(Owner is { })
-        //        {
-        //            _propertyConverter = null;
-        //            Owner.PropertyChanged -= Owner_PropertyChanged;
-        //        }
-        //        if (Owner is { })
-        //        {
-        //            Owner.PropertyChanged += Owner_PropertyChanged;
-        //        }
-        //    }
-        //}
     }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
@@ -58,7 +43,7 @@ public class EditListConverter : Freezable, IValueConverter, IMultiValueConverte
         }
     }
 
-    public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object value, Type targetType, object? parameter, CultureInfo culture)
     {
         if("Position".Equals(parameter))
         {
@@ -69,6 +54,10 @@ public class EditListConverter : Freezable, IValueConverter, IMultiValueConverte
             return null;
         }
         if ("Edit".Equals(parameter))
+        {
+            return _propertyConverter.Convert(value, targetType, null, culture);
+        }
+        if ("InvalidFormat".Equals(parameter))
         {
             return _propertyConverter.Convert(value, targetType, parameter, culture);
         }

@@ -110,12 +110,12 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                         column = new DataGridTemplateColumn();
                         ParameterizedResourceExtension pre = new()
                         {
-                            Replaces = new string[] { "$field:Value", "$converter:EditListConverter" }
+                            Replaces = new string[] { "$field:Value", "$converter:EditListConverter", "$serviceProviderCatcher:WindowSP" }
                         };
                         pre.ResourceKey = "Field";
                         column.CellTemplate = pre.ProvideValue(_dataGridXamlServices) as DataTemplate;
-                        pre.ResourceKey = "EditField";
-                        column.CellEditingTemplate = pre.ProvideValue(_dataGridXamlServices) as DataTemplate;
+                        pre.ResourceKey = "PropertyTemplateSelector1";
+                        column.CellEditingTemplateSelector = pre.ProvideValue(_dataGridXamlServices) as DataTemplateSelector;
 
                         DataGridConverter converter = new()
                         {
@@ -317,7 +317,6 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                     else
                     {
                         ((IList)_property!.Value!).Insert(insertPos, ItemType == typeof(string) ? null : Activator.CreateInstance(ItemType));
-                        //item = Activator.CreateInstance(_itemHolderType!, _property.Value);
                         item = new SimpleListItemProperty((IList)_property.Value, ItemType);
                     }
                     if (item is { })
@@ -326,6 +325,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                         DataGrid.CommitEdit();
                         RenumberItems();
                         ItemsDataGridManager.ViewSource.View.Refresh();
+                        ItemsDataGridManager.ViewSource.View.MoveCurrentTo(item);
                     }
                 }
             }
