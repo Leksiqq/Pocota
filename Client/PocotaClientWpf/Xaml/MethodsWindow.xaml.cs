@@ -16,7 +16,7 @@ public partial class MethodsWindow : Window
         Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
         _services = (IServiceProvider)Application.Current.Resources[ServiceProvider];
         RunCommand = new RunMethodCommand();
-        ConnectorsDataGridManager.ViewSource.Source = new ConnectorsMethodsList();
+        ConnectorsDataGridManager.ViewSource.Source = _services.GetRequiredService<ConnectorsMethodsList>();
         Windows = _services.GetRequiredService<WindowsList>();
         InitializeComponent();
         Windows.Touch();

@@ -61,7 +61,10 @@ public static class PocotaWpfAppExtension
                 methods.AddConnectorType(sd.ServiceType);
             }
         }
-        services.AddSingleton(methods);
+        services.AddSingleton(s => {
+            methods.Services = s;
+            return methods;
+        });
         return services;
     }
     public static IServiceCollection AddPocotaWpfApp<TApplication>(

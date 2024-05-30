@@ -4,10 +4,11 @@ using System.Reflection;
 
 namespace Net.Leksi.Pocota.Client;
 
-internal class ConnectorsMethodsList(IServiceProvider services): IEnumerable<MethodInfo>
+internal class ConnectorsMethodsList: IEnumerable<MethodInfo>
 {
     private List<MethodInfo>? _methods = null;
     private readonly List<Type> _types = [];
+    internal IServiceProvider Services { get; set; } = null!;
     public IEnumerator<MethodInfo> GetEnumerator()
     {
         return Methods.GetEnumerator();
@@ -26,7 +27,7 @@ internal class ConnectorsMethodsList(IServiceProvider services): IEnumerable<Met
                 _methods = new List<MethodInfo>();
                 foreach (Type type in _types)
                 {
-                    if(services.GetServices(type) is IEnumerable<object?> items)
+                    if(Services.GetServices(type) is IEnumerable<object?> items)
                     {
                         foreach(object? obj in items)
                         {
