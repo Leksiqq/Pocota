@@ -141,7 +141,7 @@
             </DockPanel>
         </Border>
         <DataGrid 
-            x:Name="DataGrid"
+            x:Name="ItemsDataGrid"
             ItemsSource="{Binding ItemsDataGridManager.ViewSource.View}" 
             AutoGenerateColumns="False"
             CanUserSortColumns="False"

@@ -3,7 +3,6 @@ using Net.Leksi.WpfMarkup;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,7 +10,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
-public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
+public partial class EditList : Window, IEditWindow, ICommand
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler? CanExecuteChanged
@@ -41,6 +40,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
     public DataGridManager ItemsDataGridManager { get; private init; } = new();
     public WindowsList Windows { get; private init; }
     public bool IsReadonly { get; private init; }
+    public bool KeysOnly { get; set; }
     public bool IsDataGridReadonly => IsReadonly || IsObject;
     public Type ItemType { get; private set; } = null!;
     public Window? LaunchedBy
@@ -93,18 +93,18 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                         Property = Property.Create(ItemType),
                         Launcher = this,
                     };
-                    DataGrid.IsReadOnly = IsDataGridReadonly;
+                    ItemsDataGrid.IsReadOnly = IsDataGridReadonly;
                     _property = value;
                     IList list;
-                    DataGrid.Columns.Clear();
+                    ItemsDataGrid.Columns.Clear();
                     DataGridTemplateColumn column;
                     column = new DataGridTemplateColumn
                     {
-                        CellTemplate = DataGrid.Resources["Position"] as DataTemplate,
+                        CellTemplate = ItemsDataGrid.Resources["Position"] as DataTemplate,
                         Header = _localizer.Position,
                         IsReadOnly = true
                     };
-                    DataGrid.Columns.Add(column);
+                    ItemsDataGrid.Columns.Add(column);
                     if (!IsObject)
                     {
                         column = new DataGridTemplateColumn();
@@ -122,7 +122,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                             DataGridManager = ItemsDataGridManager,
                             FieldName = "Value"
                         };
-                        DataGrid.Resources.Add("ValueConverter", converter);
+                        ItemsDataGrid.Resources.Add("ValueConverter", converter);
                         pre = new("SortHeader1")
                         {
                             Replaces = new string[] {
@@ -137,8 +137,8 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                             Source = bp
                         };
                         BindingOperations.SetBinding(column, DataGridTemplateColumn.HeaderTemplateProperty, binding);
-                        
-                        DataGrid.Columns.Add(column);
+
+                        ItemsDataGrid.Columns.Add(column);
                         list = new ObservableCollection<SimpleListItemProperty>();
                         int pos = 0;
                         foreach (object? item in (IList)_property.Value!)
@@ -150,7 +150,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                     else
                     {
                         list = (IList)_property.Value!;
-                        if (PocotaContext.IsEntityType(ItemType))
+                        if (typeof(IEntityOwner).IsAssignableFrom(ItemType))
                         {
                             var probe = (IPocotaEntity)(list.Count == 0 ? _context.CreateEntity(ItemType) : list[0])!;
                             foreach(var prop in probe.Properties)
@@ -168,7 +168,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                                     DataGridManager = ItemsDataGridManager,
                                     FieldName = $"Entity.{prop.Name}.Value"
                                 };
-                                DataGrid.Resources.Add($"{prop.Name}ValueConverter", converter);
+                                ItemsDataGrid.Resources.Add($"{prop.Name}ValueConverter", converter);
                                 pre = new("SortHeader1")
                                 {
                                     Replaces = new string[] {
@@ -184,7 +184,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                                 };
                                 BindingOperations.SetBinding(column, DataGridTemplateColumn.HeaderTemplateProperty, binding);
 
-                                DataGrid.Columns.Add(column);
+                                ItemsDataGrid.Columns.Add(column);
                             }
                         }
                         else
@@ -194,11 +194,11 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                     }
                     column = new DataGridTemplateColumn
                     {
-                        CellTemplate = DataGrid.Resources["Actions"] as DataTemplate,
+                        CellTemplate = ItemsDataGrid.Resources["Actions"] as DataTemplate,
                         Header = _localizer.Actions,
                         IsReadOnly = true
                     };
-                    DataGrid.Columns.Add(column);
+                    ItemsDataGrid.Columns.Add(column);
                     _indexMapping.Clear();
                     ItemsDataGridManager.ViewSource.Source = list;
                     ItemsDataGridManager.ViewSource.View.CurrentChanged += View_CurrentChanged;
@@ -219,10 +219,10 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
         EditWindowCore = new EditWindowCore(path, type);
         Launcher = new EditWindowLauncher(EditWindowCore.Path, this);
         InitializeComponent();
-        ItemsDataGridManager.DataGrid = DataGrid;
+        ItemsDataGridManager.DataGrid = ItemsDataGrid;
         ItemsDataGridManager.AutoCommit = true;
         _windowXamlServices = (FindResource("WindowSP") as XamlServiceProviderCatcher)!.ServiceProvider!;
-        _dataGridXamlServices = (DataGrid.FindResource("DataGridSP") as XamlServiceProviderCatcher)!.ServiceProvider!;
+        _dataGridXamlServices = (ItemsDataGrid.FindResource("DataGridSP") as XamlServiceProviderCatcher)!.ServiceProvider!;
         Windows.Touch();
     }
     protected override void OnClosed(EventArgs e)
@@ -322,7 +322,7 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
                     if (item is { })
                     {
                         ((IList)ItemsDataGridManager.ViewSource.View.SourceCollection).Insert(insertPos, item);
-                        DataGrid.CommitEdit();
+                        ItemsDataGrid.CommitEdit();
                         RenumberItems();
                         ItemsDataGridManager.ViewSource.View.Refresh();
                         ItemsDataGridManager.ViewSource.View.MoveCurrentTo(item);
@@ -415,6 +415,6 @@ public partial class EditList : Window, IEditWindow, ICommand, IWindowLauncher
     }
     private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        DataGrid.BeginEdit();
+        ItemsDataGrid.BeginEdit();
     }
 }

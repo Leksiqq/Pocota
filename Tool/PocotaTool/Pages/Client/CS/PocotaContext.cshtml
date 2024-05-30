@@ -8,7 +8,7 @@
 @Html.Partial("Header", Model)
 public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
 {
-    static @Model.ClassName@{}()
+    public @Model.ClassName@{}(IServiceProvider services): base(services) 
     {
 @foreach(string type in Model.Entities)
 {
@@ -16,30 +16,5 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
 </text>
 }
     }
-    public @Model.ClassName@{}(IServiceProvider services): base(services) { }
-    internal bool KeyOnlyJson {  get; set; }
-    public override T CreateEntity@{}@Html.Raw("<T>")@{}()
-    {
-        return base.CreateEntity@{}@Html.Raw("<T>")@{}();
-    }
     internal static void Touch() { }
-    internal new void ClearSentEntities() {
-        base.ClearSentEntities();
-    }
-    internal new bool IsSent(@nameof(PocotaEntity) entity) 
-    {
-        return base.IsSent(entity);
-    }
-    internal new bool SetSent(@nameof(PocotaEntity) entity)
-    {
-        return base.SetSent(entity);
-    }
-    internal new bool KeysFilled(PocotaEntity entity)
-    {
-        return base.KeysFilled(entity);
-    }
-    internal new void SetKeysFilled(PocotaEntity entity)
-    {
-        base.SetKeysFilled(entity);
-    }
 }

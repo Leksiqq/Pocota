@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaConnector          //
 // was generated automatically from            //
-// at 2024-05-29T18:20:46.                     //
+// at 2024-05-30T18:11:42.                     //
 // Modifying this file will break the program! //
 /////////////////////////////////////////////////
 
@@ -21,7 +21,6 @@ namespace ContosoPizza.Client;
 public class PizzaConnector: Connector
 {
     private readonly SemaphoreSlim _asyncLock = new(1, 1);
-    private readonly PizzaPocotaContext _context;
     public PizzaConnector(IServiceProvider services): base(services) 
     {
         _context = _services.GetRequiredService<PizzaPocotaContext>();
@@ -38,8 +37,7 @@ public class PizzaConnector: Connector
         await _asyncLock.WaitAsync(cancellationToken);
         try 
         {
-            _context.ClearSentEntities();
-            _context.KeyOnlyJson = true;
+            ResetContext();
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
                 $"/Pizza/GetAllPizzas"
@@ -56,8 +54,7 @@ public class PizzaConnector: Connector
         await _asyncLock.WaitAsync(cancellationToken);
         try 
         {
-            _context.ClearSentEntities();
-            _context.KeyOnlyJson = true;
+            ResetContext();
             string _filter = HttpUtility.UrlEncode(JsonSerializer.Serialize(filter, _serializerOptions));
             string _stage = HttpUtility.UrlEncode(JsonSerializer.Serialize(stage, _serializerOptions));
             HttpRequestMessage _request = new(
@@ -76,8 +73,7 @@ public class PizzaConnector: Connector
         await _asyncLock.WaitAsync(cancellationToken);
         try 
         {
-            _context.ClearSentEntities();
-            _context.KeyOnlyJson = true;
+            ResetContext();
             string _pizza = HttpUtility.UrlEncode(JsonSerializer.Serialize(pizza, _serializerOptions));
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
@@ -95,8 +91,7 @@ public class PizzaConnector: Connector
         await _asyncLock.WaitAsync(cancellationToken);
         try 
         {
-            _context.ClearSentEntities();
-            _context.KeyOnlyJson = true;
+            ResetContext();
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
                 $"/Pizza/GetAllSauces"
@@ -113,8 +108,7 @@ public class PizzaConnector: Connector
         await _asyncLock.WaitAsync(cancellationToken);
         try 
         {
-            _context.ClearSentEntities();
-            _context.KeyOnlyJson = true;
+            ResetContext();
             string _sauce = HttpUtility.UrlEncode(JsonSerializer.Serialize(sauce, _serializerOptions));
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
@@ -132,8 +126,7 @@ public class PizzaConnector: Connector
         await _asyncLock.WaitAsync(cancellationToken);
         try 
         {
-            _context.ClearSentEntities();
-            _context.KeyOnlyJson = true;
+            ResetContext();
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
                 $"/Pizza/GetAllToppings"
@@ -150,8 +143,7 @@ public class PizzaConnector: Connector
         await _asyncLock.WaitAsync(cancellationToken);
         try 
         {
-            _context.ClearSentEntities();
-            _context.KeyOnlyJson = true;
+            ResetContext();
             string _topping = HttpUtility.UrlEncode(JsonSerializer.Serialize(topping, _serializerOptions));
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
@@ -169,8 +161,7 @@ public class PizzaConnector: Connector
         await _asyncLock.WaitAsync(cancellationToken);
         try
         {
-            _context.ClearSentEntities();
-            _context.KeyOnlyJson = false;
+            ResetContext();
             HttpRequestMessage _request = new(HttpMethod.Post, "/Pizza");
             await Task.CompletedTask;
         }

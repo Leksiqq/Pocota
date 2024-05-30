@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.ToppingJsonConverter         //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-29T18:20:46.                                 //
+// at 2024-05-30T18:11:42.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -48,12 +48,12 @@ internal class ToppingJsonConverter: JsonConverter<Topping>
     }
     private void WriteKeyOnly(Utf8JsonWriter writer, Topping value, JsonSerializerOptions options)
     {
-        IToppingPocotaEntity? pocotaEntity = PocotaContext.Entity<IToppingPocotaEntity>(value);
+        IToppingPocotaEntity pocotaEntity = (IToppingPocotaEntity)((IEntityOwner)value).Entity;
         if (pocotaEntity is null)
         {
             throw new InvalidOperationException();
         }
-        bool keysFilled = _context.KeysFilled(value);
+        bool keysFilled = _context.KeysFilled(pocotaEntity);
         writer.WriteStartObject();
         if(!keysFilled || _context.IsKey(pocotaEntity.Id)) 
         {

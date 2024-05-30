@@ -14,6 +14,7 @@ public abstract class Connector
     private readonly ExceptionJsonConverter _exceptionJsonConverter = new();
     protected readonly IServiceProvider _services;
     protected readonly JsonSerializerOptions _serializerOptions = new();
+    protected PocotaContext _context = null!;
     public HttpStatusCode StatusCode { get; private set; }
     public Uri? BaseAddress
     {
@@ -55,7 +56,7 @@ public abstract class Connector
     public async Task GetPocotaConfigAsync(string path, CancellationToken cancellationToken)
     {
         HttpRequestMessage request = new(HttpMethod.Get, path);
-        _services.GetRequiredService<PocotaContext>().PocotaConfig = await GetResponseAsync<PocotaConfig>(request, _serializerOptions, cancellationToken);
+        _context.PocotaConfig = await GetResponseAsync<PocotaConfig>(request, _serializerOptions, cancellationToken);
     }
     public async Task GetResponseAsyncEnumerable<T>(
         ICollection<T>? target,
@@ -128,6 +129,11 @@ public abstract class Connector
             }
             throw;
         }
+    }
+    protected void ResetContext()
+    {
+        _context.ClearSentEntities();
+        _context.KeyOnlyJson = true;
     }
     private void ReplaceHttpClient()
     {

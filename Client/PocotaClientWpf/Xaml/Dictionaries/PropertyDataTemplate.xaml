@@ -37,13 +37,13 @@
         <StaticResource ResourceKey="DataGridCellTextBoxStyle"/>
         <l:ParameterizedResource ResourceKey="TextBoxWithInvalidFormatIndicationStyle"/>
     </l:StyleCombiner>
-    <Style x:Key="ButtonVisibleIfCanEditStyle" TargetType="ButtonBase">
+    <Style x:Key="ButtonVisibleIfCanEditStyle" TargetType="ButtonBase" x:Shared="False">
         <Style.Triggers>
             <l:DataSwitch>
                 <l:DataSwitch.Binding>
                     <MultiBinding Converter="{StaticResource BoolExpressionConverter}" ConverterParameter="@0 | @1">
                         <Binding Path="Value" Converter="{StaticResource IsNullConverter}"/>
-                        <Binding Path="IsReadonly"/>
+                        <Binding Path="IsReadonly" Converter="{l:ParameterizedResource $converter}" ConverterParameter="IsReadonly" Mode="OneTime"/>
                     </MultiBinding>
                 </l:DataSwitch.Binding>
                 <DataTrigger Value="True">
@@ -55,13 +55,13 @@
             </l:DataSwitch>
         </Style.Triggers>
     </Style>
-    <Style x:Key="ButtonVisibleIfCanEditAndNullableStyle" TargetType="ButtonBase">
+    <Style x:Key="ButtonVisibleIfCanEditAndNullableStyle" TargetType="ButtonBase" x:Shared="False">
         <Style.Triggers>
             <l:DataSwitch>
                 <l:DataSwitch.Binding>
                     <MultiBinding Converter="{StaticResource BoolExpressionConverter}" ConverterParameter="@0 | @1 | !@2">
                         <Binding Path="Value" Converter="{StaticResource IsNullConverter}"/>
-                        <Binding Path="IsReadonly"/>
+                        <Binding Path="IsReadonly" Converter="{l:ParameterizedResource $converter}" ConverterParameter="IsReadonly" Mode="OneTime"/>
                         <Binding Path="IsNullable"/>
                     </MultiBinding>
                 </l:DataSwitch.Binding>
@@ -74,9 +74,9 @@
             </l:DataSwitch>
         </Style.Triggers>
     </Style>
-    <Style x:Key="ButtonVisibleIfNotReadonly" TargetType="ButtonBase">
+    <Style x:Key="ButtonVisibleIfNotReadonly" TargetType="ButtonBase" x:Shared="False">
         <Style.Triggers>
-            <l:DataSwitch Binding="{Binding IsReadonly}">
+            <l:DataSwitch Binding="{Binding IsReadonly, Converter={l:ParameterizedResource $converter}, ConverterParameter=IsReadonly, Mode=OneTime}">
                 <DataTrigger Value="True">
                     <Setter Property="Visibility" Value="Collapsed"/>
                 </DataTrigger>
@@ -98,11 +98,28 @@
             </l:DataSwitch>
         </Style.Triggers>
     </Style>
-    <DataTemplate x:Key="ListPropertyDataTemplate">
+    <l:StyleCombiner TargetType="ButtonBase" x:Key="ClearButtonStyle1" x:Shared="False">
+        <StaticResource ResourceKey="ClearButtonStyle"/>
+        <l:ParameterizedResource ResourceKey="ButtonVisibleIfNotReadonly"/>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="ButtonBase" x:Key="CreateButtonStyle1" x:Shared="False">
+        <StaticResource ResourceKey="CreateButtonStyle"/>
+        <l:ParameterizedResource ResourceKey="ButtonVisibleIfNotReadonly"/>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="ButtonBase" x:Key="FindButtonStyle1" x:Shared="False">
+        <StaticResource ResourceKey="FindButtonStyle"/>
+        <l:ParameterizedResource ResourceKey="ButtonVisibleIfNotReadonly"/>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="ButtonBase" x:Key="CheckButtonStyle1" x:Shared="False">
+        <StaticResource ResourceKey="CheckButtonStyle"/>
+        <l:ParameterizedResource ResourceKey="ButtonVisibleIfNotReadonly"/>
+    </l:StyleCombiner>
+    <DataTemplate x:Key="ListPropertyDataTemplate" x:Shared="False">
         <DockPanel LastChildFill="True">
             <Button 
                 DockPanel.Dock="Right" 
                 Margin="0" 
+                Style="{l:ParameterizedResource ClearButtonStyle1}"
                 >
                 <Button.Command>
                     <local:PropertyCommand/>
@@ -117,12 +134,6 @@
                             }
                         }"/>
                 </Button.CommandParameter>
-                <Button.Style>
-                    <l:StyleCombiner>
-                        <StaticResource ResourceKey="ClearButtonStyle"/>
-                        <StaticResource ResourceKey="ButtonVisibleIfNotReadonly"/>
-                    </l:StyleCombiner>
-                </Button.Style>
             </Button>
             <Button 
                 DockPanel.Dock="Right" 
@@ -150,6 +161,7 @@
             <Button 
                 DockPanel.Dock="Right" 
                 Margin="0" 
+                Style="{l:ParameterizedResource CreateButtonStyle1}"
                 >
                 <Button.Command>
                     <local:PropertyCommand/>
@@ -164,12 +176,6 @@
                             }
                         }"/>
                 </Button.CommandParameter>
-                <Button.Style>
-                    <l:StyleCombiner>
-                        <StaticResource ResourceKey="CreateButtonStyle"/>
-                        <StaticResource ResourceKey="ButtonVisibleIfNotReadonly"/>
-                    </l:StyleCombiner>
-                </Button.Style>
             </Button>
             <TextBlock Margin="0, 2">
                 <TextBlock.Style>
@@ -200,11 +206,12 @@
             </TextBlock>
         </DockPanel>
     </DataTemplate>
-    <DataTemplate x:Key="ClassPropertyDataTemplate">
+    <DataTemplate x:Key="ClassPropertyDataTemplate" x:Shared="False">
         <DockPanel LastChildFill="True">
             <Button 
                 DockPanel.Dock="Right" 
                 Margin="0" 
+                Style="{l:ParameterizedResource ClearButtonStyle1}"
                 >
                 <Button.Command>
                     <local:PropertyCommand/>
@@ -219,12 +226,6 @@
                             }
                         }"/>
                 </Button.CommandParameter>
-                <Button.Style>
-                    <l:StyleCombiner>
-                        <StaticResource ResourceKey="ClearButtonStyle"/>
-                        <StaticResource ResourceKey="ButtonVisibleIfNotReadonly"/>
-                    </l:StyleCombiner>
-                </Button.Style>
             </Button>
             <Button 
                 DockPanel.Dock="Right" 
@@ -252,6 +253,7 @@
             <Button 
                 DockPanel.Dock="Right" 
                 Margin="0" 
+                Style="{l:ParameterizedResource CreateButtonStyle1}"
                 >
                 <Button.Command>
                     <local:PropertyCommand/>
@@ -266,16 +268,11 @@
                             }
                         }"/>
                 </Button.CommandParameter>
-                <Button.Style>
-                    <l:StyleCombiner>
-                        <StaticResource ResourceKey="CreateButtonStyle"/>
-                        <StaticResource ResourceKey="ButtonVisibleIfNotReadonly"/>
-                    </l:StyleCombiner>
-                </Button.Style>
             </Button>
             <Button 
                 DockPanel.Dock="Right" 
                 Margin="0" 
+                Style="{l:ParameterizedResource FindButtonStyle1}"
                 >
                 <Button.Command>
                     <local:PropertyCommand/>
@@ -283,12 +280,6 @@
                 <Button.CommandParameter>
                     <local:PropertyCommandArgs Action="Find" Property="{Binding}"/>
                 </Button.CommandParameter>
-                <Button.Style>
-                    <l:StyleCombiner>
-                        <StaticResource ResourceKey="FindButtonStyle"/>
-                        <StaticResource ResourceKey="ButtonVisibleIfNotReadonly"/>
-                    </l:StyleCombiner>
-                </Button.Style>
             </Button>
             <TextBlock FontSize="12" FontWeight="Bold">
                 <TextBlock.Style>
@@ -314,6 +305,7 @@
     </DataTemplate>
     <DataTemplate x:Key="EnumPropertyDataTemplate" x:Shared="False">
         <ComboBox 
+            IsReadOnly="{Binding IsReadonly, Converter={l:ParameterizedResource $converter}, ConverterParameter=IsReadonly, Mode=OneTime}"
             ItemsSource="{Binding Value, Converter={l:ParameterizedResource $converter}, ConverterParameter=Enum, Mode=OneTime}"
             SelectedItem="{Binding Value, Mode=TwoWay, Converter={l:ParameterizedResource $converter}, UpdateSourceTrigger=PropertyChanged}"
             />
@@ -323,6 +315,7 @@
             <Button 
                 DockPanel.Dock="Right" 
                 Margin="0" 
+                Style="{l:ParameterizedResource ClearButtonStyle1}"
                 >
                 <Button.Command>
                     <local:PropertyCommand/>
@@ -338,23 +331,12 @@
                         }"
                     />
                 </Button.CommandParameter>
-                <Button.Style>
-                    <l:StyleCombiner>
-                        <StaticResource ResourceKey="ClearButtonStyle"/>
-                        <StaticResource ResourceKey="ButtonVisibleIfNotReadonly"/>
-                    </l:StyleCombiner>
-                </Button.Style>
             </Button>
             <Button 
                 DockPanel.Dock="Right" 
                 Margin="0" 
+                Style="{l:ParameterizedResource CheckButtonStyle1}"
                 >
-                <Button.Style>
-                    <l:StyleCombiner>
-                        <StaticResource ResourceKey="CheckButtonStyle"/>
-                        <StaticResource ResourceKey="ButtonVisibleIfNotReadonly"/>
-                    </l:StyleCombiner>
-                </Button.Style>
             </Button>
             <TextBox 
                 Text="{
@@ -364,7 +346,7 @@
                     UpdateSourceTrigger=LostFocus, 
                     Converter={l:ParameterizedResource $converter}
                     }" 
-                IsReadOnly="{Binding IsReadonly}"
+                IsReadOnly="{Binding IsReadonly, Converter={l:ParameterizedResource $converter}, ConverterParameter=IsReadonly, Mode=OneTime}"
                 Style="{l:ParameterizedResource TextBoxWithInvalidFormatIndicationStyle}"
                 />
         </DockPanel>
@@ -372,8 +354,8 @@
     <local:PropertyTemplateSelector x:Key="PropertyTemplateSelector" x:Shared="False"
         ServiceProviderCatcher="{l:ParameterizedResource $serviceProviderCatcher}"
         DefaultDataTemplateKey="DefaultPropertyDataTemplate"
-        ClassDataTemplate="{StaticResource ClassPropertyDataTemplate}"
-        ListDataTemplate="{StaticResource ListPropertyDataTemplate}"
+        ClassDataTemplateKey="ClassPropertyDataTemplate"
+        ListDataTemplateKey="ListPropertyDataTemplate"
         EnumDataTemplateKey="EnumPropertyDataTemplate"
         />
     <DataTemplate x:Key="NameTemplate">

@@ -9,7 +9,6 @@
 public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
 {
     private readonly SemaphoreSlim _asyncLock = new(1, 1);
-    private readonly @Model.ContractName@{}PocotaContext _context;
     public @Model.ClassName@{}(IServiceProvider services): base(services) 
     {
         _context = _services.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}PocotaContext>")@{}();
@@ -28,8 +27,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
         await _asyncLock.WaitAsync(cancellationToken);
         try 
         {
-            _context.ClearSentEntities();
-            _context.KeyOnlyJson = true;
+            ResetContext();
     @foreach(ParameterModel pm in mm.Parameters.Skip(mm.IsEnumeration ? 1 : 0)) {
         <text>            string _@{}@pm.Name = HttpUtility.UrlEncode(JsonSerializer.Serialize(@pm.Name, _serializerOptions));
 </text>
@@ -60,8 +58,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
         await _asyncLock.WaitAsync(cancellationToken);
         try
         {
-            _context.ClearSentEntities();
-            _context.KeyOnlyJson = false;
+            ResetContext();
             HttpRequestMessage _request = new(HttpMethod.Post, "/@Model.ContractName");
             await Task.CompletedTask;
         }

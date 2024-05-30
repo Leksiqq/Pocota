@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Security.AccessControl;
+﻿using System.Globalization;
 using System.Windows.Data;
 
 namespace Net.Leksi.Pocota.Client;
@@ -16,6 +14,10 @@ public class PropertyConverter : IValueConverter
         if ("InvalidFormat".Equals(parameter))
         {
             return _invalidFormat;
+        }
+        if ("IsReadonly".Equals(parameter))
+        {
+            return value;
         }
         if ("Enum".Equals(parameter))
         {

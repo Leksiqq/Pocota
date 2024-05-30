@@ -1,53 +1,51 @@
-﻿using System.Collections;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System.Collections;
 using System.Reflection;
 
-namespace Net.Leksi.Pocota.Client
+namespace Net.Leksi.Pocota.Client;
+
+internal class ConnectorsMethodsList(IServiceProvider services): IEnumerable<MethodInfo>
 {
-    internal class ConnectorsMethodsList: IEnumerable<MethodInfo>
+    private List<MethodInfo>? _methods = null;
+    private readonly List<Type> _types = [];
+    public IEnumerator<MethodInfo> GetEnumerator()
     {
-        private readonly List<MethodInfo> _methods = [];
-        public ConnectorsMethodsList()
+        return Methods.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return Methods.GetEnumerator();
+    }
+    private List<MethodInfo> Methods
+    {
+        get
         {
-            Queue<Assembly> queue = new();
-            HashSet<string> visited = [];
-            queue.Enqueue(Assembly.GetEntryAssembly()!);
-            while(queue.Count > 0)
+            if(_methods is null)
             {
-                Assembly assembly = queue.Dequeue();
-                visited.Add(assembly.FullName!);
-                foreach(Type type in assembly.GetTypes())
+                _methods = new List<MethodInfo>();
+                foreach (Type type in _types)
                 {
-                    if (typeof(Connector).IsAssignableFrom(type) && type != typeof(Connector))
+                    if(services.GetServices(type) is IEnumerable<object?> items)
                     {
-                        foreach(MethodInfo method in type.GetMethods().Where(m => m.DeclaringType == type && m.Name != nameof(Connector.GetPocotaConfigAsync))) 
+                        foreach(object? obj in items)
                         {
-                            _methods.Add(method);
+                            if(obj is Connector conn)
+                            {
+                                foreach (MethodInfo method in conn.GetType().GetMethods().Where(m => m.DeclaringType == type && m.Name != nameof(Connector.GetPocotaConfigAsync)))
+                                {
+                                    _methods.Add(method);
+                                }
+                            }
                         }
                     }
                 }
-                foreach(
-                    AssemblyName? reference 
-                    in assembly.GetReferencedAssemblies().Where(r => !visited.Contains(r.FullName))
-                )
-                {
-                    try
-                    {
-                        queue.Enqueue(Assembly.Load(reference));
-                    }
-                    catch { }
-                }
             }
+            return _methods;
         }
-
-        public IEnumerator<MethodInfo> GetEnumerator()
-        {
-            return _methods.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _methods.GetEnumerator();
-        }
-
+    }
+    internal void AddConnectorType(Type type)
+    {
+        _types.Add(type);
     }
 }

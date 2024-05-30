@@ -7,7 +7,7 @@ using System.Windows.Data;
 using static Net.Leksi.Pocota.Client.Constants;
 
 namespace Net.Leksi.Pocota.Client;
-public partial class EditObject : Window, IEditWindow, IWindowLauncher
+public partial class EditObject : Window, IEditWindow
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     private readonly IServiceProvider _services;
@@ -19,7 +19,7 @@ public partial class EditObject : Window, IEditWindow, IWindowLauncher
     public ObservableCollection<Property> Properties { get; private init; } = [];
     public CollectionViewSource PropertiesViewSource { get; private init; } = new();
     public bool IsReadonly { get; private set; }
-    public bool KeysOnly { get; internal set; }
+    public bool KeysOnly { get; set; }
     public WindowsList Windows { get; private init; }
     public Window? LaunchedBy 
     { 
@@ -43,24 +43,28 @@ public partial class EditObject : Window, IEditWindow, IWindowLauncher
             {
                 _property = value;
                 Properties.Clear();
-                if (PocotaContext.IsEntityType(_property.Type))
+                if (typeof(IEntityOwner).IsAssignableFrom(_property.Type))
                 {
                     foreach (Property prop in ((IPocotaEntity)_property.Value!).Properties)
                     {
-                        Properties.Add(Property.Create(prop)!);
+                        Property prop1 = Property.Create(prop)!;
+                        Properties.Add(prop1);
                     }
                 }
                 else
                 {
+
                     foreach (PropertyInfo pi in _property.Type.GetProperties())
                     {
                         Property prop = Property.Create(pi, _property.Value)!;
                         Properties.Add(prop);
                     }
                 }
+                PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
             }
         }
     }
+    public string? PropertyHash => $"{Property?.GetType()}:{Property?.GetHashCode()}";
     public EditWindowCore EditWindowCore { get; private init; }
     public EditObject(string path, Type type, bool isReadonly = false)
     {

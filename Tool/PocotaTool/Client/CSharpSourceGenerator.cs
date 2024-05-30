@@ -126,8 +126,9 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
         model.ClassName = Util.GetTypeName(options.ClassName!);
         model.NamespaceValue = BuildClientNamespace(options.ClassName!);
-        model.AddInheritance(typeof(Pocota.Client.PocotaEntity));
+        model.AddInheritance(typeof(IEntityOwner));
         model.AddUsing(typeof(EntityProperty));
+        model.AddUsing(typeof(AccessKind));
         NullabilityInfoContext nullabilityInfoContext = new();
         foreach (PropertyInfo pi in options.EntityType!.GetProperties())
         {

@@ -15,8 +15,8 @@ public static class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string
         services.AddScoped@{}@Html.Raw($"<{Model.ContractName}Connector>")@{}();
         services.AddScoped@{}@Html.Raw($"<{Model.ContractName}PocotaContext>")@{}();
         services.AddScoped@{}@Html.Raw($"<{Model.ContractName}JsonConverterFactory>")@{}();
-        services.AddScoped@{}@Html.Raw("<PocotaContext>")@{}(serv => serv.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}PocotaContext>")@{}());
-        services.AddScoped@{}@Html.Raw("<Connector>")@{}(serv => serv.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}Connector>")@{}());
+        services.AddKeyedScoped@{}@Html.Raw("<PocotaContext>")@{}("@Model.ContractName", (serv, key) => serv.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}PocotaContext>")@{}());
+        services.AddKeyedScoped@{}@Html.Raw("<Connector>")@{}("@Model.ContractName", (serv, key) => serv.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}Connector>")@{}());
 @foreach(PropertyModel pm in Model.Properties)
 {
     <text>        services.AddTransient@{}@Html.Raw($"<{pm.Name}JsonConverter>")@{}();

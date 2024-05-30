@@ -5,13 +5,14 @@ namespace Net.Leksi.Pocota.Client;
 
 public class PocotaContext
 {
-    protected static readonly Dictionary<Type, Func<ulong, PocotaContext, PocotaEntity>> s_entityCreators = [];
     private readonly Dictionary<Type, Dictionary<string, bool>> _keyProperties = [];
     private readonly HashSet<Type> _keyPropertiesFilled = [];
     private readonly HashSet<ulong> _sentEntities = [];
     private PocotaConfig? _pocotaConfig;
-    protected readonly IServiceProvider _services;
     private ulong _idGen = 0;
+    protected readonly Dictionary<Type, Func<ulong, PocotaContext, IEntityOwner>> s_entityCreators = [];
+    protected readonly IServiceProvider _services;
+    public bool KeyOnlyJson { get; internal set; } = true;
     internal PocotaConfig? PocotaConfig 
     { 
         get => _pocotaConfig;
@@ -35,60 +36,45 @@ public class PocotaContext
     {
         _services = services;
     }
-    public static T? Entity<T>(PocotaEntity entity) where T : class, IPocotaEntity
-    {
-        if(s_entityCreators.ContainsKey(typeof(T)))
-        {
-            return ((IPocotaEntity)entity).Entity as T;
-        }
-        return null;
-    }
-    public static bool IsEntityType(Type type)
-    {
-        return s_entityCreators.ContainsKey(type);
-    }
-    public virtual T CreateEntity<T>() where T : PocotaEntity
+    public T CreateEntity<T>() where T : PocotaEntity
     {
         return (T)s_entityCreators[typeof(T)].Invoke(Interlocked.Increment(ref _idGen), this);
     }
-    public virtual object? CreateEntity(Type type)
+    public object? CreateEntity(Type type)
     {
-        return s_entityCreators.TryGetValue(type, out Func<ulong, PocotaContext, PocotaEntity>? creator) 
+        return s_entityCreators.TryGetValue(type, out Func<ulong, PocotaContext, IEntityOwner>? creator) 
             ? creator.Invoke(Interlocked.Increment(ref _idGen), this) : null;
     }
     public bool IsKey(EntityProperty entityProperty)
     {
         return _keyProperties.TryGetValue(entityProperty.Entity.GetType(), out Dictionary<string, bool>? keys) && keys.ContainsKey(entityProperty.Name);
     }
-    public bool? IsAutoKey(EntityProperty entityProperty)
-    {
-        return !_keyProperties.TryGetValue(entityProperty.Entity.GetType(), out Dictionary<string, bool>? keys) 
-            || !keys.TryGetValue(entityProperty.Name, out bool ans) 
-            ? null 
-            : ans;
-    }
-    protected void ClearSentEntities()
-    {
-        _sentEntities.Clear();
-    }
-    protected bool IsSent(PocotaEntity entity)
-    {
-        return _sentEntities.Contains(((IPocotaEntity)entity).PocotaId);
-    }
-    protected bool SetSent(PocotaEntity entity)
-    {
-        return _sentEntities.Add(((IPocotaEntity)entity).PocotaId);
-    }
-    protected bool KeysFilled(PocotaEntity entity)
+    public bool KeysFilled(IPocotaEntity entity)
     {
         return _keyPropertiesFilled.Contains(entity.GetType());
     }
-    protected void SetKeysFilled(PocotaEntity entity)
-    {
-        _keyPropertiesFilled.Add(entity.GetType());
-    }
-    protected static void SetPropertyState(EntityProperty property, PropertyState state)
+    internal static void SetPropertyState(EntityProperty property, PropertyState state)
     {
         property.State = state;
+    }
+    internal static void SetPropertyAccess(EntityProperty property, AccessKind access)
+    {
+        property.Access = access;
+    }
+    internal void ClearSentEntities()
+    {
+        _sentEntities.Clear();
+    }
+    internal bool IsSent(IPocotaEntity entity)
+    {
+        return _sentEntities.Contains(entity.PocotaId);
+    }
+    internal bool SetSent(IPocotaEntity entity)
+    {
+        return _sentEntities.Add(entity.PocotaId);
+    }
+    internal void SetKeysFilled(IPocotaEntity entity)
+    {
+        _keyPropertiesFilled.Add(entity.GetType());
     }
 }

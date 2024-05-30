@@ -1,22 +1,37 @@
 ﻿
 
+using Net.Leksi.Pocota.Contract;
+
 namespace Net.Leksi.Pocota.Client;
 
 public abstract class PocotaEntity: IPocotaEntity
 {
-    private readonly ulong _pocotaId;
-    protected EntityState _state;
-    protected internal PocotaContext _context;
-    protected IPocotaEntity _entity = null!;
-    ulong IPocotaEntity.PocotaId => _pocotaId;
-    EntityState IPocotaEntity.State => _state;
-    IEnumerable<EntityProperty> IPocotaEntity.Properties => GetProperties();
-
-    public IPocotaEntity Entity => _entity;
-
+    private AccessKind _access = AccessKind.Full;
+    protected readonly PocotaContext _context;
+    public ulong PocotaId {  get; private init; }
+    public EntityState State { get; internal set; } = EntityState.Detached;
+    public AccessKind Access
+    {
+        get => _access;
+        internal set
+        {
+            if (_access != value)
+            {
+                if (value is AccessKind.Full || value is AccessKind.Readonly || value is AccessKind.Anonym)
+                {
+                    _access = value;
+                }
+                else
+                {
+                    _access = AccessKind.Readonly;
+                }
+            }
+        }
+    }
+    public IEnumerable<EntityProperty> Properties => GetProperties();
     public PocotaEntity(ulong pocotaId, PocotaContext context)
     {
-        _pocotaId = pocotaId;
+        PocotaId = pocotaId;
         _context = context;
     }
     protected abstract IEnumerable<EntityProperty> GetProperties();

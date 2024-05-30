@@ -2,7 +2,7 @@
 
 namespace Net.Leksi.Pocota.Client;
 
-public interface IEditWindow
+public interface IEditWindow: IWindowLauncher
 {
     EditWindowCore EditWindowCore { get; }
     Window? LaunchedBy { get; set; }

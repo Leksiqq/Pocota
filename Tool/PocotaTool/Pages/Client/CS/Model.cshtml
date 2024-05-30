@@ -11,22 +11,30 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
 {
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>    private class @prop.Name@{}Property(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
+    <text>    private class @prop.Name@{}Property(IPocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
         public override object? Value 
         {
-            get => ((@Model.ClassName)Entity)?.@{}@prop.Name;
-            set {
-                if(Entity is {}) 
+            get 
+            {
+                if(Access is AccessKind.NotSet || Access is AccessKind.Forbidden)
+                {
+                    return default;
+                }
+                return _value ?? default;
+            }
+            set 
+            {
+                if (!IsReadonly)
                 {
                     if(value is @Html.Raw(prop.TypeName) val && val != ((@Model.ClassName)Entity).@{}@prop.Name)
                     {
-                        ((@Model.ClassName)Entity).@{}@prop.Name = val;
+                        _value = val;
                         NotifyPropertyChanged();
                     }
-                    else if(value == default && ((@Model.ClassName)Entity).@{}@prop.Name != default)
+                    else if(value == default && _value != default)
                     {
-                        ((@Model.ClassName)Entity).@{}@prop.Name = default;
+                        _value = default;
                         NotifyPropertyChanged();
                     }
                 }
@@ -36,50 +44,48 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
     }
 </text>
 }
-    private class @Model.ClassName@{}PocotaEntity(@Model.ClassName owner) : I@{}@Model.ClassName@{}PocotaEntity
+    private class @Model.ClassName@{}PocotaEntity: PocotaEntity, I@{}@Model.ClassName@{}PocotaEntity
     {
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>        public @nameof(EntityProperty) @prop.Name => owner._@prop.Name@{}EntityProperty;
+    <text>        public @nameof(EntityProperty) @prop.Name { get; private init;}
 </text>
 }
-        public ulong PocotaId => ((IPocotaEntity)owner).PocotaId;
-
-        public EntityState State => ((IPocotaEntity)owner).State;
-
-        public IEnumerable<EntityProperty> Properties => ((IPocotaEntity)owner).Properties;
-        public IPocotaEntity Entity => this;
+        internal @Model.ClassName@{}PocotaEntity(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
+        {
+@foreach (PropertyModel prop in Model.Properties)
+{
+    <text>            @prop.Name = new @prop.Name@{}Property@{}(this, s_@{}@prop.Name, typeof(@Html.Raw(prop.TypeName)));
+</text>
+}
+        }
+        protected override IEnumerable<EntityProperty> GetProperties()
+        {
+@foreach (PropertyModel prop in Model.Properties)
+{
+    <text>            yield return @prop.Name;
+</text>
+}
+        }
     }
 @foreach (PropertyModel prop in Model.Properties)
 {
     <text>    private const string s_@{}@prop.Name = "@prop.Name";
 </text>
 }
+    private readonly @Model.ClassName@{}PocotaEntity _entity;
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>    private readonly @prop.Name@{}Property _@prop.Name@{}EntityProperty;
-</text>
-}
-@foreach (PropertyModel prop in Model.Properties)
-{
-    <text>    public @Html.Raw(prop.TypeName)@(prop.IsNullable ? "?" : string.Empty) @prop.Name { get; set; }
-</text>
-}
-    internal @Model.ClassName@{}(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
-    {
-@foreach (PropertyModel prop in Model.Properties)
-{
-    <text>        _@prop.Name@{}EntityProperty = new @prop.Name@{}Property@{}(this, s_@{}@prop.Name, typeof(@Html.Raw(prop.TypeName)));
-</text>
-}
-        _entity = new @Model.ClassName@{}PocotaEntity(this);
+    <text>    public @Html.Raw(prop.TypeName)@(prop.IsNullable ? "?" : string.Empty) @prop.Name 
+    { 
+        get => (@Html.Raw(prop.TypeName)@(prop.IsNullable ? "?" : string.Empty))_entity.@prop.Name@{}.Value@(prop.IsNullable ? string.Empty : "!"); 
+        set => _entity.@prop.Name@{}.Value = value; 
     }
-    protected override IEnumerable<EntityProperty> GetProperties()
-    {
-@foreach (PropertyModel prop in Model.Properties)
-{
-    <text>        yield return _@prop.Name@{}EntityProperty;
 </text>
 }
+    IPocotaEntity IEntityOwner.Entity => _entity;
+    internal @Model.ClassName@{}(ulong pocotaId, PocotaContext context)
+    {
+        _entity = new @Model.ClassName@{}PocotaEntity(pocotaId, context);
     }
 }

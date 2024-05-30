@@ -49,7 +49,7 @@ public class EditListConverter : Freezable, IValueConverter, IMultiValueConverte
         {
             if (Owner?.GetIndex(value) is int index)
             {
-                return index;
+                return $"{index}, {value.GetType()}:{value.GetHashCode()}";
             }
             return null;
         }

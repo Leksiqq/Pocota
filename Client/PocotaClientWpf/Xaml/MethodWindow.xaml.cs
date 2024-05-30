@@ -20,6 +20,7 @@ namespace Net.Leksi.Pocota.Client
         public WindowsList Windows { get; private init; }
         public string MethodName => _method is { } ? $"{Util.BuildTypeName(_method.DeclaringType!)}.{_method.Name}" : string.Empty;
         public EditWindowLauncher Launcher {get; private init;}
+        public bool KeysOnly { get => true; set { } }
         public MethodWindow(MethodInfo method)
         {
             _method = method;

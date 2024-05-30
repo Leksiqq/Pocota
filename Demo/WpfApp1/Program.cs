@@ -16,8 +16,8 @@ static class Program
     {
         //CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("en-US");
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-        builder.Services.AddPocotaWpfApp<App>(touch: typeof(Pizza));
         builder.Services.AddPizza();
+        builder.Services.AddPocotaWpfApp<App>();
         if(builder.Services.Where(sd => sd.ServiceType == typeof(Localizer)).FirstOrDefault() is ServiceDescriptor sd)
         {
             builder.Services.Remove(sd);

@@ -50,6 +50,7 @@
             </MenuItem>
             <MenuItem Style="{l:ParameterizedResource WindowsMenuItemStyle, Replaces=$window:Window}"/>
         </Menu>
+        <TextBlock DockPanel.Dock="Top" Text="{Binding PropertyHash}"/>
         <ListView DockPanel.Dock="Top" x:Name="PropertiesView" ItemsSource="{Binding PropertiesViewSource.View}" SizeChanged="PropertiesView_SizeChanged">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">

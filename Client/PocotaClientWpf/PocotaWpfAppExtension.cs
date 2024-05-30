@@ -15,11 +15,7 @@ public static class PocotaWpfAppExtension
     public static IServiceCollection AddPocotaWpfApp(
         this IServiceCollection services, 
         Func<IServiceProvider,Application> createApplication, 
-        Type? mainWindowType = null,
-#pragma warning disable IDE0060 // Удалите неиспользуемый параметр
-        Type? touch = null,
-#pragma warning restore IDE0060 // Удалите неиспользуемый параметр
-        bool showLabels = false
+        Type? mainWindowType = null
     )
     {
         #region https://serialseb.com/blog/2007/04/03/wpf-tips-1-have-all-your-dates-times/
@@ -57,6 +53,15 @@ public static class PocotaWpfAppExtension
         services.AddScoped<WindowsList>();
         services.AddSingleton<Localizer>();
 
+        ConnectorsMethodsList methods = new();
+        foreach(ServiceDescriptor sd in services)
+        {
+            if (typeof(Connector).IsAssignableFrom(sd.ServiceType))
+            {
+                methods.AddConnectorType(sd.ServiceType);
+            }
+        }
+        services.AddSingleton(methods);
         return services;
     }
     public static IServiceCollection AddPocotaWpfApp<TApplication>(
@@ -66,7 +71,7 @@ public static class PocotaWpfAppExtension
     )
         where TApplication : Application, new()
     {
-        return AddPocotaWpfApp(services, s => new TApplication(), mainWindowType, touch);
+        return AddPocotaWpfApp(services, s => new TApplication(), mainWindowType);
     }
     public static IServiceCollection AddPocotaWpfApp<TApplication, TWindow>(
         this IServiceCollection services,
@@ -75,7 +80,7 @@ public static class PocotaWpfAppExtension
         where TApplication : Application, new()
         where TWindow: Window, new()
     {
-        return AddPocotaWpfApp(services, s => new TApplication(), typeof(TWindow), touch);
+        return AddPocotaWpfApp(services, s => new TApplication(), typeof(TWindow));
     }
     public static void RunPocotaWpfApp(this IHost host)
     {

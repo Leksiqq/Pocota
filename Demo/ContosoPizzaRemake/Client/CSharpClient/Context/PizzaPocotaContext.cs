@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaPocotaContext                  //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-29T18:20:46.                                 //
+// at 2024-05-30T18:11:42.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -14,36 +14,11 @@ namespace ContosoPizza.Client;
 
 public class PizzaPocotaContext: PocotaContext
 {
-    static PizzaPocotaContext()
+    public PizzaPocotaContext(IServiceProvider services): base(services) 
     {
         s_entityCreators.Add(typeof(Pizza), (id, ctx) => new Pizza(id, ctx));
         s_entityCreators.Add(typeof(Sauce), (id, ctx) => new Sauce(id, ctx));
         s_entityCreators.Add(typeof(Topping), (id, ctx) => new Topping(id, ctx));
     }
-    public PizzaPocotaContext(IServiceProvider services): base(services) { }
-    internal bool KeyOnlyJson {  get; set; }
-    public override T CreateEntity<T>()
-    {
-        return base.CreateEntity<T>();
-    }
     internal static void Touch() { }
-    internal new void ClearSentEntities() {
-        base.ClearSentEntities();
-    }
-    internal new bool IsSent(PocotaEntity entity) 
-    {
-        return base.IsSent(entity);
-    }
-    internal new bool SetSent(PocotaEntity entity)
-    {
-        return base.SetSent(entity);
-    }
-    internal new bool KeysFilled(PocotaEntity entity)
-    {
-        return base.KeysFilled(entity);
-    }
-    internal new void SetKeysFilled(PocotaEntity entity)
-    {
-        base.SetKeysFilled(entity);
-    }
 }

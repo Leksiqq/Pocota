@@ -1,36 +1,45 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Pizza                        //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-29T18:20:46.                                 //
+// at 2024-05-30T18:11:42.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
 using ContosoPizza.Models;
 using Net.Leksi.Pocota.Client;
+using Net.Leksi.Pocota.Contract;
 using System;
 using System.Collections.Generic;
 
 namespace ContosoPizza.Models.Client;
 
 
-public class Pizza: PocotaEntity
+public class Pizza: IEntityOwner
 {
-    private class IdProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
+    private class IdProperty(IPocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
         public override object? Value 
         {
-            get => ((Pizza)Entity)?.Id;
-            set {
-                if(Entity is {}) 
+            get 
+            {
+                if(Access is AccessKind.NotSet || Access is AccessKind.Forbidden)
+                {
+                    return default;
+                }
+                return _value ?? default;
+            }
+            set 
+            {
+                if (!IsReadonly)
                 {
                     if(value is Int32 val && val != ((Pizza)Entity).Id)
                     {
-                        ((Pizza)Entity).Id = val;
+                        _value = val;
                         NotifyPropertyChanged();
                     }
-                    else if(value == default && ((Pizza)Entity).Id != default)
+                    else if(value == default && _value != default)
                     {
-                        ((Pizza)Entity).Id = default;
+                        _value = default;
                         NotifyPropertyChanged();
                     }
                 }
@@ -38,22 +47,30 @@ public class Pizza: PocotaEntity
         }
         public override bool IsNullable => false;
     }
-    private class NameProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
+    private class NameProperty(IPocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
         public override object? Value 
         {
-            get => ((Pizza)Entity)?.Name;
-            set {
-                if(Entity is {}) 
+            get 
+            {
+                if(Access is AccessKind.NotSet || Access is AccessKind.Forbidden)
+                {
+                    return default;
+                }
+                return _value ?? default;
+            }
+            set 
+            {
+                if (!IsReadonly)
                 {
                     if(value is String val && val != ((Pizza)Entity).Name)
                     {
-                        ((Pizza)Entity).Name = val;
+                        _value = val;
                         NotifyPropertyChanged();
                     }
-                    else if(value == default && ((Pizza)Entity).Name != default)
+                    else if(value == default && _value != default)
                     {
-                        ((Pizza)Entity).Name = default;
+                        _value = default;
                         NotifyPropertyChanged();
                     }
                 }
@@ -61,22 +78,30 @@ public class Pizza: PocotaEntity
         }
         public override bool IsNullable => true;
     }
-    private class SauceProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
+    private class SauceProperty(IPocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
         public override object? Value 
         {
-            get => ((Pizza)Entity)?.Sauce;
-            set {
-                if(Entity is {}) 
+            get 
+            {
+                if(Access is AccessKind.NotSet || Access is AccessKind.Forbidden)
+                {
+                    return default;
+                }
+                return _value ?? default;
+            }
+            set 
+            {
+                if (!IsReadonly)
                 {
                     if(value is Sauce val && val != ((Pizza)Entity).Sauce)
                     {
-                        ((Pizza)Entity).Sauce = val;
+                        _value = val;
                         NotifyPropertyChanged();
                     }
-                    else if(value == default && ((Pizza)Entity).Sauce != default)
+                    else if(value == default && _value != default)
                     {
-                        ((Pizza)Entity).Sauce = default;
+                        _value = default;
                         NotifyPropertyChanged();
                     }
                 }
@@ -84,22 +109,30 @@ public class Pizza: PocotaEntity
         }
         public override bool IsNullable => true;
     }
-    private class ToppingsProperty(PocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
+    private class ToppingsProperty(IPocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
         public override object? Value 
         {
-            get => ((Pizza)Entity)?.Toppings;
-            set {
-                if(Entity is {}) 
+            get 
+            {
+                if(Access is AccessKind.NotSet || Access is AccessKind.Forbidden)
+                {
+                    return default;
+                }
+                return _value ?? default;
+            }
+            set 
+            {
+                if (!IsReadonly)
                 {
                     if(value is IList<Topping> val && val != ((Pizza)Entity).Toppings)
                     {
-                        ((Pizza)Entity).Toppings = val;
+                        _value = val;
                         NotifyPropertyChanged();
                     }
-                    else if(value == default && ((Pizza)Entity).Toppings != default)
+                    else if(value == default && _value != default)
                     {
-                        ((Pizza)Entity).Toppings = default;
+                        _value = default;
                         NotifyPropertyChanged();
                     }
                 }
@@ -107,44 +140,55 @@ public class Pizza: PocotaEntity
         }
         public override bool IsNullable => true;
     }
-    private class PizzaPocotaEntity(Pizza owner) : IPizzaPocotaEntity
+    private class PizzaPocotaEntity: PocotaEntity, IPizzaPocotaEntity
     {
-        public EntityProperty Id => owner._IdEntityProperty;
-        public EntityProperty Name => owner._NameEntityProperty;
-        public EntityProperty Sauce => owner._SauceEntityProperty;
-        public EntityProperty Toppings => owner._ToppingsEntityProperty;
-        public ulong PocotaId => ((IPocotaEntity)owner).PocotaId;
-
-        public EntityState State => ((IPocotaEntity)owner).State;
-
-        public IEnumerable<EntityProperty> Properties => ((IPocotaEntity)owner).Properties;
-        public IPocotaEntity Entity => this;
+        public EntityProperty Id { get; private init;}
+        public EntityProperty Name { get; private init;}
+        public EntityProperty Sauce { get; private init;}
+        public EntityProperty Toppings { get; private init;}
+        internal PizzaPocotaEntity(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
+        {
+            Id = new IdProperty(this, s_Id, typeof(Int32));
+            Name = new NameProperty(this, s_Name, typeof(String));
+            Sauce = new SauceProperty(this, s_Sauce, typeof(Sauce));
+            Toppings = new ToppingsProperty(this, s_Toppings, typeof(IList<Topping>));
+        }
+        protected override IEnumerable<EntityProperty> GetProperties()
+        {
+            yield return Id;
+            yield return Name;
+            yield return Sauce;
+            yield return Toppings;
+        }
     }
     private const string s_Id = "Id";
     private const string s_Name = "Name";
     private const string s_Sauce = "Sauce";
     private const string s_Toppings = "Toppings";
-    private readonly IdProperty _IdEntityProperty;
-    private readonly NameProperty _NameEntityProperty;
-    private readonly SauceProperty _SauceEntityProperty;
-    private readonly ToppingsProperty _ToppingsEntityProperty;
-    public Int32 Id { get; set; }
-    public String? Name { get; set; }
-    public Sauce? Sauce { get; set; }
-    public IList<Topping>? Toppings { get; set; }
-    internal Pizza(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
-    {
-        _IdEntityProperty = new IdProperty(this, s_Id, typeof(Int32));
-        _NameEntityProperty = new NameProperty(this, s_Name, typeof(String));
-        _SauceEntityProperty = new SauceProperty(this, s_Sauce, typeof(Sauce));
-        _ToppingsEntityProperty = new ToppingsProperty(this, s_Toppings, typeof(IList<Topping>));
-        _entity = new PizzaPocotaEntity(this);
+    private readonly PizzaPocotaEntity _entity;
+    public Int32 Id 
+    { 
+        get => (Int32)_entity.Id.Value!; 
+        set => _entity.Id.Value = value; 
     }
-    protected override IEnumerable<EntityProperty> GetProperties()
+    public String? Name 
+    { 
+        get => (String?)_entity.Name.Value; 
+        set => _entity.Name.Value = value; 
+    }
+    public Sauce? Sauce 
+    { 
+        get => (Sauce?)_entity.Sauce.Value; 
+        set => _entity.Sauce.Value = value; 
+    }
+    public IList<Topping>? Toppings 
+    { 
+        get => (IList<Topping>?)_entity.Toppings.Value; 
+        set => _entity.Toppings.Value = value; 
+    }
+    IPocotaEntity IEntityOwner.Entity => _entity;
+    internal Pizza(ulong pocotaId, PocotaContext context)
     {
-        yield return _IdEntityProperty;
-        yield return _NameEntityProperty;
-        yield return _SauceEntityProperty;
-        yield return _ToppingsEntityProperty;
+        _entity = new PizzaPocotaEntity(pocotaId, context);
     }
 }
