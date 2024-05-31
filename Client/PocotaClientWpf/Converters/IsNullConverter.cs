@@ -7,6 +7,10 @@ public class IsNullConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
     {
+        if(parameter is { })
+        {
+            Console.WriteLine($"{GetType()}.Convert: {parameter}");
+        }
         return value is null;
     }
 

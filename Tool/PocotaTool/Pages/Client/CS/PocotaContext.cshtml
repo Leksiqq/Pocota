@@ -8,7 +8,7 @@
 @Html.Partial("Header", Model)
 public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
 {
-    public @Model.ClassName@{}(IServiceProvider services): base(services) 
+    public @Model.ClassName@{}(IServiceProvider services, string serviceKey): base(services, serviceKey) 
     {
 @foreach(string type in Model.Entities)
 {

@@ -59,7 +59,7 @@ public class PropertyCommand : ICommand
                 {
                     if (typeof(IEntityOwner).IsAssignableFrom(args.Property.Type))
                     {
-                        args.Property.Value = _services.GetRequiredService<PocotaContext>().CreateEntity(args.Property.Type);
+                        args.Property.Value = _services.GetRequiredKeyedService<PocotaContext>(launcher.ServiceKey).CreateEntity(args.Property.Type)!;
                     }
                     else if(args.Property.Type.IsClass && args.Property.Type != typeof(string))
                     {
@@ -78,6 +78,7 @@ public class PropertyCommand : ICommand
                 case PropertyAction.Edit or PropertyAction.Create:
                     if(launcher.Launcher.Launch(args.Property, args.AltName) is Window editWindow)
                     {
+                        ((IEditWindow)editWindow).ServiceKey = launcher.ServiceKey;
                         ((IEditWindow)editWindow).Property = args.Property;
                         ((IEditWindow)editWindow).KeysOnly = launcher.KeysOnly;
                         editWindow.Show();

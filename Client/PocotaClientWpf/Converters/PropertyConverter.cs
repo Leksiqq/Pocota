@@ -10,7 +10,7 @@ public class PropertyConverter : IValueConverter
     public Property? Property {  get; set; }
     public object? Convert(object value, Type targetType, object? parameter, CultureInfo culture)
     {
-        Console.WriteLine($"Convert: {value}, {Property?.Type} -> {targetType}, {parameter}");
+        Console.WriteLine($"{GetType()}.Convert: {value}, {Property?.Type} -> {targetType}, {parameter}");
         if ("InvalidFormat".Equals(parameter))
         {
             return _invalidFormat;
@@ -91,10 +91,15 @@ public class PropertyConverter : IValueConverter
         {
             result = ((TimeOnly)value).ToString(((DateTimeFormatInfo)formatProvider).LongTimePattern, formatProvider);
         }
+        else if (Property is ListProperty)
+        {
+            result = "list";
+        }
         else
         {
             result = (string)System.Convert.ChangeType(value, typeof(string), formatProvider);
         }
+
         return result;
     }
     private object? InternalConvertBack(string valueString, IFormatProvider formatProvider)

@@ -40,6 +40,7 @@ public class Localizer: LocalizationBase
     public string Position => GetString();
     public string Parameter => GetString();
     public string Check => GetString();
+    public string ServiceKey => GetString();
     public Localizer()
     {
     }

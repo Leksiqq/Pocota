@@ -6,6 +6,8 @@ using Net.Leksi.Pocota.Client;
 using Net.Leksi.Pocota.Contract;
 using Net.Leksi.Pocota.Tool.Pages.Client.CS;
 using Net.Leksi.Pocota.Tool.Pages.CS;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -127,6 +129,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         model.ClassName = Util.GetTypeName(options.ClassName!);
         model.NamespaceValue = BuildClientNamespace(options.ClassName!);
         model.AddInheritance(typeof(IEntityOwner));
+        model.AddInheritance(typeof(INotifyPropertyChanged));
         model.AddUsing(typeof(EntityProperty));
         model.AddUsing(typeof(AccessKind));
         NullabilityInfoContext nullabilityInfoContext = new();
@@ -144,8 +147,9 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
             {
                 Type itemType = pi.PropertyType.GetGenericArguments()[0];
                 model.AddUsing(itemType);
+                model.AddUsing(typeof(ObservableCollection<>));
                 pm.ItemTypeName = Util.BuildTypeName(itemType);
-                pm.TypeName = Util.BuildTypeName(typeof(IList<>).MakeGenericType([itemType]));
+                pm.TypeName = Util.BuildTypeName(typeof(ObservableCollection<>).MakeGenericType([itemType]));
             }
             model.Properties.Add(pm);
         }

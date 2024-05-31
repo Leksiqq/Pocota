@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaExtensions                     //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-05-30T18:11:42.                                 //
+// at 2024-05-31T16:57:58.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -15,14 +15,15 @@ namespace ContosoPizza.Client;
 public static class PizzaExtensions
 {
     public static IServiceCollection AddPizza(
-        this IServiceCollection services
+        this IServiceCollection services,
+        string servicesKey = "Pizza"
     )
     {
-        services.AddScoped<PizzaConnector>();
-        services.AddScoped<PizzaPocotaContext>();
+        services.AddScoped(serv => new PizzaConnector(serv, servicesKey));
+        services.AddScoped(serv => new PizzaPocotaContext(serv, servicesKey));
         services.AddScoped<PizzaJsonConverterFactory>();
-        services.AddKeyedScoped<PocotaContext>("Pizza", (serv, key) => serv.GetRequiredService<PizzaPocotaContext>());
-        services.AddKeyedScoped<Connector>("Pizza", (serv, key) => serv.GetRequiredService<PizzaConnector>());
+        services.AddKeyedScoped<PocotaContext>(servicesKey, (serv, key) => serv.GetRequiredService<PizzaPocotaContext>());
+        services.AddKeyedScoped<Connector>(servicesKey, (serv, key) => serv.GetRequiredService<PizzaConnector>());
         services.AddTransient<PizzaJsonConverter>();
         services.AddTransient<SauceJsonConverter>();
         services.AddTransient<ToppingJsonConverter>();

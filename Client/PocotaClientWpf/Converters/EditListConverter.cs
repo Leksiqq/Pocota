@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
@@ -26,9 +27,9 @@ public class EditListConverter : Freezable, IValueConverter, IMultiValueConverte
             if (e.NewValue is EditList el1)
             {
                 el1.PropertyChanged += Owner_PropertyChanged;
-                if (Owner?.CurrentProperty is { })
+                if (Owner?.ItemProperty is { })
                 {
-                    _propertyConverter.Property = Owner.CurrentProperty;
+                    _propertyConverter.Property = Owner.ItemProperty;
                 }
             }
         }
@@ -37,9 +38,9 @@ public class EditListConverter : Freezable, IValueConverter, IMultiValueConverte
 
     private void Owner_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if(Owner?.CurrentProperty is { })
+        if(Owner?.ItemProperty is { })
         {
-            _propertyConverter.Property = Owner.CurrentProperty;
+            _propertyConverter.Property = Owner.ItemProperty;
         }
     }
 
@@ -57,11 +58,20 @@ public class EditListConverter : Freezable, IValueConverter, IMultiValueConverte
         {
             return _propertyConverter.Convert(value, targetType, null, culture);
         }
+        if ("Count".Equals(parameter))
+        {
+            if(value is { } && _propertyConverter.Property is ListProperty lp )
+            {
+                lp.Value = value;
+                return lp.Count;
+            }
+            return null;
+        }
         if ("InvalidFormat".Equals(parameter))
         {
             return _propertyConverter.Convert(value, targetType, parameter, culture);
         }
-        Console.WriteLine($"Convert: {value}, {parameter}, {targetType}");
+        Console.WriteLine($"{GetType()}.Convert: {value}, {parameter}, {targetType}");
         return value;
     }
 

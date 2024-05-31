@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaConnector          //
 // was generated automatically from            //
-// at 2024-05-30T18:11:42.                     //
+// at 2024-05-31T16:57:58.                     //
 // Modifying this file will break the program! //
 /////////////////////////////////////////////////
 
@@ -21,7 +21,7 @@ namespace ContosoPizza.Client;
 public class PizzaConnector: Connector
 {
     private readonly SemaphoreSlim _asyncLock = new(1, 1);
-    public PizzaConnector(IServiceProvider services): base(services) 
+    public PizzaConnector(IServiceProvider services, string serviceKey): base(services, serviceKey) 
     {
         _context = _services.GetRequiredService<PizzaPocotaContext>();
         _serializerOptions.Converters.Add(

@@ -21,7 +21,6 @@
                 <ResourceDictionary Source="../Xaml/Dictionaries/Dictionary1.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy x:Key="ConnectorsDataGridManager" Value="{Binding ConnectorsDataGridManager}"/>
-            <l:BindingProxy x:Key="RunCommand" Value="{Binding RunCommand}"/>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
             <l:BindingProxy Value="{Binding Windows}" x:Key="Windows"/>
         </ResourceDictionary>
@@ -51,6 +50,13 @@
                             Margin="0"
                             />
                     </DataTemplate>
+                    <DataTemplate x:Key="ServiceKey">
+                        <TextBox 
+                            Text="{Binding ServiceKey, Mode=OneTime}" 
+                            Style="{StaticResource ReadonlyDataGridCellTextBoxStyle}"
+                            Margin="0"
+                            />
+                    </DataTemplate>
                     <DataTemplate x:Key="Connector">
                         <TextBox 
                             Text="{Binding DeclaringType, Mode=OneTime}" 
@@ -69,7 +75,7 @@
                         <StackPanel Orientation="Horizontal" Margin="0">
                             <Button 
                             Style="{StaticResource PlayButtonStyle}" 
-                            Command="{Binding Value, Source={StaticResource RunCommand}}"
+                            Command="{Binding Value, Source={StaticResource Window}}"
                             CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                             />
                         </StackPanel>
@@ -83,6 +89,11 @@
                         FieldName="Name" 
                         DataGridManager="{Binding Value.ConnectorsDataGridManager, Source={StaticResource Window}}" 
                         x:Key="NameConverter"
+                        />
+                    <local:DataGridConverter 
+                        FieldName="ServiceKey" 
+                        DataGridManager="{Binding Value.ConnectorsDataGridManager, Source={StaticResource Window}}" 
+                        x:Key="ServiceKeyConverter"
                         />
                     <local:DataGridConverter 
                         FieldName="DeclaringType" 
@@ -124,6 +135,23 @@
                                             <sys:String>$converter:DeclaringTypeConverter</sys:String>
                                             <sys:String>$field:DeclaringType</sys:String>
                                             <l:BindingProxy Name="$name" Value="{Binding Connector, Source={StaticResource Localizer}}"/>
+                                        </x:Array>
+                                    </l:ParameterizedResource.Replaces>
+                                </l:ParameterizedResource>
+                            </Binding.Source>
+                        </Binding>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellTemplate="{StaticResource ServiceKey}">
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <Binding Path="Value">
+                            <Binding.Source>
+                                <l:ParameterizedResource ResourceKey="SortHeader1">
+                                    <l:ParameterizedResource.Replaces>
+                                        <x:Array Type="sys:Object">
+                                            <sys:String>$converter:ServiceKeyConverter</sys:String>
+                                            <sys:String>$field:ServiceKey</sys:String>
+                                            <l:BindingProxy Name="$name" Value="{Binding ServiceKey, Source={StaticResource Localizer}}"/>
                                         </x:Array>
                                     </l:ParameterizedResource.Replaces>
                                 </l:ParameterizedResource>

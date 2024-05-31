@@ -11,15 +11,28 @@ public partial class EditObject : Window, IEditWindow
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     private readonly IServiceProvider _services;
-    private readonly PocotaContext _context;
     private readonly Dictionary<string, WeakReference<EditObject>> _editWindows = [];
+    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private Property? _property;
     private Window? _launchedBy;
-    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
+    private string? _serviceKey = null;
+    private PocotaContext? _context = null;
     public ObservableCollection<Property> Properties { get; private init; } = [];
     public CollectionViewSource PropertiesViewSource { get; private init; } = new();
     public bool IsReadonly { get; private set; }
     public bool KeysOnly { get; set; }
+    public string ServiceKey 
+    {
+        get => _serviceKey ?? string.Empty; 
+        set
+        {
+            if(_serviceKey is null && value != _serviceKey)
+            {
+                _serviceKey = value;
+                _context = _services.GetRequiredKeyedService<PocotaContext>(ServiceKey);
+            }
+        }
+    }
     public WindowsList Windows { get; private init; }
     public Window? LaunchedBy 
     { 
@@ -45,10 +58,9 @@ public partial class EditObject : Window, IEditWindow
                 Properties.Clear();
                 if (typeof(IEntityOwner).IsAssignableFrom(_property.Type))
                 {
-                    foreach (Property prop in ((IPocotaEntity)_property.Value!).Properties)
+                    foreach (Property prop in ((IEntityOwner)_property.Value!).Entity.Properties)
                     {
-                        Property prop1 = Property.Create(prop)!;
-                        Properties.Add(prop1);
+                        Properties.Add(Property.Create(prop)!);
                     }
                 }
                 else
@@ -71,7 +83,6 @@ public partial class EditObject : Window, IEditWindow
         PropertiesViewSource.Source = Properties;
         IsReadonly = false;
         _services = (IServiceProvider)Application.Current.Resources[ServiceProvider];
-        _context = _services.GetRequiredService<PocotaContext>();
         Windows = _services.GetRequiredService<WindowsList>();
         EditWindowCore = new EditWindowCore(path, type);
         Launcher = new EditWindowLauncher(EditWindowCore.Path, this);

@@ -26,7 +26,6 @@ public partial class EditList : Window, IEditWindow, ICommand
     }
     private readonly ConditionalWeakTable<object, object> _indexMapping = [];
     private readonly IServiceProvider _services;
-    private readonly PocotaContext _context;
     private readonly Localizer _localizer;
     private Property? _property;
     private Window? _launchedBy;
@@ -37,10 +36,24 @@ public partial class EditList : Window, IEditWindow, ICommand
     private PropertyCommandArgs? _editPropertyCommandArgs;
     private PropertyCommandArgs? _createPropertyCommandArgs;
     private PropertyCommandArgs? _clearPropertyCommandArgs;
+    private string? _serviceKey = null;
+    private PocotaContext? _context = null;
     public DataGridManager ItemsDataGridManager { get; private init; } = new();
     public WindowsList Windows { get; private init; }
     public bool IsReadonly { get; private init; }
     public bool KeysOnly { get; set; }
+    public string ServiceKey
+    {
+        get => _serviceKey ?? string.Empty;
+        set
+        {
+            if (_serviceKey is null && value != _serviceKey)
+            {
+                _serviceKey = value;
+                _context = _services.GetRequiredKeyedService<PocotaContext>(ServiceKey);
+            }
+        }
+    }
     public bool IsDataGridReadonly => IsReadonly || IsObject;
     public Type ItemType { get; private set; } = null!;
     public Window? LaunchedBy
@@ -66,6 +79,10 @@ public partial class EditList : Window, IEditWindow, ICommand
         {
             if (_property != value && value is { })
             {
+                if(_context is null)
+                {
+                    throw new InvalidOperationException("Must set ServiceKey first!");
+                }
                 if (
                     value.Type.IsGenericType
                     && value.Type.GetGenericArguments()[0] is Type itemType
@@ -107,6 +124,7 @@ public partial class EditList : Window, IEditWindow, ICommand
                     ItemsDataGrid.Columns.Add(column);
                     if (!IsObject)
                     {
+                        ItemProperty = new SimpleListItemProperty((IList)_property.Value!, ItemType);
                         column = new DataGridTemplateColumn();
                         ParameterizedResourceExtension pre = new()
                         {
@@ -115,7 +133,9 @@ public partial class EditList : Window, IEditWindow, ICommand
                         pre.ResourceKey = "Field";
                         column.CellTemplate = pre.ProvideValue(_dataGridXamlServices) as DataTemplate;
                         pre.ResourceKey = "PropertyTemplateSelector1";
-                        column.CellEditingTemplateSelector = pre.ProvideValue(_dataGridXamlServices) as DataTemplateSelector;
+                        PropertyTemplateSelector templateSelector = (pre.ProvideValue(_dataGridXamlServices) as PropertyTemplateSelector)!;
+                        templateSelector.Replaces = ["$field:Value"];
+                        column.CellEditingTemplateSelector = templateSelector;
 
                         DataGridConverter converter = new()
                         {
@@ -150,30 +170,38 @@ public partial class EditList : Window, IEditWindow, ICommand
                     else
                     {
                         list = (IList)_property.Value!;
+                        ItemProperty = null;
                         if (typeof(IEntityOwner).IsAssignableFrom(ItemType))
                         {
-                            var probe = (IPocotaEntity)(list.Count == 0 ? _context.CreateEntity(ItemType) : list[0])!;
-                            foreach(var prop in probe.Properties)
+                            IPocotaEntity probe = (list.Count == 0 ? _context!.CreateEntity(ItemType)?.Entity : ((IEntityOwner)list[0]!).Entity)!;
+                            foreach(EntityProperty prop in probe.Properties)
                             {
+                                ItemProperty = Property.Create(prop);
+                                EditListConverter editListConverter = new()
+                                {
+                                    Owner = this
+                                };
+                                ItemsDataGrid.Resources[$"{prop.Name}EditListConverter"] = editListConverter;
                                 column = new DataGridTemplateColumn();
                                 ParameterizedResourceExtension pre = new()
                                 {
-                                    Replaces = new string[] { $"$field:Entity.{prop.Name}.Value", "$converter:EditListConverter" }
+                                    Replaces = new string[] { $"$field:{prop.Name}", $"$converter:{prop.Name}EditListConverter" }
                                 };
-                                pre.ResourceKey = "Field";
+                                pre.ResourceKey = ItemProperty is ListProperty ? "Collection" : "Field";
                                 column.CellTemplate = pre.ProvideValue(_dataGridXamlServices) as DataTemplate;
+                                ItemsDataGrid.Resources.Remove($"{prop.Name}EditListConverter");
 
                                 DataGridConverter converter = new()
                                 {
                                     DataGridManager = ItemsDataGridManager,
-                                    FieldName = $"Entity.{prop.Name}.Value"
+                                    FieldName = prop.Name
                                 };
                                 ItemsDataGrid.Resources.Add($"{prop.Name}ValueConverter", converter);
                                 pre = new("SortHeader1")
                                 {
                                     Replaces = new string[] {
                                         $"$converter:{prop.Name}ValueConverter",
-                                        $"$field:Entity.{prop.Name}.Value",
+                                        $"$field:{prop.Name}",
                                         $"$name:{prop.Name}"
                                     }
                                 };
@@ -183,8 +211,10 @@ public partial class EditList : Window, IEditWindow, ICommand
                                     Source = bp
                                 };
                                 BindingOperations.SetBinding(column, DataGridTemplateColumn.HeaderTemplateProperty, binding);
+                                ItemsDataGrid.Resources.Remove($"{prop.Name}ValueConverter");
 
                                 ItemsDataGrid.Columns.Add(column);
+                                ItemProperty = null;
                             }
                         }
                         else
@@ -208,12 +238,11 @@ public partial class EditList : Window, IEditWindow, ICommand
             }
         }
     }
-    public Property? CurrentProperty => ItemsDataGridManager.ViewSource.View?.CurrentItem as Property;
+    public Property? ItemProperty { get; private set; } = null;
     public EditList(string path, Type type, bool isReadonly = false)
     {
         IsReadonly = isReadonly;
         _services = (IServiceProvider)Application.Current.Resources[ServiceProvider];
-        _context = _services.GetRequiredService<PocotaContext>();
         _localizer = _services.GetRequiredService<Localizer>();
         Windows = _services.GetRequiredService<WindowsList>();
         EditWindowCore = new EditWindowCore(path, type);
@@ -379,9 +408,9 @@ public partial class EditList : Window, IEditWindow, ICommand
                         }
                         MovedItem = null;
                     }
-                    PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
                 }
             }
+            PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
             _property?.NotifyPropertyChanged();
         }
     }

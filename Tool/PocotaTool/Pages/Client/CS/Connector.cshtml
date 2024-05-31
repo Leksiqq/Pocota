@@ -9,7 +9,7 @@
 public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
 {
     private readonly SemaphoreSlim _asyncLock = new(1, 1);
-    public @Model.ClassName@{}(IServiceProvider services): base(services) 
+    public @Model.ClassName@{}(IServiceProvider services, string serviceKey): base(services, serviceKey) 
     {
         _context = _services.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}PocotaContext>")@{}();
         _serializerOptions.Converters.Add(

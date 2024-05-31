@@ -170,6 +170,37 @@
                             Margin="0"
                             />
                     </DataTemplate>
+                    <Style TargetType="TextBlock" x:Key="CollectionStyle" x:Shared="False">
+                        <Style.Triggers>
+                            <l:DataSwitch Binding="{Binding $field, Converter={StaticResource IsNullConverter}, ConverterParameter=Collection}">
+                                <DataTrigger Value="True">
+                                    <Setter Property="Text" Value="∅"/>
+                                    <Setter Property="FontSize" Value="12"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="Foreground" Value="Red"/>
+                                    <Setter Property="ToolTip" Value="{Binding IsNotSet, Source={StaticResource Localizer}}"/>
+                                </DataTrigger>
+                                <DataTrigger Value="False">
+                                    <Setter Property="Text">
+                                        <Setter.Value>
+                                            <MultiBinding StringFormat="{}{0}: {1}">
+                                                <Binding Path="Count" Source="{StaticResource Localizer}"/>
+                                                <Binding Path="$field" Converter="{l:ParameterizedResource $converter}" ConverterParameter="Count"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </l:DataSwitch>
+                        </Style.Triggers>
+                    </Style>
+                    <DataTemplate x:Key="Collection" x:Shared="False">
+                        <TextBlock
+                            d:Text="LIST"
+                            Style="{l:ParameterizedResource CollectionStyle}"
+                            Margin="0"
+                            >
+                        </TextBlock>
+                    </DataTemplate>
                     <DataTemplate x:Key="Actions">
                         <DockPanel LastChildFill="True">
                             <Button 

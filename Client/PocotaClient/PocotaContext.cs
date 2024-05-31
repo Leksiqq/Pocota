@@ -12,6 +12,7 @@ public class PocotaContext
     private ulong _idGen = 0;
     protected readonly Dictionary<Type, Func<ulong, PocotaContext, IEntityOwner>> s_entityCreators = [];
     protected readonly IServiceProvider _services;
+    public string ServiceKey { get; private init; }
     public bool KeyOnlyJson { get; internal set; } = true;
     internal PocotaConfig? PocotaConfig 
     { 
@@ -32,15 +33,16 @@ public class PocotaContext
             }
         }
     }
-    public PocotaContext(IServiceProvider services)
+    public PocotaContext(IServiceProvider services, string serviceKey)
     {
         _services = services;
+        ServiceKey = serviceKey;
     }
     public T CreateEntity<T>() where T : PocotaEntity
     {
         return (T)s_entityCreators[typeof(T)].Invoke(Interlocked.Increment(ref _idGen), this);
     }
-    public object? CreateEntity(Type type)
+    public IEntityOwner? CreateEntity(Type type)
     {
         return s_entityCreators.TryGetValue(type, out Func<ulong, PocotaContext, IEntityOwner>? creator) 
             ? creator.Invoke(Interlocked.Increment(ref _idGen), this) : null;

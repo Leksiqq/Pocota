@@ -6,4 +6,5 @@ public interface IWindowLauncher: INotifyPropertyChanged
 {
     EditWindowLauncher Launcher { get; }
     bool KeysOnly { get; set; }
+    string ServiceKey { get; set; }
 }

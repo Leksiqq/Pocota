@@ -4,12 +4,12 @@ using System.Reflection;
 
 namespace Net.Leksi.Pocota.Client;
 
-internal class ConnectorsMethodsList: IEnumerable<MethodInfo>
+internal class ConnectorsMethodsList: IEnumerable<ConnectorMethod>
 {
-    private List<MethodInfo>? _methods = null;
+    private List<ConnectorMethod>? _methods = null;
     private readonly List<Type> _types = [];
     internal IServiceProvider Services { get; set; } = null!;
-    public IEnumerator<MethodInfo> GetEnumerator()
+    public IEnumerator<ConnectorMethod> GetEnumerator()
     {
         return Methods.GetEnumerator();
     }
@@ -18,13 +18,13 @@ internal class ConnectorsMethodsList: IEnumerable<MethodInfo>
     {
         return Methods.GetEnumerator();
     }
-    private List<MethodInfo> Methods
+    private List<ConnectorMethod> Methods
     {
         get
         {
             if(_methods is null)
             {
-                _methods = new List<MethodInfo>();
+                _methods = new List<ConnectorMethod>();
                 foreach (Type type in _types)
                 {
                     if(Services.GetServices(type) is IEnumerable<object?> items)
@@ -35,7 +35,7 @@ internal class ConnectorsMethodsList: IEnumerable<MethodInfo>
                             {
                                 foreach (MethodInfo method in conn.GetType().GetMethods().Where(m => m.DeclaringType == type && m.Name != nameof(Connector.GetPocotaConfigAsync)))
                                 {
-                                    _methods.Add(method);
+                                    _methods.Add(new ConnectorMethod(conn, method));
                                 }
                             }
                         }

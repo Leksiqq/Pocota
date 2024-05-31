@@ -11,7 +11,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
 {
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>    private class @prop.Name@{}Property(IPocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
+    <text>    private class @prop.Name@{}Property(@Model.ClassName owner, IPocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
     {
         public override object? Value 
         {
@@ -21,21 +21,23 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
                 {
                     return default;
                 }
-                return _value ?? default;
+                return _value;
             }
             set 
             {
                 if (!IsReadonly)
                 {
-                    if(value is @Html.Raw(prop.TypeName) val && val != ((@Model.ClassName)Entity).@{}@prop.Name)
+                    if(value is @Html.Raw(prop.TypeName) val && val != owner.@{}@prop.Name)
                     {
                         _value = val;
                         NotifyPropertyChanged();
+                        owner.PropertyChanged?.Invoke(owner, _@{}@prop.Name@{}PropertyChangedEventArgs);
                     }
-                    else if(value == default && _value != default)
+                    else if((@Html.Raw(prop.TypeName))value! == default && (@Html.Raw(prop.TypeName))_value! != default)
                     {
-                        _value = default;
+                        _value = default(@Html.Raw(prop.TypeName));
                         NotifyPropertyChanged();
+                        owner.PropertyChanged?.Invoke(owner, _@{}@prop.Name@{}PropertyChangedEventArgs);
                     }
                 }
             }
@@ -51,11 +53,11 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
     <text>        public @nameof(EntityProperty) @prop.Name { get; private init;}
 </text>
 }
-        internal @Model.ClassName@{}PocotaEntity(ulong pocotaId, PocotaContext context): base(pocotaId, context) 
+        internal @Model.ClassName@{}PocotaEntity(ulong pocotaId, PocotaContext context, @Model.ClassName owner): base(pocotaId, context) 
         {
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>            @prop.Name = new @prop.Name@{}Property@{}(this, s_@{}@prop.Name, typeof(@Html.Raw(prop.TypeName)));
+    <text>            @prop.Name = new @prop.Name@{}Property@{}(owner, this, s_@{}@prop.Name, typeof(@Html.Raw(prop.TypeName)));
 </text>
 }
         }
@@ -68,9 +70,11 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
 }
         }
     }
+    public event PropertyChangedEventHandler? PropertyChanged;
 @foreach (PropertyModel prop in Model.Properties)
 {
     <text>    private const string s_@{}@prop.Name = "@prop.Name";
+    private static readonly PropertyChangedEventArgs _@{}@prop.Name@{}PropertyChangedEventArgs = new(s_@{}@prop.Name);
 </text>
 }
     private readonly @Model.ClassName@{}PocotaEntity _entity;
@@ -86,6 +90,6 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
     IPocotaEntity IEntityOwner.Entity => _entity;
     internal @Model.ClassName@{}(ulong pocotaId, PocotaContext context)
     {
-        _entity = new @Model.ClassName@{}PocotaEntity(pocotaId, context);
+        _entity = new @Model.ClassName@{}PocotaEntity(pocotaId, context, this);
     }
 }

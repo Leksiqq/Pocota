@@ -192,7 +192,7 @@
                                 <DataTrigger Value="False">
                                     <Setter Property="Text">
                                         <Setter.Value>
-                                            <MultiBinding StringFormat="[..], {0}: {1}">
+                                            <MultiBinding StringFormat="{}{0}: {1}">
                                                 <Binding Path="Count" Source="{StaticResource Localizer}"/>
                                                 <Binding Path="Value.Count"/>
                                             </MultiBinding>
