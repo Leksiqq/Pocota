@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Client\PocotaClientWpf\PocotaClientWpf.csproj" />
+    <ProjectReference Include="..\..\Client\PocotaClientWpf1\PocotaClientWpf1.csproj" />
     <ProjectReference Include="..\ContosoPizzaRemake\Client\CSharpClient\CSharpClient.csproj" />
   </ItemGroup>
 

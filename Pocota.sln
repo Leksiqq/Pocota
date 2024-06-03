@@ -39,11 +39,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6F7B5E12
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfMarkupExtension", "..\WPF\WpfMarkupExtension\WpfMarkupExtension\WpfMarkupExtension.csproj", "{97FCE996-3A52-4F7C-878C-465C4CDA1821}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localization", "..\Localization\Localization\Localization.csproj", "{153C75B1-99AE-4C2B-977F-D81F47252213}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Localization", "..\Localization\Localization\Localization.csproj", "{153C75B1-99AE-4C2B-977F-D81F47252213}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp2", "..\Localization\Test\ConsoleApp1\ConsoleApp2.csproj", "{D1C12661-3977-4421-8F2D-4A869E5984E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp2", "..\Localization\Test\ConsoleApp1\ConsoleApp2.csproj", "{D1C12661-3977-4421-8F2D-4A869E5984E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "..\Localization\Test\ClassLibrary1\ClassLibrary1.csproj", "{7BF57B9B-1FF3-413B-BC9D-E4DFB2ED8B32}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibrary1", "..\Localization\Test\ClassLibrary1\ClassLibrary1.csproj", "{7BF57B9B-1FF3-413B-BC9D-E4DFB2ED8B32}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocotaClientWpf1", "Client\PocotaClientWpf1\PocotaClientWpf1.csproj", "{594E057A-DC85-43D8-8D87-9BAD3F354D6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -107,6 +109,10 @@ Global
 		{7BF57B9B-1FF3-413B-BC9D-E4DFB2ED8B32}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BF57B9B-1FF3-413B-BC9D-E4DFB2ED8B32}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7BF57B9B-1FF3-413B-BC9D-E4DFB2ED8B32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{594E057A-DC85-43D8-8D87-9BAD3F354D6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{594E057A-DC85-43D8-8D87-9BAD3F354D6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{594E057A-DC85-43D8-8D87-9BAD3F354D6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{594E057A-DC85-43D8-8D87-9BAD3F354D6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -125,6 +131,7 @@ Global
 		{3299B6B5-FF05-4C71-B165-BC62824B1D7E} = {E196270F-9B8E-4231-8EDB-74E68391AECD}
 		{D1C12661-3977-4421-8F2D-4A869E5984E5} = {6F7B5E12-9F91-40C8-B0C2-492F878EEC96}
 		{7BF57B9B-1FF3-413B-BC9D-E4DFB2ED8B32} = {6F7B5E12-9F91-40C8-B0C2-492F878EEC96}
+		{594E057A-DC85-43D8-8D87-9BAD3F354D6C} = {E196270F-9B8E-4231-8EDB-74E68391AECD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {03A22767-6ACB-43F5-ACE0-24BDB396D7E9}

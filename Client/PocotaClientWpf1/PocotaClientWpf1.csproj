@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Net.Leksi.Pocota.ClientWpf</AssemblyName>
+    <RootNamespace>Net.Leksi.Pocota.Client</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\I18nConverter.Designer.cs">
+      <DependentUpon>I18nConverter.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\I18nConverter.resx">
+      <LastGenOutput>I18nConverter.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Localization\Localization\Localization.csproj" />
+    <ProjectReference Include="..\..\..\WPF\WpfMarkupExtension\WpfMarkupExtension\WpfMarkupExtension.csproj" />
+    <ProjectReference Include="..\PocotaClient\PocotaClient.csproj" />
+  </ItemGroup>
+
+</Project>

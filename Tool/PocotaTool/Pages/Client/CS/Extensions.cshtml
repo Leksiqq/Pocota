@@ -24,8 +24,6 @@ public static class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string
     <text>        services.AddTransient@{}@Html.Raw($"<{pm.Name}JsonConverter>")@{}();
 </text>
 }
-        @Html.Raw($"{Model.ContractName}PocotaContext")@{}.Touch();
-
         return services;
     }
 }

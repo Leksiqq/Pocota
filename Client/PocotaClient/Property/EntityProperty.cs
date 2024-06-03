@@ -5,7 +5,6 @@ namespace Net.Leksi.Pocota.Client;
 public abstract class EntityProperty(IPocotaEntity entity, string name, Type type) : Property(name, type)
 {
     private AccessKind _access = AccessKind.Full;
-    private bool _readOnly = false;
     public IPocotaEntity Entity { get; private init; } = entity;
     public PropertyState State { get; internal set; }
     public AccessKind Access 
@@ -32,7 +31,7 @@ public abstract class EntityProperty(IPocotaEntity entity, string name, Type typ
         {
             if (Entity.State is EntityState.Detached || Entity.State is EntityState.Created)
             {
-                return _readOnly;
+                return IsSetReadOnly;
             }
             if (
                 Entity.State is EntityState.Deleted
@@ -46,15 +45,7 @@ public abstract class EntityProperty(IPocotaEntity entity, string name, Type typ
             {
                 return true;
             }
-            return _readOnly;
-        }
-    }
-    public void SetReadonly(bool value)
-    {
-        if(_readOnly != value)
-        {
-            _readOnly = value;
-            NotifyPropertyChanged();
+            return IsSetReadOnly;
         }
     }
 }

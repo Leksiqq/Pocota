@@ -1,0 +1,53 @@
+﻿<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
+    >
+    <Style TargetType="MenuItem" x:Key="WindowsMenuItemStyle" x:Shared="True">
+        <Setter Property="Header" Value="{Binding Windows, Source={StaticResource Localizer}}"/>
+        <Setter Property="ItemsSource" Value="{Binding Value.Core.ApplicationCore.Windows, Source={l:ParameterizedResource $window}}"/>
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="{x:Type MenuItem}">
+                    <Setter Property="Command" Value="{Binding Value.Core.ApplicationCore, Source={l:ParameterizedResource $window}}" />
+                    <Setter Property="CommandParameter" Value="{Binding}"/>
+                </Style>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <HierarchicalDataTemplate DataType="Window">
+                    <TextBlock Text="{Binding Title}"/>
+                </HierarchicalDataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <l:StyleCombiner TargetType="Button" x:Key="ActionButtonStyle">
+        <Style TargetType="Button">
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Margin" Value="10,0,0,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </l:StyleCombiner>
+    <Style TargetType="TextBox" x:Key="DataGridCellTextBoxStyle">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Margin" Value="10"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <l:StyleCombiner TargetType="TextBox" x:Key="ReadonlyDataGridCellTextBoxStyle">
+        <StaticResource ResourceKey="DataGridCellTextBoxStyle"/>
+        <Style TargetType="TextBox">
+            <Setter Property="IsReadOnly" Value="True"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="PlayButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="▶"/>
+            <Setter Property="ToolTip" Value="{Binding Call, Source={StaticResource Localizer}}"/>
+        </Style>
+    </l:StyleCombiner>
+</ResourceDictionary>

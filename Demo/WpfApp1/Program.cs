@@ -1,11 +1,7 @@
 ﻿using ContosoPizza.Client;
-using ContosoPizza.Models.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Localization;
 using Net.Leksi.Pocota.Client;
-using System.Globalization;
-using System.Windows;
 
 namespace WpfApp1;
 
@@ -25,6 +21,9 @@ static class Program
         builder.Services.AddSingleton<MyLocalizer>();
         builder.Services.AddSingleton<Localizer>(s => s.GetRequiredService<MyLocalizer>());
         using IHost host = builder.Build();
-        host.RunPocotaWpfApp();
+        host.RunPocotaWpfApp(app =>
+        {
+            app.ShutdownMode = System.Windows.ShutdownMode.OnMainWindowClose;
+        });
     }
 }
