@@ -9,14 +9,14 @@
 public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join(", ", Model.Inheritances)}" : string.Empty)
 {
     private readonly SemaphoreSlim _asyncLock = new(1, 1);
-    public @Model.ClassName@{}(IServiceProvider services, string serviceKey): base(services, serviceKey) 
+    public @Model.ClassName@{}(IServiceProvider services, string serviceKey, Uri? baseUri): base(services, serviceKey, baseUri) 
     {
         _context = _services.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}PocotaContext>")@{}();
         _serializerOptions.Converters.Add(
             _services.GetRequiredService@{}@Html.Raw($"<{Model.JsonConverterFactoryClassName}>")@{}()
         );
     }
-    public async Task GetPocotaConfigAsync(CancellationToken cancellationToken)
+    public override async Task GetPocotaConfigAsync(CancellationToken cancellationToken)
     {
         await GetPocotaConfigAsync("/@Model.ContractName", cancellationToken);
     }

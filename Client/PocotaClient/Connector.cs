@@ -26,6 +26,10 @@ public abstract class Connector
             {
                 _baseAddress = value;
                 ReplaceHttpClient();
+                if(_baseAddress is { })
+                {
+                    GetPocotaConfigAsync(CancellationToken.None).Wait();
+                }
             }
         }
     }
@@ -41,10 +45,14 @@ public abstract class Connector
             }
         }
     }
-    public Connector(IServiceProvider services, string serviceKey)
+    public Connector(IServiceProvider services, string serviceKey, Uri? baseUri)
     {
         _services = services;
         _httpClient = new HttpClient();
+        if(baseUri is { })
+        {
+            _httpClient.BaseAddress = baseUri;
+        }
         _httpClient.DefaultRequestHeaders.Add(PocotaHeader.WithFieldsAccess, string.Empty);
         _timeout = _httpClient.Timeout;
         _baseAddress = _httpClient.BaseAddress;
@@ -132,6 +140,7 @@ public abstract class Connector
             throw;
         }
     }
+    public abstract Task GetPocotaConfigAsync(CancellationToken cancellationToken);
     protected void ResetContext()
     {
         _context.ClearSentEntities();

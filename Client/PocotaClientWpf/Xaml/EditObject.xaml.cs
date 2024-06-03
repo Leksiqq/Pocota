@@ -60,7 +60,11 @@ public partial class EditObject : Window, IEditWindow
                 {
                     foreach (Property prop in ((IEntityOwner)_property.Value!).Entity.Properties)
                     {
-                        Properties.Add(Property.Create(prop)!);
+                        Property prop1 = Property.Create(prop)!;
+                        if(prop1 is EntityProperty ep && ep.Access is not Contract.AccessKind.Key)
+                        {
+                        }
+                        Properties.Add(prop1);
                     }
                 }
                 else
@@ -68,8 +72,7 @@ public partial class EditObject : Window, IEditWindow
 
                     foreach (PropertyInfo pi in _property.Type.GetProperties())
                     {
-                        Property prop = Property.Create(pi, _property.Value)!;
-                        Properties.Add(prop);
+                        Properties.Add(Property.Create(pi, _property.Value)!);
                     }
                 }
                 PropertyChanged?.Invoke(this, _propertyChangedEventArgs);

@@ -41,7 +41,7 @@ public static class PocotaWpfAppExtension
                 (s, o) => new MethodsWindow()
             );
         }
-        services.AddScoped<Application>(
+        services.AddScoped(
             s =>
             {
                 Application app = createApplication.Invoke(s);

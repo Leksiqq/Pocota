@@ -51,6 +51,24 @@
                 DefaultDataTemplateKey="EditField"
                 EnumDataTemplateKey="EnumPropertyDataTemplate"
                 />
+            <Style x:Key="ButtonVisibleIfNotReadonlyAndNotObject" TargetType="ButtonBase" x:Shared="False">
+                <Style.Triggers>
+                    <l:DataSwitch d:Binding="{Binding IsReadonly, Converter={l:ParameterizedResource $converter}, ConverterParameter=IsReadonly, Mode=OneTime}">
+                        <l:DataSwitch.Binding>
+                            <MultiBinding Converter="{StaticResource BoolExpressionConverter}" ConverterParameter="@0 | @1">
+                                <Binding Path="IsReadonly" Converter="{l:ParameterizedResource $converter}" ConverterParameter="IsReadonly"/>
+                                <Binding Path="Value.IsObject" Source="{StaticResource Window}"/>
+                            </MultiBinding>
+                        </l:DataSwitch.Binding>
+                        <DataTrigger Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Value="False">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </l:DataSwitch>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
@@ -210,7 +228,7 @@
                                 <Button.Style>
                                     <l:StyleCombiner>
                                         <StaticResource ResourceKey="CheckButtonStyle"/>
-                                        <StaticResource ResourceKey="ButtonVisibleIfNotReadonly"/>
+                                        <StaticResource ResourceKey="ButtonVisibleIfNotReadonlyAndNotObject"/>
                                     </l:StyleCombiner>
                                 </Button.Style>
                             </Button>

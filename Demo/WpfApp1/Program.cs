@@ -16,7 +16,7 @@ static class Program
     {
         //CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("en-US");
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-        builder.Services.AddPizza();
+        builder.Services.AddPizza(baseUri: new Uri("http://localhost:5000/Pizza/"));
         builder.Services.AddPocotaWpfApp<App>();
         if(builder.Services.Where(sd => sd.ServiceType == typeof(Localizer)).FirstOrDefault() is ServiceDescriptor sd)
         {
@@ -25,8 +25,6 @@ static class Program
         builder.Services.AddSingleton<MyLocalizer>();
         builder.Services.AddSingleton<Localizer>(s => s.GetRequiredService<MyLocalizer>());
         using IHost host = builder.Build();
-        host.Services.GetRequiredService<PizzaConnector>().BaseAddress = new Uri("http://localhost:5000/Pizza/");
-        host.Services.GetRequiredService<PizzaConnector>().GetPocotaConfigAsync(CancellationToken.None).Wait();
         host.RunPocotaWpfApp();
     }
 }

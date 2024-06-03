@@ -297,6 +297,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         model.NamespaceValue = BuildClientNamespace(options.ClassName!);
         model.AddInheritance(typeof(PocotaContext));
         model.AddUsing(typeof(HashSet<>));
+        model.AddUsing(typeof(AccessKind));
         foreach (EntityAttribute attribute in options.ContractType!.GetCustomAttributes<EntityAttribute>())
         {
             model.AddUsing($"{(string.IsNullOrEmpty(attribute.EntityType.Namespace) ? string.Empty : $"{attribute.EntityType.Namespace}.")}Client");

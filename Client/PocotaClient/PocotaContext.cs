@@ -1,5 +1,4 @@
 ﻿using Net.Leksi.Pocota.Contract;
-using System.Reflection;
 
 namespace Net.Leksi.Pocota.Client;
 
@@ -44,8 +43,14 @@ public class PocotaContext
     }
     public IEntityOwner? CreateEntity(Type type)
     {
-        return s_entityCreators.TryGetValue(type, out Func<ulong, PocotaContext, IEntityOwner>? creator) 
-            ? creator.Invoke(Interlocked.Increment(ref _idGen), this) : null;
+        if(
+            s_entityCreators.TryGetValue(type, out Func<ulong, PocotaContext, IEntityOwner>? creator) 
+            && creator.Invoke(Interlocked.Increment(ref _idGen), this) is IEntityOwner eo
+        )
+        {
+            return eo;
+        }
+        return null;
     }
     public bool IsKey(EntityProperty entityProperty)
     {
@@ -54,14 +59,6 @@ public class PocotaContext
     public bool KeysFilled(IPocotaEntity entity)
     {
         return _keyPropertiesFilled.Contains(entity.GetType());
-    }
-    internal static void SetPropertyState(EntityProperty property, PropertyState state)
-    {
-        property.State = state;
-    }
-    internal static void SetPropertyAccess(EntityProperty property, AccessKind access)
-    {
-        property.Access = access;
     }
     internal void ClearSentEntities()
     {
@@ -78,5 +75,13 @@ public class PocotaContext
     internal void SetKeysFilled(IPocotaEntity entity)
     {
         _keyPropertiesFilled.Add(entity.GetType());
+    }
+    internal void SetPropertyState(EntityProperty property, PropertyState state)
+    {
+        property.State = state;
+    }
+    internal void SetPropertyAccess(EntityProperty property, AccessKind access)
+    {
+        property.Access = access;
     }
 }
