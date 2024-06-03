@@ -17,10 +17,23 @@ public class Property : INotifyPropertyChanged
         }
     }
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(nameof(Value));
+    private bool _isSetReadonly = false;
     protected object? _value;
 
     public string Name { get; private init; }
     public Type Type { get; private init; }
+    public bool IsSetReadOnly 
+    { 
+        get => _isSetReadonly;
+        set
+        {
+            if(_isSetReadonly != value)
+            {
+                _isSetReadonly = value;
+                NotifyPropertyChanged();
+            }
+        }
+    }
     public virtual object? Value
     {
         get => _value;
@@ -33,7 +46,7 @@ public class Property : INotifyPropertyChanged
             }
         }
     }
-    public virtual bool IsReadonly => false;
+    public virtual bool IsReadonly => IsSetReadOnly;
     public virtual bool IsNullable => false;
     
     public Property(string name, Type type)
