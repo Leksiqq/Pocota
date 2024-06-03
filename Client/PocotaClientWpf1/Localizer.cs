@@ -38,9 +38,11 @@ public class Localizer: LocalizationBase
     public string Value => GetString();
     public string Actions => GetString();
     public string Position => GetString();
-    public string Parameter => GetString();
+    public string Parameters => GetString();
     public string Check => GetString();
     public string ServiceKey => GetString();
+    public string Interrupt => GetString();
+    public string Return => GetString();
     public Localizer()
     {
     }

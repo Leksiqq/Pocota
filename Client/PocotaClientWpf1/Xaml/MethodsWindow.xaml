@@ -69,12 +69,13 @@
                             />
                     </DataTemplate>
                     <DataTemplate x:Key="Actions">
-                        <StackPanel Orientation="Horizontal" Margin="0">
+                        <StackPanel Orientation="Horizontal" Margin="0" HorizontalAlignment="Center">
                             <Button 
-                            Style="{StaticResource PlayButtonStyle}" 
-                            Command="{Binding Value, Source={StaticResource Window}}"
-                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                            />
+                                Margin="0"
+                                Style="{StaticResource PlayButtonStyle}" 
+                                Command="{Binding Value, Source={StaticResource Window}}"
+                                CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                />
                         </StackPanel>
                     </DataTemplate>
                     <l:BindingProxy 
