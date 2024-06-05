@@ -5,9 +5,21 @@ namespace Net.Leksi.Pocota.Client;
 public abstract class EntityProperty(IPocotaEntity entity, string name, Type type) : Property(name, type)
 {
     private AccessKind _access = AccessKind.Full;
+    private PropertyState _state = PropertyState.Unchanged;
     public IPocotaEntity Entity { get; private init; } = entity;
-    public PropertyState State { get; internal set; }
-    public AccessKind Access 
+    public override PropertyState State 
+    {
+        get => _state;  
+        internal set
+        {
+            if(_state != value)
+            {
+                _state = value;
+                NotifyPropertyChanged();
+            }
+        }
+    }
+    public override AccessKind Access 
     { 
         get => _access;
         internal set
@@ -22,6 +34,7 @@ public abstract class EntityProperty(IPocotaEntity entity, string name, Type typ
                 {
                     _access = AccessKind.Readonly;
                 }
+                NotifyPropertyChanged();
             }
         }
     }

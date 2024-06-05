@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Net.Leksi.Pocota.Contract;
+using System.ComponentModel;
 using System.Reflection;
 
 namespace Net.Leksi.Pocota.Client;
@@ -16,7 +17,7 @@ public class Property : INotifyPropertyChanged
             _propertyChanged -= value;
         }
     }
-    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(nameof(Value));
+    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private bool _isSetReadonly = false;
     protected object? _value;
 
@@ -48,7 +49,10 @@ public class Property : INotifyPropertyChanged
     }
     public virtual bool IsReadonly => IsSetReadOnly;
     public virtual bool IsNullable => false;
-    
+    public virtual PropertyState State { get => PropertyState.Unchanged; internal set => throw new InvalidOperationException(); }
+    public virtual AccessKind Access { get => AccessKind.Full; internal set => throw new InvalidOperationException(); }
+
+
     public Property(string name, Type type)
     {
         Name = name;

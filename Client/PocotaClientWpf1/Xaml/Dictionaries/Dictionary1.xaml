@@ -31,6 +31,56 @@
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
     </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="ClearButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="➖"/>
+            <Setter Property="ToolTip" Value="{Binding Clear, Source={StaticResource Localizer}}"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="EditButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="👁"/>
+            <Setter Property="ToolTip" Value="{Binding Edit, Source={StaticResource Localizer}}"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="CreateButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="➕"/>
+            <Setter Property="ToolTip" Value="{Binding Create, Source={StaticResource Localizer}}"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="CheckButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="✔"/>
+            <Setter Property="ToolTip" Value="{Binding Check, Source={StaticResource Localizer}}"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="InsertBeforeButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="⤉"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="ToolTip" Value="{Binding InsertBefore, Source={StaticResource Localizer}}"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="MoveButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="≡"/>
+            <Setter Property="ToolTip" Value="{Binding Move, Source={StaticResource Localizer}}"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="FindButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="🔍"/>
+            <Setter Property="ToolTip" Value="{Binding Find, Source={StaticResource Localizer}}"/>
+        </Style>
+    </l:StyleCombiner>
     <Style TargetType="TextBox" x:Key="DataGridCellTextBoxStyle">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>

@@ -12,9 +12,10 @@
     DataContext="{Binding RelativeSource={RelativeSource Self}}" 
     >
     <Window.Title>
-        <MultiBinding StringFormat="{}{0}: {1}">
+        <MultiBinding StringFormat="{}{0}: {1} [{2}]">
             <Binding Path="Method" Source="{StaticResource Localizer}"/>
             <Binding Path="MethodName"/>
+            <Binding Path="ServiceKey"/>
         </MultiBinding>
     </Window.Title>
     <Window.Resources>
@@ -31,11 +32,12 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Style="{l:ParameterizedResource WindowsMenuItemStyle, Replaces=$window:Window}"/>
         </Menu>
-        <TextBlock Text="{Binding MethodName}" DockPanel.Dock="Top" FontSize="20" HorizontalAlignment="Center"/>
-        <TextBlock DockPanel.Dock="Top" Margin="5">
+        <TextBlock d:Text="{Binding MethodName}" DockPanel.Dock="Top" FontSize="20" HorizontalAlignment="Center">
             <TextBlock.Text>
-                <MultiBinding StringFormat="{}{0}:">
-                    <Binding Path="Parameters" Source="{StaticResource Localizer}"/>
+                <MultiBinding StringFormat="{}{0} {1} [{2}]">
+                    <Binding Path="ReturnType" Converter="{local:TypeNameConverter}" ConverterParameter="Short"/>
+                    <Binding Path="MethodName"/>
+                    <Binding Path="ServiceKey"/>
                 </MultiBinding>
             </TextBlock.Text>
         </TextBlock>
@@ -72,14 +74,6 @@
             <Button Content="{Binding Call, Source={StaticResource Localizer}}" Margin="0,10,0,10"/>
             <Button Content="{Binding Interrupt, Source={StaticResource Localizer}}" Margin="10,10,0,10"/>
         </StackPanel>
-        <TextBlock DockPanel.Dock="Top" Margin="5">
-            <TextBlock.Text>
-                <MultiBinding StringFormat="{}{0}: {1}">
-                    <Binding Path="Return" Source="{StaticResource Localizer}"/>
-                    <Binding Path="ReturnType"/>
-                </MultiBinding>
-            </TextBlock.Text>
-        </TextBlock>
-        <StackPanel/>
+        <local:ObjectEditor/>
     </DockPanel>
 </Window>

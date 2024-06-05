@@ -3,16 +3,19 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
+    xmlns:uc="clr-namespace:Net.Leksi.Pocota.Client.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     >
-    <local:PropertyTemplateSelector x:Key="PropertyTemplateSelector" x:Shared="False"
-        d:ServiceProviderCatcher="{l:ParameterizedResource $serviceProviderCatcher}"
-        d:DefaultDataTemplateKey="DefaultPropertyDataTemplate"
-        d:ClassDataTemplateKey="ClassPropertyDataTemplate"
-        d:ListDataTemplateKey="ListPropertyDataTemplate"
-        d:EnumDataTemplateKey="EnumPropertyDataTemplate"
+    <DataTemplate x:Key="ClassDataTemplate">
+        <uc:ObjectField Property="{Binding}" Window="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"/>
+    </DataTemplate>
+    <local:PropertyTemplateSelector 
+        x:Key="PropertyTemplateSelector"
+        ServiceProviderCatcher="{l:ParameterizedResource $serviceProviderCatcher}"
+        ClassDataTemplateKey="ClassDataTemplate"
+        x:Shared="False"
         />
     <DataTemplate x:Key="NameTemplate">
         <DockPanel LastChildFill="True">

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Net.Leksi.Pocota.Contract;
+using System.Collections;
 
 namespace Net.Leksi.Pocota.Client;
 
@@ -9,6 +10,16 @@ public class ListProperty : Property
     { 
         get => _source.Value; 
         set => _source.Value = value; 
+    }
+    public override AccessKind Access
+    {
+        get => _source.Access;
+        internal set => _source.Access = value;
+    }
+    public override PropertyState State
+    {
+        get => _source.State;
+        internal set => _source.State = value;
     }
     public override bool IsReadonly => _source.IsReadonly;
     public override bool IsNullable => _source.IsNullable;

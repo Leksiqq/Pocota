@@ -2,15 +2,16 @@
 using System.Reflection;
 using System.Windows;
 namespace Net.Leksi.Pocota.Client;
-public partial class MethodWindow : Window, IWindowWithCore
+public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated
 {
     private const string s_target = "target";
     private readonly ConnectorMethod _connectorMethod;
     public ObservableCollection<Property> Parameters { get; private init; } = [];
     public WindowCore Core { get; private init; }
     public string MethodName => _connectorMethod.Method.Name;
-    public string ReturnType => _connectorMethod.Method.GetParameters()
-        .Where(p => p.Name == s_target).FirstOrDefault()?.ParameterType.FullName!;
+    public string ServiceKey => _connectorMethod.ServiceKey;
+    public Type ReturnType => _connectorMethod.Method.GetParameters()
+        .Where(p => p.Name == s_target).FirstOrDefault()?.ParameterType ?? _connectorMethod.Method.ReturnType.GetGenericArguments()[0];
     public MethodWindow(ConnectorMethod connectorMethod)
     {
         _connectorMethod = connectorMethod;

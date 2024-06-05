@@ -52,6 +52,14 @@ public class PocotaContext
         }
         return null;
     }
+    public object? CreateInstance(Type type)
+    {
+        if(CreateEntity(type) is object obj)
+        {
+            return obj;
+        }
+        return Activator.CreateInstance(type);
+    }
     public bool IsKey(EntityProperty entityProperty)
     {
         return _keyProperties.TryGetValue(entityProperty.Entity.GetType(), out Dictionary<string, bool>? keys) && keys.ContainsKey(entityProperty.Name);
