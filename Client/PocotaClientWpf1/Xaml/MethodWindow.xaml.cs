@@ -16,7 +16,6 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated
     {
         _connectorMethod = connectorMethod;
         Core = new WindowCore(this);
-        InitializeComponent();
         foreach (ParameterInfo parameter in _connectorMethod.Method.GetParameters())
         {
             if (parameter.ParameterType != typeof(CancellationToken) && parameter.Name != s_target)
@@ -24,21 +23,22 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated
                 Parameters.Add(Property.Create(parameter)!);
             }
         }
-        CalcColumnsWidth(ParametersView.ActualWidth);
+        InitializeComponent();
+        //CalcColumnsWidth(ParametersView.ActualWidth);
     }
-    private void ListView_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        if (e.WidthChanged)
-        {
-            CalcColumnsWidth(e.NewSize.Width);
-        }
-    }
-    private void CalcColumnsWidth(double width)
-    {
-        ParameterValueColumn.Width = width * 0.89 - ParameterNameColumn.ActualWidth;
-    }
-    private void ListViewItem_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        CalcColumnsWidth(ParametersView.ActualWidth);
-    }
+    //private void ListView_SizeChanged(object sender, SizeChangedEventArgs e)
+    //{
+    //    if (e.WidthChanged)
+    //    {
+    //        CalcColumnsWidth(e.NewSize.Width);
+    //    }
+    //}
+    //private void CalcColumnsWidth(double width)
+    //{
+    //    ParameterValueColumn.Width = width * 0.89 - ParameterNameColumn.ActualWidth;
+    //}
+    //private void ListViewItem_SizeChanged(object sender, SizeChangedEventArgs e)
+    //{
+    //    CalcColumnsWidth(ParametersView.ActualWidth);
+    //}
 }

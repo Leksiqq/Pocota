@@ -11,7 +11,7 @@
     <Compile Update="Xaml\MethodWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Xaml\ObjectEditor.xaml.cs">
+    <Compile Update="UserControls\ObjectEditor.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -37,7 +37,7 @@
     <Page Update="Xaml\MethodWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Xaml\ObjectEditor.xaml">
+    <Page Update="UserControls\ObjectEditor.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
