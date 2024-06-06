@@ -43,10 +43,10 @@
             </TextBlock.Text>
         </TextBlock>
         <uc:ObjectEditor 
-            Properties="{Binding Parameters}" 
-            Window="{Binding Value, Source={StaticResource Window}}" 
-            ServiceProviderCatcher="{StaticResource WindowSP}" 
             DockPanel.Dock="Top"
+            Properties="{Binding Parameters}" 
+            Window="{Binding}" 
+            ServiceProviderCatcher="{StaticResource WindowSP}" 
             />
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="{Binding Call, Source={StaticResource Localizer}}" Margin="0,10,0,10"/>

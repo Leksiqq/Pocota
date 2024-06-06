@@ -45,7 +45,6 @@ public class PropertyTemplateSelector: DataTemplateSelector
     }
     private DataTemplate? ProvideValue(string templateKey)
     {
-        Console.WriteLine($"{GetType()}: ProvideValue");
         DataTemplate? result = null;
         if (ServiceProviderCatcher is { })
         {

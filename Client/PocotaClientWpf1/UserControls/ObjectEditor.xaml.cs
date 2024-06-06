@@ -7,7 +7,7 @@ using System.Windows.Data;
 
 namespace Net.Leksi.Pocota.Client.UserControls;
 
-public partial class ObjectEditor : UserControl, IValueConverter
+public partial class ObjectEditor : UserControl
 {
     public static readonly DependencyProperty ServiceProviderCatcherProperty = DependencyProperty.Register(
        nameof(ServiceProviderCatcher), typeof(XamlServiceProviderCatcher),
@@ -54,32 +54,12 @@ public partial class ObjectEditor : UserControl, IValueConverter
     }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
-        if (e.Property == PropertiesProperty)
+
+        if (e.Property.OwnerType == GetType())
         {
-            Console.WriteLine($"{e.Property}: {e.NewValue}");
-            SetTemplateSelector();
-        }
-        else if (e.Property == ServiceProviderCatcherProperty)
-        {
-            Console.WriteLine($"{e.Property}: {e.NewValue}");
-            SetTemplateSelector();
-        }
-        else if (e.Property == WindowProperty)
-        {
-            Console.WriteLine($"{e.Property}: {e.NewValue}");
             SetTemplateSelector();
         }
         base.OnPropertyChanged(e);
-    }
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        Console.WriteLine($"Convert: {value}");
-        return value;
-    }
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        Console.WriteLine($"ConvertBack: {value}");
-        return value;
     }
     private void SetTemplateSelector()
     {
@@ -89,7 +69,6 @@ public partial class ObjectEditor : UserControl, IValueConverter
             ParameterizedResourceExtension pre = new("PropertyTemplateSelector")
             {
                 Replaces = new string[] { $"$serviceProviderCatcher:{spName}" },
-                Verbose = 2,
             };
             this.Window.Resources.Add(spName, ServiceProviderCatcher);
             PropertyValueColumn.CellTemplateSelector = pre.ProvideValue(ServiceProviderCatcher.ServiceProvider!) as DataTemplateSelector;
