@@ -9,7 +9,7 @@ namespace Net.Leksi.Pocota.Client;
 
 public class PropertyTemplateSelector: DataTemplateSelector
 {
-    public XamlServiceProviderCatcher ServiceProviderCatcher { get; set; } = null!;
+    public XamlServiceProviderCatcher? ServiceProviderCatcher { get; set; }
     public string ClassDataTemplateKey { get; set; } = null!;
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
@@ -45,10 +45,14 @@ public class PropertyTemplateSelector: DataTemplateSelector
     }
     private DataTemplate? ProvideValue(string templateKey)
     {
-        DataTemplate? result;
-        IServiceProvider sp = ServiceProviderCatcher.ServiceProvider!;
-        ParameterizedResourceExtension pre = new(templateKey);
-        result = pre.ProvideValue(sp) as DataTemplate;
+        Console.WriteLine($"{GetType()}: ProvideValue");
+        DataTemplate? result = null;
+        if (ServiceProviderCatcher is { })
+        {
+            IServiceProvider sp = ServiceProviderCatcher.ServiceProvider!;
+            ParameterizedResourceExtension pre = new(templateKey);
+            result = pre.ProvideValue(sp) as DataTemplate;
+        }
         return result;
     }
 }

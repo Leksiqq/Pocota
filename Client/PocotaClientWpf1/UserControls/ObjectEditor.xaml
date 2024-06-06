@@ -18,10 +18,13 @@
                 <ResourceDictionary Source="../Xaml/Dictionaries/Dictionary1.xaml" />
                 <ResourceDictionary Source="../Xaml/Dictionaries/PropertyTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <l:BindingProxy x:Key="WindowSP" Value="{Binding ServiceProviderCatcher, ElementName=oe}"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <ListView DockPanel.Dock="Top" x:Name="PropertiesView" ItemsSource="{Binding PropertiesViewSource.View, ElementName=oe}" SizeChanged="PropertiesView_SizeChanged">
+        <ListView.Resources>
+            <ResourceDictionary>
+            </ResourceDictionary>
+        </ListView.Resources>
         <ListView.ItemContainerStyle>
             <Style TargetType="ListViewItem">
                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -38,23 +41,14 @@
                     </Style>
                 </GridView.ColumnHeaderContainerStyle>
                 <GridViewColumn 
-                        x:Name="PropertyNameColumn"
-                        Header="{Binding Property, Source={StaticResource Localizer}}"
-                        CellTemplate="{StaticResource NameTemplate}"
-                        />
+                    x:Name="PropertyNameColumn"
+                    Header="{Binding Property, Source={StaticResource Localizer}}"
+                    CellTemplate="{StaticResource NameTemplate}"
+                    />
                 <GridViewColumn
-                        x:Name="PropertyValueColumn"
-                        Header="{Binding Value, Source={StaticResource Localizer}}"
-                        >
-                    <GridViewColumn.CellTemplateSelector>
-                        <l:ParameterizedResource ResourceKey="PropertyTemplateSelector">
-                            <l:ParameterizedResource.Replaces>
-                                <x:Array Type="{x:Type l:BindingProxy}">
-                                    <l:BindingProxy Name="serviceProviderCatcher" Value="{Binding Value, Source={StaticResource WindowSP}}"/>
-                                </x:Array>
-                            </l:ParameterizedResource.Replaces>
-                        </l:ParameterizedResource>
-                    </GridViewColumn.CellTemplateSelector>
+                    x:Name="PropertyValueColumn"
+                    Header="{Binding Value, Source={StaticResource Localizer}}"
+                    >
                 </GridViewColumn>
             </GridView>
         </ListView.View>

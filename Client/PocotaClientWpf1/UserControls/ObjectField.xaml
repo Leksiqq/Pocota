@@ -16,7 +16,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Xaml/Dictionaries/Dictionary1.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <local:ConverterProxy Converter="{Binding  ElementName=of}" x:Key="Converter"/>
+            <l:ConverterProxy Converter="{Binding  ElementName=of}" x:Key="Converter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
