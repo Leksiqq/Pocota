@@ -13,10 +13,10 @@
     DataContext="{Binding RelativeSource={RelativeSource Self}}" 
     >
     <Window.Title>
-        <MultiBinding StringFormat="{}{0}: {1} [{2}]">
+        <MultiBinding StringFormat="{}{0} {1}:{2}">
             <Binding Path="Method" Source="{StaticResource Localizer}"/>
-            <Binding Path="MethodName"/>
             <Binding Path="ServiceKey"/>
+            <Binding Path="MethodName"/>
         </MultiBinding>
     </Window.Title>
     <Window.Resources>
@@ -36,10 +36,10 @@
         </Menu>
         <TextBlock DockPanel.Dock="Top" FontSize="20" HorizontalAlignment="Center">
             <TextBlock.Text>
-                <MultiBinding StringFormat="{}{0} {1} [{2}]">
+                <MultiBinding StringFormat="{}{0} {1}:{2}">
                     <Binding Path="ReturnType" Converter="{local:TypeNameConverter}" ConverterParameter="Short"/>
-                    <Binding Path="MethodName"/>
                     <Binding Path="ServiceKey"/>
+                    <Binding Path="MethodName"/>
                 </MultiBinding>
             </TextBlock.Text>
         </TextBlock>

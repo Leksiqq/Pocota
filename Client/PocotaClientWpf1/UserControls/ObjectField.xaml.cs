@@ -74,23 +74,34 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     {
         if(Property is { })
         {
-            if(!Property.IsReadonly && "Create".Equals(parameter))
-            {
-                Property.Value = ((IServiceProvider)FindResource(ServiceProviderResourceKey))
-                    .GetRequiredKeyedService<PocotaContext>(ServiceKey).CreateInstance(Property.Type);
-            }
-            else if(!Property.IsReadonly && Property.Value is { } && "Clear".Equals(parameter))
+            
+            if(!Property.IsReadonly && Property.Value is { } && "Clear".Equals(parameter))
             {
                 Property.Value = default;
             }
-            else if(Property.Value is { } && "Edit".Equals(parameter))
+            else if(
+                (
+                    !Property.IsReadonly 
+                    && "Create".Equals(parameter)
+                )
+                || (
+                    Property.Value is { } 
+                    && "Edit".Equals(parameter)
+                )
+            )
             {
-                if(!_editWindow.TryGetTarget(out ObjectWindow? window) || !window.Activate())
+                if ("Create".Equals(parameter))
+                {
+                    Property.Value = ((IServiceProvider)FindResource(ServiceProviderResourceKey))
+                        .GetRequiredKeyedService<PocotaContext>(ServiceKey).CreateInstance(Property.Type);
+                }
+                if (!_editWindow.TryGetTarget(out ObjectWindow? window) || !window.Activate())
                 {
                     window = new ObjectWindow(_serviceKey, Window);
                     _editWindow.SetTarget(window);
                     window.Show();
                 }
+                window.Property = Property;
             }
         }
     }
