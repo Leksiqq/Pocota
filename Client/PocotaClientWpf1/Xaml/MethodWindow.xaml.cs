@@ -1,6 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows;
+using System.Windows.Controls;
 namespace Net.Leksi.Pocota.Client;
 public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated
 {
@@ -24,21 +27,19 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated
             }
         }
         InitializeComponent();
-        //CalcColumnsWidth(ParametersView.ActualWidth);
     }
-    //private void ListView_SizeChanged(object sender, SizeChangedEventArgs e)
-    //{
-    //    if (e.WidthChanged)
-    //    {
-    //        CalcColumnsWidth(e.NewSize.Width);
-    //    }
-    //}
-    //private void CalcColumnsWidth(double width)
-    //{
-    //    ParameterValueColumn.Width = width * 0.89 - ParameterNameColumn.ActualWidth;
-    //}
-    //private void ListViewItem_SizeChanged(object sender, SizeChangedEventArgs e)
-    //{
-    //    CalcColumnsWidth(ParametersView.ActualWidth);
-    //}
+    private void Button_Click(object sender, RoutedEventArgs e)
+    {
+        Console.WriteLine(JsonSerializer.Serialize(Parameters.Select(p => p.Value)));
+    }
+
+    private void MenuItem_SubmenuOpened(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem mi)
+        {
+            foreach (var item in mi.Items)
+            {
+            }
+        }
+    }
 }

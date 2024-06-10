@@ -21,7 +21,6 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             CommandManager.RequerySuggested -= value;
         }
     }
-
     public static readonly DependencyProperty PropertyProperty = DependencyProperty.Register(
        nameof(Property), typeof(Property),
        typeof(ObjectField)
@@ -32,6 +31,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     );
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private string _serviceKey = string.Empty;
+    private readonly WeakReference<ObjectWindow> _editWindow = new(null!);
     public Property Property
     {
         get => (Property)GetValue(PropertyProperty);
@@ -50,9 +50,22 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     public bool CanExecute(object? parameter)
     {
         return 
-            Property is { } && (
-                (Property.Value is { } && "Edit".Equals(parameter))
-                || (!Property.IsReadonly && ("Find".Equals(parameter) || "Create".Equals(parameter)))
+            Property is { } 
+            && (
+                (
+                    Property.Value is { } 
+                    && "Edit".Equals(parameter)
+                )
+                || (
+                    !Property.IsReadonly 
+                    && (
+                        (
+                            "Find".Equals(parameter) 
+                            && typeof(IEntityOwner).IsAssignableFrom(Property.Type)
+                        ) 
+                        || "Create".Equals(parameter)
+                    )
+                )
                 || (!Property.IsReadonly && Property.Value is { } && "Clear".Equals(parameter))
             )
             ;
@@ -69,6 +82,15 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             else if(!Property.IsReadonly && Property.Value is { } && "Clear".Equals(parameter))
             {
                 Property.Value = default;
+            }
+            else if(Property.Value is { } && "Edit".Equals(parameter))
+            {
+                if(!_editWindow.TryGetTarget(out ObjectWindow? window) || !window.Activate())
+                {
+                    window = new ObjectWindow(_serviceKey, Window);
+                    _editWindow.SetTarget(window);
+                    window.Show();
+                }
             }
         }
     }
@@ -106,10 +128,12 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             if (e.OldValue is Property oldProperty)
             {
                 TextBlock.DataContext = null;
+                Find.Visibility = Visibility.Collapsed;
             }
             if (e.NewValue is Property newProperty)
             {
                 TextBlock.DataContext = newProperty;
+                Find.Visibility = typeof(IEntityOwner).IsAssignableFrom(Property.Type) ? Visibility.Visible : Visibility.Collapsed;
             }
         }
         else if (e.Property == WindowProperty)

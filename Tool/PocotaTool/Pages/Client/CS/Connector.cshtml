@@ -22,7 +22,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
     }
 @foreach (MethodModel mm in @Model.Methods)
 {
-    <text>    public async @Html.Raw(mm.ReturnTypeName) @mm.Name@{}(@Html.Raw(string.Join(", ", mm.Parameters.Select(p => $"{p.TypeName} {p.Name}")))@(mm.Parameters.Count > 0 ? ", " : string.Empty)@{}CancellationToken cancellationToken) 
+    <text>    public async @Html.Raw(mm.ReturnTypeName) @mm.Name@{}(@Html.Raw(string.Join(", ", mm.Parameters.Select(p => $"{p.TypeName}{(p.IsNullable ? "?" : string.Empty)} {p.Name}")))@(mm.Parameters.Count > 0 ? ", " : string.Empty)@{}CancellationToken cancellationToken) 
     {
         await _asyncLock.WaitAsync(cancellationToken);
         try 

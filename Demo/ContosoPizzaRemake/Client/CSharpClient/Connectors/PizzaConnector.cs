@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaConnector          //
 // was generated automatically from            //
-// at 2024-06-03T16:59:17.                     //
+// at 2024-06-10T13:02:53.                     //
 // Modifying this file will break the program! //
 /////////////////////////////////////////////////
 
@@ -49,7 +49,7 @@ public class PizzaConnector: Connector
             _asyncLock.Release();
         }
     }
-    public async Task FindPizzasAsync(ICollection<Pizza> target, PizzaFilter filter, Int32 stage, CancellationToken cancellationToken) 
+    public async Task FindPizzasAsync(ICollection<Pizza> target, PizzaFilter filter, Int32 stage, Boolean? sure, CancellationToken cancellationToken) 
     {
         await _asyncLock.WaitAsync(cancellationToken);
         try 
@@ -57,9 +57,10 @@ public class PizzaConnector: Connector
             ResetContext();
             string _filter = HttpUtility.UrlEncode(JsonSerializer.Serialize(filter, _serializerOptions));
             string _stage = HttpUtility.UrlEncode(JsonSerializer.Serialize(stage, _serializerOptions));
+            string _sure = HttpUtility.UrlEncode(JsonSerializer.Serialize(sure, _serializerOptions));
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
-                $"/Pizza/FindPizzas/{_filter}/{_stage}"
+                $"/Pizza/FindPizzas/{_filter}/{_stage}/{_sure}"
             );
             await GetResponseAsyncEnumerable<Pizza>(target, _request, _serializerOptions, cancellationToken);
         }

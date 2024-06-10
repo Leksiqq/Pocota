@@ -43,7 +43,7 @@ public class Localizer: LocalizationBase
     public string ServiceKey => GetString();
     public string Interrupt => GetString();
     public string Return => GetString();
-    public Localizer()
-    {
-    }
+    public string Undo => GetString();
+    public string Owner => GetString();
+    public string Owned => GetString();
 }

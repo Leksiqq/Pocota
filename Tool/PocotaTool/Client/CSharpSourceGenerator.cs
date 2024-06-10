@@ -167,6 +167,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         model.AddUsing(typeof(JsonSerializerOptions));
         model.AddUsing(s_dependencyInjectionNs);
         model.AddUsing(typeof(HttpUtility));
+        NullabilityInfoContext nullabilityInfoContext = new();
         foreach (MethodInfo mi in options.ContractType!.GetMethods())
         {
             MethodModel mm = new()
@@ -214,6 +215,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 {
                     Name = pi.Name!,
                     TypeName = Util.BuildTypeName(pi.ParameterType),
+                    IsNullable = nullabilityInfoContext.Create(pi).ReadState is NullabilityState.Nullable,
                 };
                 mm.Parameters.Add(pm);
             }

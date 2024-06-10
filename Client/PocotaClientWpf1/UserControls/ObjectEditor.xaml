@@ -11,6 +11,7 @@
     d:DesignHeight="450" 
     d:DesignWidth="800"
     x:Name="oe"
+    Loaded="oe_Loaded"
     >
     <UserControl.Resources>
         <ResourceDictionary>
@@ -20,37 +21,41 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <ListView DockPanel.Dock="Top" x:Name="PropertiesView" ItemsSource="{Binding PropertiesViewSource.View, ElementName=oe}" SizeChanged="PropertiesView_SizeChanged">
-        <ListView.Resources>
-            <ResourceDictionary>
-            </ResourceDictionary>
-        </ListView.Resources>
-        <ListView.ItemContainerStyle>
-            <Style TargetType="ListViewItem">
-                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                <Setter Property="VerticalContentAlignment" Value="Top"/>
-                <Setter Property="Margin" Value="0"/>
-                <EventSetter Event="SizeChanged" Handler="PropertiesView_SizeChanged"/>
-            </Style>
-        </ListView.ItemContainerStyle>
-        <ListView.View>
-            <GridView AllowsColumnReorder="False">
-                <GridView.ColumnHeaderContainerStyle>
-                    <Style TargetType="GridViewColumnHeader">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                    </Style>
-                </GridView.ColumnHeaderContainerStyle>
-                <GridViewColumn 
+    <DockPanel LastChildFill="True">
+        <ListView x:Name="PropertiesView" ItemsSource="{Binding PropertiesViewSource.View, ElementName=oe}" SizeChanged="PropertiesView_SizeChanged">
+            <ListView.Resources>
+                <ResourceDictionary>
+                </ResourceDictionary>
+            </ListView.Resources>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="VerticalContentAlignment" Value="Top"/>
+                    <Setter Property="Margin" Value="0"/>
+                    <EventSetter Event="SizeChanged" Handler="PropertiesView_SizeChanged"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView AllowsColumnReorder="False">
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+                    <GridViewColumn 
                     x:Name="PropertyNameColumn"
                     Header="{Binding Property, Source={StaticResource Localizer}}"
                     CellTemplate="{StaticResource NameTemplate}"
+                    Width="Auto"
                     />
-                <GridViewColumn
+                    <GridViewColumn
                     x:Name="PropertyValueColumn"
                     Header="{Binding Value, Source={StaticResource Localizer}}"
+                    Width="Auto"
                     >
-                </GridViewColumn>
-            </GridView>
-        </ListView.View>
-    </ListView>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </DockPanel>
 </UserControl>

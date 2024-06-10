@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Net.Leksi.WpfMarkup;
+using System.Globalization;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 namespace Net.Leksi.Pocota.Client;
 public partial class MethodsWindow : Window, IWindowWithCore, ICommand
@@ -24,12 +26,10 @@ public partial class MethodsWindow : Window, IWindowWithCore, ICommand
         ConnectorsDataGridManager.ViewSource.Source = Core.Services.GetRequiredService<ConnectorsMethodsList>();
         InitializeComponent();
     }
-
     public bool CanExecute(object? parameter)
     {
         return parameter is ConnectorMethod;
     }
-
     public void Execute(object? parameter)
     {
         if (parameter is ConnectorMethod cm)

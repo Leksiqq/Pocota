@@ -24,7 +24,7 @@
             DockPanel.Dock="Right" 
             Margin="0" 
             Style="{StaticResource ClearButtonStyle}"
-            Command="{Binding  ElementName=of}"
+            Command="{Binding ElementName=of}"
             CommandParameter="Clear"
             />
         <Button 
@@ -38,15 +38,16 @@
             DockPanel.Dock="Right" 
             Margin="0" 
             Style="{StaticResource CreateButtonStyle}"
-            Command="{Binding  ElementName=of}"
+            Command="{Binding ElementName=of}"
             CommandParameter="Create"
             />
         <Button 
             DockPanel.Dock="Right" 
             Margin="0" 
             Style="{StaticResource FindButtonStyle}"
-            Command="{Binding  ElementName=of}"
+            Command="{Binding ElementName=of}"
             CommandParameter="Find"
+            x:Name="Find"
             />
         <TextBlock FontSize="12" FontWeight="Bold" x:Name="TextBlock">
             <TextBlock.Style>

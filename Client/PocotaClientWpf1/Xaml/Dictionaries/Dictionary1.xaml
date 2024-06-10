@@ -2,6 +2,9 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
     >
     <Style TargetType="MenuItem" x:Key="WindowsMenuItemStyle" x:Shared="True">
         <Setter Property="Header" Value="{Binding Windows, Source={StaticResource Localizer}}"/>
@@ -11,13 +14,21 @@
                 <Style TargetType="{x:Type MenuItem}">
                     <Setter Property="Command" Value="{Binding Value.Core.ApplicationCore, Source={l:ParameterizedResource $window}}" />
                     <Setter Property="CommandParameter" Value="{Binding}"/>
+                    <Setter Property="IsChecked" Value="{Binding Converter={l:ParameterizedResource $converter}, ConverterParameter=ThisWindow, Mode=OneWay}"/>
                 </Style>
             </Setter.Value>
         </Setter>
         <Setter Property="ItemTemplate">
             <Setter.Value>
                 <HierarchicalDataTemplate DataType="Window">
-                    <TextBlock Text="{Binding Title}"/>
+                    <TextBlock d:Text="{Binding Title}">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0}{1}">
+                                <Binding Path="Title"/>
+                                <Binding Converter="{l:ParameterizedResource $converter}" ConverterParameter="AdditionalInfo"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
                 </HierarchicalDataTemplate>
             </Setter.Value>
         </Setter>
@@ -57,6 +68,13 @@
         <Style TargetType="Button">
             <Setter Property="Content" Value="✔"/>
             <Setter Property="ToolTip" Value="{Binding Check, Source={StaticResource Localizer}}"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="UndoButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="⎌"/>
+            <Setter Property="ToolTip" Value="{Binding Undo, Source={StaticResource Localizer}}"/>
         </Style>
     </l:StyleCombiner>
     <l:StyleCombiner TargetType="Button" x:Key="InsertBeforeButtonStyle">

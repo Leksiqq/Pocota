@@ -1,9 +1,9 @@
 ﻿using Net.Leksi.WpfMarkup;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace Net.Leksi.Pocota.Client.UserControls;
 
@@ -41,15 +41,16 @@ public partial class ObjectEditor : UserControl
     {
         InitializeComponent();
     }
-    private void CalcColumnsWidth(double width)
+    private void CalcColumnsWidth()
     {
-        PropertyValueColumn.Width = width * 0.8 - PropertyNameColumn.ActualWidth;
+        PropertyValueColumn.Width = PropertiesView.ActualWidth - PropertyNameColumn.ActualWidth - 10;
     }
     private void PropertiesView_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         if (e.WidthChanged)
         {
-            CalcColumnsWidth(PropertiesView.ActualWidth);
+            
+            CalcColumnsWidth();
         }
     }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
@@ -75,5 +76,10 @@ public partial class ObjectEditor : UserControl
             this.Window.Resources.Remove(spName);
             PropertiesViewSource.Source = Properties;
         }
+    }
+
+    private void oe_Loaded(object sender, RoutedEventArgs e)
+    {
+        CalcColumnsWidth();
     }
 }

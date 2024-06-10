@@ -1,0 +1,46 @@
+﻿<UserControl 
+    x:Class="Net.Leksi.Pocota.Client.UserControls.TextField"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
+    xmlns:uc="clr-namespace:Net.Leksi.Pocota.Client.UserControls"
+    xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    mc:Ignorable="d" 
+    x:Name="tf"
+    >
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Xaml/Dictionaries/Dictionary1.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <l:ConverterProxy Converter="{Binding  ElementName=tf}" x:Key="Converter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <DockPanel LastChildFill="True">
+        <Button 
+            DockPanel.Dock="Right" 
+            Margin="0" 
+            Style="{StaticResource ClearButtonStyle}"
+            Command="{Binding ElementName=tf}"
+            CommandParameter="Clear"
+            />
+        <Button 
+            DockPanel.Dock="Right" 
+            Margin="0" 
+            Style="{StaticResource UndoButtonStyle}"
+            Command="{Binding ElementName=tf}"
+            CommandParameter="Undo"
+            />
+        <TextBox 
+            x:Name="TextBox"
+            Text="{Binding Value, Converter={StaticResource Converter}, ConverterParameter=Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            IsReadOnly="{Binding IsReadonly}"
+            TextWrapping="Wrap"
+            Foreground="{Binding Value, Converter={StaticResource Converter}, ConverterParameter=Foreground, Mode=OneWay}"
+            BorderBrush="{Binding Value, Converter={StaticResource Converter}, ConverterParameter=Foreground, Mode=OneWay}"
+            >
+        </TextBox>
+    </DockPanel>
+</UserControl>

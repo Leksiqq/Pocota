@@ -11,12 +11,18 @@ public class PropertyTemplateSelector: DataTemplateSelector
 {
     public XamlServiceProviderCatcher? ServiceProviderCatcher { get; set; }
     public string ClassDataTemplateKey { get; set; } = null!;
+    public string EnumDataTemplateKey { get; set; } = null!;
+    public string TextDataTemplateKey { get; set; } = null!;
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
         DataTemplate? result = null;
         if (item is Property property)
         {
-            if (property is ListProperty)
+            if(property.Access is Contract.AccessKind.NotSet || property.Access is Contract.AccessKind.Forbidden)
+            {
+                result = ProvideValue(ClassDataTemplateKey);
+            }
+            else if (property is ListProperty)
             {
             }
             else if (property.Type.IsClass && property.Type != typeof(string))
@@ -32,11 +38,13 @@ public class PropertyTemplateSelector: DataTemplateSelector
                 )
             )
             {
+                result = ProvideValue(EnumDataTemplateKey);
             }
             else
             {
+                result = ProvideValue(TextDataTemplateKey);
             }
-            if(result is { })
+            if (result is { })
             {
                 return result;
             }

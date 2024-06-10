@@ -1,5 +1,5 @@
 ﻿<Window 
-    x:Class="Net.Leksi.Pocota.Client.MethodWindow"
+    x:Class="Net.Leksi.Pocota.Client.ObjectWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
@@ -8,17 +8,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    Title="ObjectWindow" 
     Height="450" 
     Width="800"
     DataContext="{Binding RelativeSource={RelativeSource Self}}" 
     >
-    <Window.Title>
-        <MultiBinding StringFormat="{}{0}: {1} [{2}]">
-            <Binding Path="Method" Source="{StaticResource Localizer}"/>
-            <Binding Path="MethodName"/>
-            <Binding Path="ServiceKey"/>
-        </MultiBinding>
-    </Window.Title>
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -26,33 +20,19 @@
                 <ResourceDictionary Source="Dictionaries/PropertyTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
-            <l:ConverterProxy Converter="{Binding Core}" x:Key="Converter"/>
             <l:XamlServiceProviderCatcher x:Key="WindowSP"/>
+            <l:ConverterProxy Converter="{Binding Core}" x:Key="Converter"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
             <MenuItem Style="{l:ParameterizedResource WindowsMenuItemStyle, Replaces=$window:Window|$converter:Converter}"/>
         </Menu>
-        <TextBlock DockPanel.Dock="Top" FontSize="20" HorizontalAlignment="Center">
-            <TextBlock.Text>
-                <MultiBinding StringFormat="{}{0} {1} [{2}]">
-                    <Binding Path="ReturnType" Converter="{local:TypeNameConverter}" ConverterParameter="Short"/>
-                    <Binding Path="MethodName"/>
-                    <Binding Path="ServiceKey"/>
-                </MultiBinding>
-            </TextBlock.Text>
-        </TextBlock>
         <uc:ObjectEditor 
             DockPanel.Dock="Top"
-            Properties="{Binding Parameters}" 
+            Properties="{Binding Properties}" 
             Window="{Binding}" 
             ServiceProviderCatcher="{StaticResource WindowSP}" 
             />
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Content="{Binding Call, Source={StaticResource Localizer}}" Margin="0,10,0,10" Click="Button_Click"/>
-            <Button Content="{Binding Interrupt, Source={StaticResource Localizer}}" Margin="10,10,0,10"/>
-        </StackPanel>
-        <StackPanel/>
     </DockPanel>
 </Window>

@@ -2,7 +2,13 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
+    <Compile Update="UserControls\EnumField.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\ObjectField.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\TextField.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Xaml\MethodsWindow.xaml.cs">
@@ -14,9 +20,18 @@
     <Compile Update="UserControls\ObjectEditor.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Xaml\ObjectWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Update="UserControls\EnumField.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="UserControls\ObjectField.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\TextField.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Xaml\Dictionaries\DataGrid.xaml">
@@ -38,6 +53,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\ObjectEditor.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Xaml\ObjectWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

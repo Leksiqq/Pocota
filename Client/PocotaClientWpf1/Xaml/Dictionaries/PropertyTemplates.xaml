@@ -11,10 +11,18 @@
     <DataTemplate x:Key="ClassDataTemplate">
         <uc:ObjectField Property="{Binding}" Window="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"/>
     </DataTemplate>
+    <DataTemplate x:Key="EnumDataTemplate">
+        <uc:EnumField Property="{Binding}"/>
+    </DataTemplate>
+    <DataTemplate x:Key="TextDataTemplate">
+        <uc:TextField Property="{Binding}"/>
+    </DataTemplate>
     <local:PropertyTemplateSelector 
         x:Key="PropertyTemplateSelector"
         ServiceProviderCatcher="{l:ParameterizedResource $serviceProviderCatcher}"
         ClassDataTemplateKey="ClassDataTemplate"
+        EnumDataTemplateKey="EnumDataTemplate"
+        TextDataTemplateKey="TextDataTemplate"
         x:Shared="False"
         />
     <DataTemplate x:Key="NameTemplate">
