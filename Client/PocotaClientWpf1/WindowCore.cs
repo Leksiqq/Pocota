@@ -8,8 +8,21 @@ public class WindowCore : IValueConverter
 {
     private readonly Window _owner;
     private readonly Localizer _localizer;
+    private WindowCore? _launcher = null;
     public ApplicationCore ApplicationCore => Services.GetRequiredService<ApplicationCore>();
     public IServiceProvider Services => (IServiceProvider)Application.Current.Resources[ServiceProviderResourceKey];
+    public WindowCore? Launcher
+    {
+        get => _launcher;
+        set
+        {
+            if(_launcher is null && value is { })
+            {
+                _launcher = value;
+            }
+        }
+    }
+    public Window Owner => _owner;
     internal WindowCore(Window owner)
     {
         _owner = owner;
@@ -59,7 +72,8 @@ public class WindowCore : IValueConverter
         {
             if (value is Tuple<int, Window> tup)
             {
-                return tup.Item2 == _owner.Owner ? $" - {_localizer.Owner}" : ((tup.Item2 as Window)?.Owner == _owner ? $" - {_localizer.Owned}" : string.Empty);
+                return (tup.Item2 as IWindowWithCore)?.Core == _launcher ? $" - {_localizer.Owner}" : ((tup.Item2 as IWindowWithCore)?.Core._launcher == this ? $" - {_localizer.Owned}" : string.Empty);
+
             }
         }
         return null;

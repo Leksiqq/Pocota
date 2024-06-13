@@ -40,13 +40,13 @@ public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, IN
         } 
     }
     public ObservableCollection<Property> Properties { get; private init; } = [];
-    public string ObjectTitle => $"{(Owner is IEditWindow ew ? $"{ew.ObjectTitle}/" : string.Empty)}{Property?.Name ?? string.Empty}";
+    public string ObjectTitle => $"{(Core.Launcher?.Owner is IEditWindow ew ? $"{ew.ObjectTitle}/" : string.Empty)}{Property?.Name ?? string.Empty}";
 
     public ObjectWindow(string serviceKey, Window owner)
     {
         Core = new WindowCore(this);
         ServiceKey = serviceKey;
-        Owner = owner;
+        Core.Launcher = (owner as IWindowWithCore)?.Core;
         InitializeComponent();
     }
 }
