@@ -23,6 +23,9 @@
     <Compile Update="Xaml\ObjectWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Xaml\WindowsWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="UserControls\EnumField.xaml">
@@ -56,6 +59,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Xaml\ObjectWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Xaml\WindowsWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

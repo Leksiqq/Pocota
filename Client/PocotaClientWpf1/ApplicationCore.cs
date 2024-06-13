@@ -1,12 +1,18 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
-
 namespace Net.Leksi.Pocota.Client;
 
-public class ApplicationCore: ICommand, INotifyPropertyChanged
+public class ApplicationCore(IServiceProvider services): ICommand, INotifyPropertyChanged
 {
+    private const string s_allWindows = "AllWindows";
     private readonly PropertyChangedEventArgs _propertyChangedEventsArg = new(null);
+    private readonly Localizer _localizer = services.GetRequiredService<Localizer>();
+    private readonly HashSet<Window> _uniqWindows = [];
+    internal Window? ActiveWindow { get; set; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -21,29 +27,68 @@ public class ApplicationCore: ICommand, INotifyPropertyChanged
             CommandManager.RequerySuggested -= value;
         }
     }
-    public IEnumerable<Window> Windows
+    public IEnumerable<object> WindowMenuItems
     {
         get
         {
+            yield return new Separator();
+            int i = 0;
             foreach (Window window in Application.Current.Windows)
             {
-                yield return window;
+                yield return new Tuple<int, Window>(++i, window);
+                if(i == 10)
+                {
+                    break;
+                }
             }
+            yield return new MenuItem()
+            {
+                Header = $"{_localizer.Windows}...",
+                Command = this,
+                CommandParameter = s_allWindows
+            };
         }
     }
     public bool CanExecute(object? parameter)
     {
-        return parameter is Window;
+        return true;
     }
     public void Execute(object? parameter)
     {
-        if (parameter is Window window)
+        if (parameter is Tuple<int, Window> tup)
         {
-            window.Activate();
+            tup.Item2.Activate();
+        }
+        else if(s_allWindows.Equals(parameter))
+        {
+            WindowsWindow windowsWindow = new();
+            windowsWindow.Owner = ActiveWindow;
+            windowsWindow.Clear();
+            _uniqWindows.Clear();
+            foreach (Window window in Application.Current.Windows)
+            {
+                Walk(window, 0, windowsWindow);
+            }
+            windowsWindow.ActiveWindow = ActiveWindow;
+            if(windowsWindow.ShowDialog() is bool b && b)
+            {
+                windowsWindow.ActiveWindow?.Activate();
+            }
         }
     }
     internal void Touch()
     {
         PropertyChanged?.Invoke(this, _propertyChangedEventsArg);
+    }
+    private void Walk(Window window, int v, WindowsWindow windowsWindow)
+    {
+        if (window != windowsWindow && _uniqWindows.Add(window))
+        {
+            windowsWindow!.Add(window, v);
+            foreach (Window win in window.OwnedWindows)
+            {
+                Walk(win, v + 1, windowsWindow);
+            }
+        }
     }
 }

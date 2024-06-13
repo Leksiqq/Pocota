@@ -8,11 +8,16 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="ObjectWindow" 
     Height="450" 
     Width="800"
     DataContext="{Binding RelativeSource={RelativeSource Self}}" 
     >
+    <Window.Title>
+        <MultiBinding StringFormat="{}{0} {1}">
+            <Binding Path="Edit" Source="{StaticResource Localizer}"/>
+            <Binding Path="ObjectTitle"/>
+        </MultiBinding>
+    </Window.Title>
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

@@ -1,5 +1,6 @@
 ﻿using Net.Leksi.WpfMarkup;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -44,12 +45,16 @@ public partial class ObjectEditor : UserControl
     private void CalcColumnsWidth()
     {
         PropertyValueColumn.Width = PropertiesView.ActualWidth - PropertyNameColumn.ActualWidth - 10;
+        ScrollViewer scrollViewer = GetDescendants(Window).OfType<ScrollViewer>().First();
+        if(scrollViewer.ComputedHorizontalScrollBarVisibility is Visibility.Visible)
+        {
+            Window.Width = Window.ActualWidth + 1;
+        }
     }
     private void PropertiesView_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         if (e.WidthChanged)
         {
-            
             CalcColumnsWidth();
         }
     }
@@ -58,15 +63,32 @@ public partial class ObjectEditor : UserControl
 
         if (e.Property.OwnerType == GetType())
         {
+            if(e.Property == PropertiesProperty)
+            {
+                if (e.OldValue is ObservableCollection<Property> oc)
+                {
+                    oc.CollectionChanged -= Properties_CollectionChanged;
+                }
+                if (e.NewValue is ObservableCollection<Property> oc1)
+                {
+                    oc1.CollectionChanged += Properties_CollectionChanged;
+                }
+            }
             SetTemplateSelector();
         }
         base.OnPropertyChanged(e);
     }
+
+    private void Properties_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        CalcColumnsWidth();
+    }
+
     private void SetTemplateSelector()
     {
         if (ServiceProviderCatcher is { } && Properties is { } && Window is { } && PropertyValueColumn.CellTemplateSelector is null)
         {
-            string spName = $"sp{Guid.NewGuid}";
+            string spName = $"sp{Guid.NewGuid()}";
             ParameterizedResourceExtension pre = new("PropertyTemplateSelector")
             {
                 Replaces = new string[] { $"$serviceProviderCatcher:{spName}" },
@@ -81,5 +103,18 @@ public partial class ObjectEditor : UserControl
     private void oe_Loaded(object sender, RoutedEventArgs e)
     {
         CalcColumnsWidth();
+    }
+    private static IEnumerable<DependencyObject> GetDescendants(DependencyObject obj)
+    {
+        int childrenCount = VisualTreeHelper.GetChildrenCount(obj);
+        for(int i = 0; i < childrenCount; ++i)
+        {
+            DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+            yield return child;
+            foreach (var descendant in GetDescendants(child))
+            {
+                yield return descendant;
+            }
+        }
     }
 }

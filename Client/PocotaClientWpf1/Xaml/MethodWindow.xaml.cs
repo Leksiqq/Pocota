@@ -1,11 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 namespace Net.Leksi.Pocota.Client;
-public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated
+public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated, IEditWindow
 {
     private const string s_target = "target";
     private readonly ConnectorMethod _connectorMethod;
@@ -15,6 +14,9 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated
     public string ServiceKey => _connectorMethod.ServiceKey;
     public Type ReturnType => _connectorMethod.Method.GetParameters()
         .Where(p => p.Name == s_target).FirstOrDefault()?.ParameterType ?? _connectorMethod.Method.ReturnType.GetGenericArguments()[0];
+
+    public string ObjectTitle => $"{ServiceKey}:{_connectorMethod.Method.Name}()";
+
     public MethodWindow(ConnectorMethod connectorMethod)
     {
         _connectorMethod = connectorMethod;

@@ -13,10 +13,9 @@
     DataContext="{Binding RelativeSource={RelativeSource Self}}" 
     >
     <Window.Title>
-        <MultiBinding StringFormat="{}{0} {1}:{2}">
+        <MultiBinding StringFormat="{}{0} {1}">
             <Binding Path="Method" Source="{StaticResource Localizer}"/>
-            <Binding Path="ServiceKey"/>
-            <Binding Path="MethodName"/>
+            <Binding Path="ObjectTitle"/>
         </MultiBinding>
     </Window.Title>
     <Window.Resources>

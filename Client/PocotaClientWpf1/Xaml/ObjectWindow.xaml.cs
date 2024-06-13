@@ -1,7 +1,9 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Reflection;
 using System.Windows;
 namespace Net.Leksi.Pocota.Client;
-public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, INotifyPropertyChanged
+public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, INotifyPropertyChanged, IEditWindow
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     private Property? _property;
@@ -15,11 +17,31 @@ public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, IN
         {
             if (_property != value)
             {
+                if (_property is { })
+                {
+                    Properties.Clear();
+                }
                 _property = value;
+                if (_property is { })
+                {
+                    if (_property.Value is IEntityOwner eo)
+                    {
+                    }
+                    else if (_property.Value is {})
+                    {
+                        foreach(PropertyInfo pi in _property.Type.GetProperties())
+                        {
+                            Properties.Add(Property.Create(pi, _property.Value)!);
+                        }
+                    }
+                }
                 PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
             }
         } 
     }
+    public ObservableCollection<Property> Properties { get; private init; } = [];
+    public string ObjectTitle => $"{(Owner is IEditWindow ew ? $"{ew.ObjectTitle}/" : string.Empty)}{Property?.Name ?? string.Empty}";
+
     public ObjectWindow(string serviceKey, Window owner)
     {
         Core = new WindowCore(this);

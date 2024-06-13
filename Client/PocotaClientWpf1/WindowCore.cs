@@ -1,22 +1,29 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Net.Leksi.WpfMarkup;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
-using System.Windows.Input;
 using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
-public class WindowCore: IValueConverter
+public class WindowCore : IValueConverter
 {
     private readonly Window _owner;
+    private readonly Localizer _localizer;
     public ApplicationCore ApplicationCore => Services.GetRequiredService<ApplicationCore>();
     public IServiceProvider Services => (IServiceProvider)Application.Current.Resources[ServiceProviderResourceKey];
     internal WindowCore(Window owner)
     {
         _owner = owner;
         _owner.Closed += _owner_Closed;
+        _owner.Activated += _owner_Activated;
+        _localizer = Services.GetRequiredService<Localizer>();
         Services.GetRequiredService<ApplicationCore>().Touch();
     }
+
+    private void _owner_Activated(object? sender, EventArgs e)
+    {
+        ApplicationCore.ActiveWindow = _owner;
+    }
+
     private void _owner_Closed(object? sender, EventArgs e)
     {
         Services.GetRequiredService<ApplicationCore>().Touch();
@@ -26,11 +33,34 @@ public class WindowCore: IValueConverter
     {
         if ("ThisWindow".Equals(parameter))
         {
-            return value == _owner;
+            if (value is Tuple<int, Window> tup)
+            {
+                return tup.Item2 == _owner;
+            }
+            return false;
+        }
+        if ("PriorInfo".Equals(parameter))
+        {
+            if (value is Tuple<int, Window> tup)
+            {
+                return string.Format("{0,2} ", tup.Item1);
+            }
+            return string.Empty;
+        }
+        if ("Title".Equals(parameter))
+        {
+            if (value is Tuple<int, Window> tup)
+            {
+                return tup.Item2.Title;
+            }
+            return value?.ToString() ?? string.Empty;
         }
         if ("AdditionalInfo".Equals(parameter))
         {
-            return value == _owner.Owner ? $" - {(Application.Current.Resources[LocalizerResourceKey] as Localizer)?.Owner}" : ((value as Window)?.Owner == _owner ? $" - {(Application.Current.Resources[LocalizerResourceKey] as Localizer)?.Owned}" : string.Empty);
+            if (value is Tuple<int, Window> tup)
+            {
+                return tup.Item2 == _owner.Owner ? $" - {_localizer.Owner}" : ((tup.Item2 as Window)?.Owner == _owner ? $" - {_localizer.Owned}" : string.Empty);
+            }
         }
         return null;
     }

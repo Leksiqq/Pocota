@@ -7,8 +7,8 @@
     mc:Ignorable="d"
     >
     <Style TargetType="MenuItem" x:Key="WindowsMenuItemStyle" x:Shared="True">
-        <Setter Property="Header" Value="{Binding Windows, Source={StaticResource Localizer}}"/>
-        <Setter Property="ItemsSource" Value="{Binding Value.Core.ApplicationCore.Windows, Source={l:ParameterizedResource $window}}"/>
+        <Setter Property="Header" Value="{Binding Window, Source={StaticResource Localizer}}"/>
+        <Setter Property="ItemsSource" Value="{Binding Value.Core.ApplicationCore.WindowMenuItems, Source={l:ParameterizedResource $window}}"/>
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
                 <Style TargetType="{x:Type MenuItem}">
@@ -23,8 +23,9 @@
                 <HierarchicalDataTemplate DataType="Window">
                     <TextBlock d:Text="{Binding Title}">
                         <TextBlock.Text>
-                            <MultiBinding StringFormat="{}{0}{1}">
-                                <Binding Path="Title"/>
+                            <MultiBinding StringFormat="{}{0}{1}{2}">
+                                <Binding Converter="{l:ParameterizedResource $converter}" ConverterParameter="PriorInfo"/>
+                                <Binding Converter="{l:ParameterizedResource $converter}" ConverterParameter="Title"/>
                                 <Binding Converter="{l:ParameterizedResource $converter}" ConverterParameter="AdditionalInfo"/>
                             </MultiBinding>
                         </TextBlock.Text>
