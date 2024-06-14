@@ -2,17 +2,21 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using static Net.Leksi.Pocota.Client.Constants;
 
 namespace Net.Leksi.Pocota.Client.UserControls;
 
-public partial class ObjectEditor : UserControl, INotifyPropertyChanged
+public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueConverter
 {
     public event PropertyChangedEventHandler? PropertyChanged;
+    public event EventHandler? CurrentInputChanged;
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
+    private readonly Localizer _localizer;
     private IInputElement? _currentInput = null;
     public static readonly DependencyProperty ServiceProviderCatcherProperty = DependencyProperty.Register(
        nameof(ServiceProviderCatcher), typeof(XamlServiceProviderCatcher),
@@ -49,12 +53,32 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged
         internal set
         {
             _currentInput = value;
-            PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+            CurrentInputChanged?.Invoke(this, EventArgs.Empty);
         }
     }
     public ObjectEditor()
     {
+        _localizer = (Application.Current.Resources[LocalizerResourceKey] as Localizer)!;
         InitializeComponent();
+    }
+    public object? Convert(object? value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if("InsertInputMode".Equals(parameter))
+        {
+            if(value is bool b)
+            {
+                return b ? _localizer.Insert : _localizer.Overwrite;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+        return value;
+    }
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
     }
     private void CalcColumnsWidth()
     {
@@ -92,12 +116,10 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged
         }
         base.OnPropertyChanged(e);
     }
-
     private void Properties_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         CalcColumnsWidth();
     }
-
     private void SetTemplateSelector()
     {
         if (ServiceProviderCatcher is { } && Properties is { } && Window is { } && PropertyValueColumn.CellTemplateSelector is null)
@@ -113,7 +135,6 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged
             PropertiesViewSource.Source = Properties;
         }
     }
-
     private void oe_Loaded(object sender, RoutedEventArgs e)
     {
         CalcColumnsWidth();

@@ -46,7 +46,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     }
     
     public bool IsReadonly => Property?.IsReadonly ?? true;
-    public bool IsInsertMode { get; private set; } = false;
+    public bool IsInsertMode { get; private set; } = true;
     private ObjectEditor? Editor
     {
         get
@@ -269,7 +269,10 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         if(e.Key is Key.Insert)
         {
             IsInsertMode = !IsInsertMode;
-            PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+            if(Editor is { })
+            {
+                Editor.CurrentInput = this;
+            }
         }
     }
     private void TextBox_GotFocus(object sender, RoutedEventArgs e)

@@ -2,4 +2,5 @@
 
 public interface IInputElement
 {
+    bool IsInsertMode { get; }
 }

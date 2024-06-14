@@ -22,6 +22,7 @@ public class Localizer: LocalizationBase
     public string Find => GetString();
     public string GoTo => GetString();
     public string HideNamespace => GetString();
+    public string Insert => GetString();
     public string InsertBefore => GetString();
     public string Interrupt => GetString();
     public string IsNotSet => GetString();
@@ -30,6 +31,7 @@ public class Localizer: LocalizationBase
     public string MethodsWindowTitle => GetString();
     public string Module => GetString();
     public string Move => GetString();
+    public string Overwrite => GetString();
     public string Owned => GetString();
     public string Owner => GetString();
     public string Parameter => GetString();
