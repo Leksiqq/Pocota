@@ -58,6 +58,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                 )
                 || (
                     !Property.IsReadonly 
+                    && Property.Value is null
                     && (
                         (
                             "Find".Equals(parameter) 

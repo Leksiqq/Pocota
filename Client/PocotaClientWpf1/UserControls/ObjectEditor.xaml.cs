@@ -1,6 +1,7 @@
 ﻿using Net.Leksi.WpfMarkup;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -8,8 +9,11 @@ using System.Windows.Media;
 
 namespace Net.Leksi.Pocota.Client.UserControls;
 
-public partial class ObjectEditor : UserControl
+public partial class ObjectEditor : UserControl, INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
+    private IInputElement? _currentInput = null;
     public static readonly DependencyProperty ServiceProviderCatcherProperty = DependencyProperty.Register(
        nameof(ServiceProviderCatcher), typeof(XamlServiceProviderCatcher),
        typeof(ObjectEditor)
@@ -38,6 +42,16 @@ public partial class ObjectEditor : UserControl
         get => (Window)GetValue(WindowProperty);
         set => SetValue(WindowProperty, value);
     }
+    public bool? IsInsertMode {  get; private set; }
+    public IInputElement? CurrentInput 
+    { 
+        get => _currentInput; 
+        internal set
+        {
+            _currentInput = value;
+            PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+        }
+    }
     public ObjectEditor()
     {
         InitializeComponent();
@@ -45,7 +59,7 @@ public partial class ObjectEditor : UserControl
     private void CalcColumnsWidth()
     {
         PropertyValueColumn.Width = PropertiesView.ActualWidth - PropertyNameColumn.ActualWidth - 10;
-        ScrollViewer scrollViewer = GetDescendants(Window).OfType<ScrollViewer>().First();
+        ScrollViewer scrollViewer = GetVisualDescendants(Window).OfType<ScrollViewer>().First();
         if(scrollViewer.ComputedHorizontalScrollBarVisibility is Visibility.Visible)
         {
             Window.Width = Window.ActualWidth + 1;
@@ -104,16 +118,30 @@ public partial class ObjectEditor : UserControl
     {
         CalcColumnsWidth();
     }
-    private static IEnumerable<DependencyObject> GetDescendants(DependencyObject obj)
+    private static IEnumerable<DependencyObject> GetVisualDescendants(DependencyObject obj)
     {
         int childrenCount = VisualTreeHelper.GetChildrenCount(obj);
-        for(int i = 0; i < childrenCount; ++i)
+        for (int i = 0; i < childrenCount; ++i)
         {
             DependencyObject child = VisualTreeHelper.GetChild(obj, i);
             yield return child;
-            foreach (var descendant in GetDescendants(child))
+            foreach (var descendant in GetVisualDescendants(child))
             {
                 yield return descendant;
+            }
+        }
+    }
+    private static IEnumerable<DependencyObject> GetLogicalDescendants(DependencyObject obj)
+    {
+        foreach (var child in LogicalTreeHelper.GetChildren(obj))
+        {
+            if(child is DependencyObject dob)
+            {
+                yield return dob;
+                foreach (var descendant in GetLogicalDescendants(dob))
+                {
+                    yield return descendant;
+                }
             }
         }
     }

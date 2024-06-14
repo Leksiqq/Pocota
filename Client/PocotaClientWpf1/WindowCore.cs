@@ -9,6 +9,7 @@ public class WindowCore : IValueConverter
     private readonly Window _owner;
     private readonly Localizer _localizer;
     private WindowCore? _launcher = null;
+    private List<WeakReference<WindowCore>> _launched = [];
     public ApplicationCore ApplicationCore => Services.GetRequiredService<ApplicationCore>();
     public IServiceProvider Services => (IServiceProvider)Application.Current.Resources[ServiceProviderResourceKey];
     public WindowCore? Launcher
@@ -19,9 +20,11 @@ public class WindowCore : IValueConverter
             if(_launcher is null && value is { })
             {
                 _launcher = value;
+                _launcher._launched.Add(new WeakReference<WindowCore>(this));
             }
         }
     }
+    public IEnumerable<WindowCore> Launched => _launched.Select(wr => wr.TryGetTarget(out WindowCore? wc) ?  wc : null).Where(wc => wc is { })!;
     public Window Owner => _owner;
     internal WindowCore(Window owner)
     {
@@ -39,6 +42,13 @@ public class WindowCore : IValueConverter
 
     private void _owner_Closed(object? sender, EventArgs e)
     {
+        foreach(WeakReference<WindowCore> wr in _launched)
+        {
+            if(wr.TryGetTarget(out WindowCore? core))
+            {
+                core.Owner.Close();
+            }
+        }
         Services.GetRequiredService<ApplicationCore>().Touch();
     }
 

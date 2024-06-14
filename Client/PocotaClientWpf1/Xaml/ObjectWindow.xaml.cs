@@ -1,9 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Data;
 namespace Net.Leksi.Pocota.Client;
-public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, INotifyPropertyChanged, IEditWindow
+public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, INotifyPropertyChanged, IEditWindow, IValueConverter
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     private Property? _property;
@@ -48,5 +50,16 @@ public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, IN
         ServiceKey = serviceKey;
         Core.Launcher = (owner as IWindowWithCore)?.Core;
         InitializeComponent();
+    }
+
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        Console.WriteLine(value);
+        return value;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
     }
 }

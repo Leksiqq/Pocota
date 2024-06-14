@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.PizzaAccessBase                     //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-10T13:02:53.                                 //
+// at 2024-06-14T17:14:56.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 

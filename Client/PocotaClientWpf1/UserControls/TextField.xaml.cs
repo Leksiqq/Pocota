@@ -6,7 +6,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 namespace Net.Leksi.Pocota.Client.UserControls;
-public partial class TextField : UserControl, IValueConverter, INotifyPropertyChanged, ICommand
+public partial class TextField : UserControl, IValueConverter, INotifyPropertyChanged, ICommand, IInputElement
 {
     public event EventHandler? CanExecuteChanged
     {
@@ -24,9 +24,10 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
        nameof(Property), typeof(Property),
        typeof(TextField)
     );
+    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private object? _value;
     private string? _badFormat = null;
-    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
+    private ObjectEditor? _objectEditor = null;
     public Property Property
     {
         get => (Property)GetValue(PropertyProperty);
@@ -45,6 +46,21 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     }
     
     public bool IsReadonly => Property?.IsReadonly ?? true;
+    public bool IsInsertMode { get; private set; } = false;
+    private ObjectEditor? Editor
+    {
+        get
+        {
+            if (_objectEditor is null)
+            {
+                if (GetAncestors(this).OfType<ObjectEditor>().FirstOrDefault() is ObjectEditor oe)
+                {
+                    _objectEditor = oe;
+                }
+            }
+            return _objectEditor;
+        }
+    }
     public TextField()
     {
         InitializeComponent();
@@ -98,20 +114,35 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             if (value is string s)
             {
                 Console.WriteLine($"value: \"{s}\"");
+                object? res;
+                Type type = Property.Type;
+                if (Property.IsNullable)
+                {
+                    if(string.IsNullOrWhiteSpace(s))
+                    {
+                        _badFormat = null;
+                        PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+                        return null;
+                    }
+                    if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    {
+                        type = type.GetGenericArguments()[0];
+                    }
+                }
                 try
                 {
-                    object? res = System.Convert.ChangeType(s, Property.Type);
-                    _badFormat = null;
-                    PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
-                    Console.WriteLine($"_badFormat: {_badFormat}");
-                    return res;
+                    if(TryParse(s, type, out res))
+                    {
+                        _badFormat = null;
+                        PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+                        return res;
+                    }
+                    return BadFormat(s);
                 }
-                catch (FormatException)
+                catch (Exception ex)
                 {
-                    _badFormat = s;
-                    PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
-                    Console.WriteLine($"_badFormat: {_badFormat}");
-                    return _value;
+                    Console.WriteLine(ex);
+                    return BadFormat(s);
                 }
             }
         }
@@ -156,12 +187,10 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             if (e.OldValue is Property oldProperty)
             {
                 TextBox.DataContext = null;
-                TextBox.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
             }
             if (e.NewValue is Property newProperty)
             {
                 TextBox.DataContext = this;
-                TextBox.VerticalScrollBarVisibility = Property.Type == typeof(string) ? ScrollBarVisibility.Visible : ScrollBarVisibility.Hidden;
             }
         }
         base.OnPropertyChanged(e);
@@ -191,5 +220,78 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             return Value?.Equals(Activator.CreateInstance(Property.Type)) ?? true;
         }
         return true;
+    }
+    private bool TryParse(string s, Type type, out object? res)
+    {
+        if (type == typeof(DateOnly))
+        {
+            if (DateOnly.TryParse(s, out DateOnly don))
+            {
+                res = don;
+                return true;
+            }
+            res = null;
+            return false;
+        }
+        if (type == typeof(TimeOnly))
+        {
+            if (TimeOnly.TryParse(s, CultureInfo.CurrentCulture.DateTimeFormat, out TimeOnly ton))
+            {
+                res = ton;
+                return true;
+            }
+            res = null;
+            return false;
+        }
+        if (type == typeof(TimeSpan))
+        {
+            if (TimeSpan.TryParse(s, out TimeSpan ts))
+            {
+                res = ts;
+                return true;
+            }
+            res = null;
+            return false;
+        }
+        res = System.Convert.ChangeType(s, type);
+        return true;
+    }
+    private object? BadFormat(string s)
+    {
+        _badFormat = s;
+        PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+        Console.WriteLine($"_badFormat: {_badFormat}");
+        return _value;
+    }
+
+    private void TextBox_KeyUp(object sender, KeyEventArgs e)
+    {
+        if(e.Key is Key.Insert)
+        {
+            IsInsertMode = !IsInsertMode;
+            PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+        }
+    }
+    private void TextBox_GotFocus(object sender, RoutedEventArgs e)
+    {
+        if(sender is TextBox tb && Editor is { })
+        {
+            Editor.CurrentInput = this;
+        }
+    }
+    private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox tb && Editor is { })
+        {
+            Editor.CurrentInput = null;
+        }
+    }
+
+    private static IEnumerable<DependencyObject> GetAncestors(DependencyObject obj)
+    {
+        for (var cur = obj; cur is not null; cur = VisualTreeHelper.GetParent(cur))
+        {
+            yield return cur;
+        }
     }
 }

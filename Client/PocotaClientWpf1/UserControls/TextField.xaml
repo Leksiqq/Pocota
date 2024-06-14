@@ -40,6 +40,9 @@
             TextWrapping="Wrap"
             Foreground="{Binding Value, Converter={StaticResource Converter}, ConverterParameter=Foreground, Mode=OneWay}"
             BorderBrush="{Binding Value, Converter={StaticResource Converter}, ConverterParameter=Foreground, Mode=OneWay}"
+            KeyUp="TextBox_KeyUp"
+            GotFocus="TextBox_GotFocus"
+            LostFocus="TextBox_LostFocus"
             >
         </TextBox>
     </DockPanel>

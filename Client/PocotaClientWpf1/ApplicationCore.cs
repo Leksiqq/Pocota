@@ -85,9 +85,12 @@ public class ApplicationCore(IServiceProvider services): ICommand, INotifyProper
         if (window != windowsWindow && _uniqWindows.Add(window))
         {
             windowsWindow!.Add(window, v);
-            foreach (Window win in window.OwnedWindows)
+            if(window is IWindowWithCore wc)
             {
-                Walk(win, v + 1, windowsWindow);
+                foreach (WindowCore core in wc.Core.Launched)
+                {
+                    Walk(core.Owner, v + 1, windowsWindow);
+                }
             }
         }
     }

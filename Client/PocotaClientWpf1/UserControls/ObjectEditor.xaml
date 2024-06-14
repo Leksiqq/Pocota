@@ -22,7 +22,11 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
-        <ListView x:Name="PropertiesView" ItemsSource="{Binding PropertiesViewSource.View, ElementName=oe}" SizeChanged="PropertiesView_SizeChanged">
+        <ListView 
+            x:Name="PropertiesView" 
+            ItemsSource="{Binding PropertiesViewSource.View, ElementName=oe}" 
+            SizeChanged="PropertiesView_SizeChanged"
+            >
             <ListView.Resources>
                 <ResourceDictionary>
                 </ResourceDictionary>

@@ -41,7 +41,13 @@
                 </MultiBinding>
             </TextBlock.Text>
         </TextBlock>
+        <ToolBar DockPanel.Dock="Bottom">
+            <ToolBarPanel>
+                <TextBlock Text="{Binding CurrentInput, ElementName=Editor, Mode=OneWay, Converter={StaticResource Converter}}"/>
+            </ToolBarPanel>
+        </ToolBar>
         <uc:ObjectEditor 
+            x:Name="Editor"
             DockPanel.Dock="Top"
             Properties="{Binding Properties}" 
             Window="{Binding}" 

@@ -12,7 +12,7 @@ public class PizzaFilter
     public List<decimal>? Decs { get; set; }
     public DateTime? DateTime { get; set; }
     public DateOnly? DateOnly { get; set; }
-    public TimeOnly? TimeOnly { get; set; }
+    public TimeSpan? TimeOnly { get; set; }
     public AccessKind? AccessKind { get; set; }
     public bool? CanSing { get; set; }
     public List<bool>? Bools { get; set; }
