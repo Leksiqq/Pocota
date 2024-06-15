@@ -96,13 +96,18 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                     Property.Value = ((IServiceProvider)FindResource(ServiceProviderResourceKey))
                         .GetRequiredKeyedService<PocotaContext>(ServiceKey).CreateInstance(Property.Type);
                 }
-                if (!_editWindow.TryGetTarget(out ObjectWindow? window) || !window.Activate())
+                if (!_editWindow.TryGetTarget(out ObjectWindow? window) || !window.IsLoaded)
                 {
                     window = new ObjectWindow(_serviceKey, Window);
                     _editWindow.SetTarget(window);
+                    window.Property = Property;
                     window.Show();
                 }
-                window.Property = Property;
+                else
+                {
+                    //window.Property = Property;
+                    window.Activate();
+                }
             }
         }
     }

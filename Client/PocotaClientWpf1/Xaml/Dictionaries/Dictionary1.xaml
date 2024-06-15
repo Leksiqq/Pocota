@@ -74,7 +74,8 @@
     <l:StyleCombiner TargetType="Button" x:Key="UndoButtonStyle">
         <StaticResource ResourceKey="ActionButtonStyle"/>
         <Style TargetType="Button">
-            <Setter Property="Content" Value="⎌"/>
+            <Setter Property="Content" Value="↶"/>
+            <Setter Property="FontWeight" Value="ExtraBold"/>
             <Setter Property="ToolTip" Value="{Binding Undo, Source={StaticResource Localizer}}"/>
         </Style>
     </l:StyleCombiner>

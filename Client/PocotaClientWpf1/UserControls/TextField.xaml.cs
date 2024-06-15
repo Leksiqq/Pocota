@@ -88,14 +88,13 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     {
         if ("Text".Equals(parameter))
         {
-            if (value is string s)
+            if (value is string valueAsString)
             {
-                Console.WriteLine($"value: \"{s}\"");
                 object? res;
                 Type type = Property.Type;
                 if (Property.IsNullable)
                 {
-                    if(string.IsNullOrWhiteSpace(s))
+                    if(string.IsNullOrWhiteSpace(valueAsString))
                     {
                         _badFormat = null;
                         PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
@@ -106,7 +105,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
                         type = type.GetGenericArguments()[0];
                     }
                 }
-                else if (string.IsNullOrWhiteSpace(s))
+                else if (string.IsNullOrWhiteSpace(valueAsString))
                 {
                     _badFormat = null;
                     PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
@@ -114,18 +113,18 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
                 }
                 try
                 {
-                    if(TryParse(s, type, out res))
+                    if(TryParse(valueAsString, type, out res))
                     {
                         _badFormat = null;
                         PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
                         return res;
                     }
-                    return BadFormat(s);
+                    return BadFormat(valueAsString);
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex);
-                    return BadFormat(s);
+                    return BadFormat(valueAsString);
                 }
             }
         }
@@ -174,6 +173,9 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             if (e.NewValue is Property newProperty)
             {
                 TextBox.DataContext = this;
+                UndoButton.Visibility = Property is EntityProperty ep 
+                    && (ep.Entity.State is EntityState.Unchanged || ep.Entity.State is EntityState.Modified)
+                    ? Visibility.Visible : Visibility.Collapsed;
             }
         }
         base.OnPropertyChanged(e);
@@ -204,7 +206,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         }
         return true;
     }
-    private static object? ToString(object value, Type type)
+    private static string? ToString(object value, Type type)
     {
         if (value is { })
         {
@@ -212,11 +214,11 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         }
         return string.Empty;
     }
-    private static bool TryParse(string s, Type type, out object? res)
+    private static bool TryParse(string valueAsString, Type type, out object? res)
     {
         if (type == typeof(DateOnly))
         {
-            if (DateOnly.TryParse(s, out DateOnly don))
+            if (DateOnly.TryParse(valueAsString, out DateOnly don))
             {
                 res = don;
                 return true;
@@ -226,7 +228,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         }
         if (type == typeof(TimeOnly))
         {
-            if (TimeOnly.TryParse(s, CultureInfo.CurrentCulture.DateTimeFormat, out TimeOnly ton))
+            if (TimeOnly.TryParse(valueAsString, CultureInfo.CurrentCulture.DateTimeFormat, out TimeOnly ton))
             {
                 res = ton;
                 return true;
@@ -236,7 +238,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         }
         if (type == typeof(TimeSpan))
         {
-            if (TimeSpan.TryParse(s, out TimeSpan ts))
+            if (TimeSpan.TryParse(valueAsString, out TimeSpan ts))
             {
                 res = ts;
                 return true;
@@ -244,8 +246,8 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             res = null;
             return false;
         }
-        res = System.Convert.ChangeType(s, type);
-        if (IsNumeric(res) && res.ToString() != s)
+        res = System.Convert.ChangeType(valueAsString, type);
+        if (IsNumeric(res) && res.ToString() != valueAsString)
         {
             return false;
         }

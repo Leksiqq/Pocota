@@ -82,11 +82,14 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     }
     private void CalcColumnsWidth()
     {
-        PropertyValueColumn.Width = PropertiesView.ActualWidth - PropertyNameColumn.ActualWidth - 10;
-        ScrollViewer scrollViewer = GetVisualDescendants(Window).OfType<ScrollViewer>().First();
-        if(scrollViewer.ComputedHorizontalScrollBarVisibility is Visibility.Visible)
+        if (Window.IsActive) 
         {
-            Window.Width = Window.ActualWidth + 1;
+            PropertyValueColumn.Width = PropertiesView.ActualWidth - PropertyNameColumn.ActualWidth - 10;
+            ScrollViewer scrollViewer = GetVisualDescendants(Window).OfType<ScrollViewer>().First();
+            if (scrollViewer.ComputedHorizontalScrollBarVisibility is Visibility.Visible)
+            {
+                Window.Width = Window.ActualWidth + 1;
+            }
         }
     }
     private void PropertiesView_SizeChanged(object sender, SizeChangedEventArgs e)
