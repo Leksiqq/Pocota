@@ -46,7 +46,6 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             }
         }
     }
-    
     public bool IsReadonly => Property?.IsReadonly ?? true;
     public bool IsInsertMode { get; private set; } = true;
     private ObjectEditor? Editor
@@ -134,7 +133,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     {
         bool res = Property is { } 
         && (
-            ("Undo".Equals(parameter) && _badFormat is { }) 
+            "Undo".Equals(parameter)
             || ("Clear".Equals(parameter) && !IsClean())
         );
         return res;
@@ -144,15 +143,14 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         if(
             Property is { }
             && (
-                ("Undo".Equals(parameter) && _badFormat is { })
+                "Undo".Equals(parameter)
                 || ("Clear".Equals(parameter) && !IsClean())
             )
         )
         {
             if("Undo".Equals(parameter))
             {
-                _badFormat = null;
-                PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+                //TODO Execute
             }
             else if ("Clear".Equals(parameter))
             {

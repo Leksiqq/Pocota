@@ -44,9 +44,9 @@
         <StatusBar DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
             <StatusBarItem HorizontalAlignment="Right">
                 <StatusBarItem>
-                    <StackPanel Orientation="Horizontal" Width="70">
+                    <StackPanel Orientation="Horizontal">
                         <Separator Style="{StaticResource {x:Static StatusBar.SeparatorStyleKey}}" />
-                        <TextBlock x:Name="InsertInputMode" Margin="5,0"/>
+                        <TextBlock x:Name="InsertInputMode" Margin="5,0,5,0"/>
                     </StackPanel>
                 </StatusBarItem>
             </StatusBarItem>

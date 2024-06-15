@@ -18,10 +18,27 @@
             <l:ConverterProxy Converter="{Binding  ElementName=ef}" x:Key="Converter"/>
         </ResourceDictionary>
     </UserControl.Resources>
-    <ComboBox 
-        x:Name="ComboBox"
-        IsReadOnly="{Binding IsReadonly}"
-        ItemsSource="{Binding Converter={StaticResource Converter}, ConverterParameter=Enum, Mode=OneTime}"
-        SelectedItem="{Binding Value, Mode=TwoWay, Converter={StaticResource Converter}, UpdateSourceTrigger=PropertyChanged}"
-        />
+    <DockPanel LastChildFill="True">
+        <Button 
+            DockPanel.Dock="Right" 
+            Margin="0" 
+            Style="{StaticResource ClearButtonStyle}"
+            Command="{Binding ElementName=ef}"
+            CommandParameter="Clear"
+            />
+        <Button 
+            x:Name="UndoButton"
+            DockPanel.Dock="Right" 
+            Margin="0" 
+            Style="{StaticResource UndoButtonStyle}"
+            Command="{Binding ElementName=ef}"
+            CommandParameter="Undo"
+            />
+        <ComboBox 
+            x:Name="ComboBox"
+            IsReadOnly="{Binding IsReadonly}"
+            ItemsSource="{Binding Converter={StaticResource Converter}, ConverterParameter=Enum, Mode=OneTime}"
+            SelectedItem="{Binding Value, Mode=TwoWay, Converter={StaticResource Converter}, UpdateSourceTrigger=PropertyChanged}"
+            />
+    </DockPanel>
 </UserControl>

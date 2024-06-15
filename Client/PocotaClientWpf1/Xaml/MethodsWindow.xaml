@@ -27,6 +27,13 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Style="{l:ParameterizedResource WindowsMenuItemStyle,  Replaces=$window:Window|$converter:Converter}"/>
         </Menu>
+        <StatusBar DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
+            <StatusBarItem>
+                <StatusBarItem>
+                    <TextBlock Margin="5,0,5,0"/>
+                </StatusBarItem>
+            </StatusBarItem>
+        </StatusBar>
         <DataGrid 
             ItemsSource="{Binding ConnectorsDataGridManager.ViewSource.View}" 
             IsReadOnly="True" 
