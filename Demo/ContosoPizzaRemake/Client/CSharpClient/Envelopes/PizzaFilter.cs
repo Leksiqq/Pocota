@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaFilter                         //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-14T23:31:32.                                 //
+// at 2024-06-15T08:59:48.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -26,4 +26,6 @@ public class PizzaFilter
     public AccessKind? AccessKind { get; set; }
     public Boolean? CanSing { get; set; }
     public List<Boolean>? Bools { get; set; }
+    public Int32 NotNullInt { get; set; }
+    public Double DoubleValue { get; set; }
 }

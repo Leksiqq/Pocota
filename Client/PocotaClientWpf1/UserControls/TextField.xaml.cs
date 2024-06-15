@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
+using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -28,6 +29,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     private object? _value;
     private string? _badFormat = null;
     private ObjectEditor? _objectEditor = null;
+    private int _expectedCaretIndex = -1;
     public Property Property
     {
         get => (Property)GetValue(PropertyProperty);
@@ -67,7 +69,6 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     }
     public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        Console.WriteLine($"{value}, {parameter}");
         if ("Foreground".Equals(parameter))
         {
             return _badFormat is { } ? Brushes.Red : Brushes.Black;
@@ -79,31 +80,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             {
                 return _badFormat;
             }
-            if (value is string s)
-            {
-                return s;
-            }
-            if (value is Decimal d)
-            {
-                return d.ToString(CultureInfo.CurrentCulture.NumberFormat);
-            }
-            if (value is DateTime dt)
-            {
-                return dt.ToString(CultureInfo.CurrentCulture.DateTimeFormat);
-            }
-            if (value is DateOnly don)
-            {
-                return don.ToString(CultureInfo.CurrentCulture.DateTimeFormat);
-            }
-            if (value is TimeOnly ton)
-            {
-                return ton.ToString(CultureInfo.CurrentCulture.DateTimeFormat);
-            }
-            if(value is { })
-            {
-                return value.ToString();
-            }
-            return string.Empty;
+            return ToString(value, Property.Type);
         }
         return value;
     }
@@ -128,6 +105,12 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
                     {
                         type = type.GetGenericArguments()[0];
                     }
+                }
+                else if (string.IsNullOrWhiteSpace(s))
+                {
+                    _badFormat = null;
+                    PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+                    return Activator.CreateInstance(type);
                 }
                 try
                 {
@@ -221,7 +204,15 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         }
         return true;
     }
-    private bool TryParse(string s, Type type, out object? res)
+    private static object? ToString(object value, Type type)
+    {
+        if (value is { })
+        {
+            return value.ToString();
+        }
+        return string.Empty;
+    }
+    private static bool TryParse(string s, Type type, out object? res)
     {
         if (type == typeof(DateOnly))
         {
@@ -254,6 +245,10 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             return false;
         }
         res = System.Convert.ChangeType(s, type);
+        if (IsNumeric(res) && res.ToString() != s)
+        {
+            return false;
+        }
         return true;
     }
     private object? BadFormat(string s)
@@ -266,12 +261,15 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
 
     private void TextBox_KeyUp(object sender, KeyEventArgs e)
     {
-        if(e.Key is Key.Insert)
+        if(sender is TextBox tb)
         {
-            IsInsertMode = !IsInsertMode;
-            if(Editor is { })
+            if (e.Key is Key.Insert)
             {
-                Editor.CurrentInput = this;
+                IsInsertMode = !IsInsertMode;
+                if (Editor is { })
+                {
+                    Editor.CurrentInput = this;
+                }
             }
         }
     }
@@ -295,6 +293,42 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         for (var cur = obj; cur is not null; cur = VisualTreeHelper.GetParent(cur))
         {
             yield return cur;
+        }
+    }
+    private static bool IsNumeric(object value)
+    {
+        return (value is Byte ||
+                value is Int16 ||
+                value is Int32 ||
+                value is Int64 ||
+                value is SByte ||
+                value is UInt16 ||
+                value is UInt32 ||
+                value is UInt64 ||
+                value is BigInteger ||
+                value is Decimal ||
+                value is Double ||
+                value is Single);
+    }
+    private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if(sender is TextBox tb)
+        {
+            if(_expectedCaretIndex != -1 && _expectedCaretIndex != tb.CaretIndex)
+            {
+                tb.CaretIndex = _expectedCaretIndex;
+            }
+            _expectedCaretIndex = -1;
+        }
+    }
+    private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+        if (sender is TextBox tb)
+        {
+            if (!string.IsNullOrEmpty(e.TextComposition.Text))
+            {
+                _expectedCaretIndex = tb.CaretIndex + e.TextComposition.Text.Length;
+            }
         }
     }
 }

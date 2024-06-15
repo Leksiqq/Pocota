@@ -16,4 +16,6 @@ public class PizzaFilter
     public AccessKind? AccessKind { get; set; }
     public bool? CanSing { get; set; }
     public List<bool>? Bools { get; set; }
+    public int NotNullInt { get; set; }
+    public double DoubleValue { get; set; }
 }

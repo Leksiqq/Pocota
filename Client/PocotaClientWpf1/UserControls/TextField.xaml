@@ -43,6 +43,8 @@
             KeyUp="TextBox_KeyUp"
             GotFocus="TextBox_GotFocus"
             LostFocus="TextBox_LostFocus"
+            TextChanged="TextBox_TextChanged"
+            PreviewTextInput="TextBox_PreviewTextInput"
             >
         </TextBox>
     </DockPanel>
