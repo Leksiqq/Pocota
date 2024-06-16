@@ -21,8 +21,13 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         }
     }
     public event PropertyChangedEventHandler? PropertyChanged;
+    private const int s_defaultChangeHeight = 5;
     public static readonly DependencyProperty PropertyProperty = DependencyProperty.Register(
        nameof(Property), typeof(Property),
+       typeof(TextField)
+    );
+    public static readonly DependencyProperty ChangeHeightProperty = DependencyProperty.Register(
+       nameof(ChangeHeight), typeof(int),
        typeof(TextField)
     );
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
@@ -30,10 +35,16 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     private string? _badFormat = null;
     private ObjectEditor? _objectEditor = null;
     private int _expectedCaretIndex = -1;
+    private double _initialHeight = 0;
     public Property Property
     {
         get => (Property)GetValue(PropertyProperty);
         set => SetValue(PropertyProperty, value);
+    }
+    public int ChangeHeight
+    {
+        get => (int)GetValue(ChangeHeightProperty);
+        set => SetValue(ChangeHeightProperty, value);
     }
     public object? Value
     {
@@ -64,6 +75,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     }
     public TextField()
     {
+        ChangeHeight = s_defaultChangeHeight;
         InitializeComponent();
     }
     public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -134,7 +146,14 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         bool res = Property is { } 
         && (
             "Undo".Equals(parameter)
-            || "MultilineText".Equals(parameter)
+            || "Increase".Equals(parameter)
+            || (
+                "Decrease".Equals(parameter)
+                && (
+                    _initialHeight >= TextBox.FontSize
+                    || (TextBox.ActualHeight - _initialHeight >= TextBox.FontSize * ChangeHeight)
+                )
+            )
             || ("Clear".Equals(parameter) && !IsClean())
         );
         return res;
@@ -145,7 +164,14 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             Property is { }
             && (
                 "Undo".Equals(parameter)
-                || "MultilineText".Equals(parameter)
+                || "Increase".Equals(parameter)
+                || (
+                    "Decrease".Equals(parameter) 
+                    && (
+                        _initialHeight >= TextBox.FontSize
+                        || (TextBox.ActualHeight - _initialHeight >= TextBox.FontSize * ChangeHeight)
+                    )
+                )
                 || ("Clear".Equals(parameter) && !IsClean())
             )
         )
@@ -160,9 +186,27 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
                 Clear();
                 PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
             }
-            else if("MultilineText".Equals(parameter))
+            else if ("Increase".Equals(parameter) || "Decrease".Equals(parameter))
             {
-                TextBox.Height = 100;
+                if ("Increase".Equals(parameter))
+                {
+                    if(_initialHeight <= 0.1) 
+                    {
+                        _initialHeight = TextBox.ActualHeight;
+                    }
+                    TextBox.Height = TextBox.ActualHeight + TextBox.FontSize * ChangeHeight;
+                }
+                else if ("Decrease".Equals(parameter))
+                {
+                    if(TextBox.ActualHeight - _initialHeight >= TextBox.FontSize * ChangeHeight)
+                    {
+                        TextBox.Height = TextBox.ActualHeight - TextBox.FontSize * ChangeHeight;
+                    }
+                    else
+                    {
+                        TextBox.Height = _initialHeight;
+                    }
+                }
             }
         }
     }
@@ -180,7 +224,8 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
                 UndoButton.Visibility = Property is EntityProperty ep 
                     && (ep.Entity.State is EntityState.Unchanged || ep.Entity.State is EntityState.Modified)
                     ? Visibility.Visible : Visibility.Collapsed;
-                MultilineTextButton.Visibility = Property.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
+                IncreaseTextButton.Visibility = Property.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
+                DecreaseTextButton.Visibility = Property.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
             }
         }
         base.OnPropertyChanged(e);

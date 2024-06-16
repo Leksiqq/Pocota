@@ -80,16 +80,12 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     {
         throw new NotImplementedException();
     }
-    private void CalcColumnsWidth()
+    public void CalcColumnsWidth()
     {
         if (Window.IsActive) 
         {
             ScrollViewer scrollViewer = GetVisualDescendants(Window).OfType<ScrollViewer>().First();
             PropertyValueColumn.Width = scrollViewer.ActualWidth - PropertyNameColumn.ActualWidth - 15;
-            //if (scrollViewer.ComputedHorizontalScrollBarVisibility is Visibility.Visible)
-            //{
-            //    Window.Width = Window.ActualWidth + 1;
-            //}
             scrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
         }
     }

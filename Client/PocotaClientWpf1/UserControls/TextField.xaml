@@ -21,11 +21,18 @@
     <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
             <Button 
-                x:Name="MultilineTextButton"
+                x:Name="IncreaseTextButton"
                 Margin="0" 
-                Style="{StaticResource MultilineTextButtonStyle}"
+                Style="{StaticResource IncreaseButtonStyle}"
                 Command="{Binding ElementName=tf}"
-                CommandParameter="MultilineText"
+                CommandParameter="Increase"
+                />
+            <Button 
+                x:Name="DecreaseTextButton"
+                Margin="0" 
+                Style="{StaticResource DecreaseButtonStyle}"
+                Command="{Binding ElementName=tf}"
+                CommandParameter="Decrease"
                 />
             <Button 
                 x:Name="UndoButton"

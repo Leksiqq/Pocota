@@ -79,11 +79,18 @@
             <Setter Property="ToolTip" Value="{Binding Undo, Source={StaticResource Localizer}}"/>
         </Style>
     </l:StyleCombiner>
-    <l:StyleCombiner TargetType="Button" x:Key="MultilineTextButtonStyle">
+    <l:StyleCombiner TargetType="Button" x:Key="IncreaseButtonStyle">
         <StaticResource ResourceKey="ActionButtonStyle"/>
         <Style TargetType="Button">
-            <Setter Property="Content" Value="𝌕"/>
-            <Setter Property="ToolTip" Value="{Binding MultilineText, Source={StaticResource Localizer}}"/>
+            <Setter Property="Content" Value="++"/>
+            <Setter Property="ToolTip" Value="{Binding Increase, Source={StaticResource Localizer}}"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="DecreaseButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="--"/>
+            <Setter Property="ToolTip" Value="{Binding Decrease, Source={StaticResource Localizer}}"/>
         </Style>
     </l:StyleCombiner>
     <l:StyleCombiner TargetType="Button" x:Key="InsertBeforeButtonStyle">

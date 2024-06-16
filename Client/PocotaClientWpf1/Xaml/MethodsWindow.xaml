@@ -9,8 +9,6 @@
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
     mc:Ignorable="d"
     Title="{Binding MethodsWindowTitle, Source={StaticResource Localizer}}" 
-    Height="450" 
-    Width="800"
     DataContext="{Binding RelativeSource={RelativeSource Self}}" 
     >
     <Window.Resources>

@@ -21,6 +21,7 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated, IE
     {
         _connectorMethod = connectorMethod;
         Core = new WindowCore(this);
+        InitializeComponent();
         foreach (ParameterInfo parameter in _connectorMethod.Method.GetParameters())
         {
             if (parameter.ParameterType != typeof(CancellationToken) && parameter.Name != s_target)
@@ -28,7 +29,11 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated, IE
                 Parameters.Add(Property.Create(parameter)!);
             }
         }
-        InitializeComponent();
+    }
+    protected override void OnActivated(EventArgs e)
+    {
+        ObjectEditor.CalcColumnsWidth();
+        base.OnActivated(e);
     }
     private void Button_Click(object sender, RoutedEventArgs e)
     {

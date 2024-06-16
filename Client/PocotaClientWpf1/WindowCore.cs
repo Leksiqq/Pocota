@@ -29,6 +29,7 @@ public class WindowCore : IValueConverter
     internal WindowCore(Window owner)
     {
         _owner = owner;
+        _owner.SizeToContent = SizeToContent.WidthAndHeight;
         _owner.Closed += _owner_Closed;
         _owner.Activated += _owner_Activated;
         _localizer = Services.GetRequiredService<Localizer>();
