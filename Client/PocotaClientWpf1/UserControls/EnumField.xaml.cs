@@ -1,11 +1,12 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 namespace Net.Leksi.Pocota.Client.UserControls;
-public partial class EnumField : UserControl, IValueConverter, ICommand, INotifyPropertyChanged
+public partial class EnumField : UserControl, ICommand, INotifyPropertyChanged, IValueConverter
 {
     public static readonly DependencyProperty PropertyProperty = DependencyProperty.Register(
        nameof(Property), typeof(Property),
@@ -24,6 +25,7 @@ public partial class EnumField : UserControl, IValueConverter, ICommand, INotify
     }
     public event PropertyChangedEventHandler? PropertyChanged;
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
+    public List<object?> Items { get; private init; } = [];
     public Property Property
     {
         get => (Property)GetValue(PropertyProperty);
@@ -46,37 +48,6 @@ public partial class EnumField : UserControl, IValueConverter, ICommand, INotify
     public EnumField()
     {
         InitializeComponent();
-    }
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if ("Enum".Equals(parameter))
-        {
-            List<string> result = [];
-            if(Property is { })
-            {
-                Type enumType = Property.Type;
-                if (enumType.IsGenericType && enumType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                {
-                    enumType = enumType.GetGenericArguments()[0];
-                    result.Add(string.Empty);
-                }
-                if (enumType.IsEnum)
-                {
-                    result.AddRange(Enum.GetNames(enumType));
-                }
-                else
-                {
-                    result.Add(true.ToString());
-                    result.Add(false.ToString());
-                }
-            }
-            return result;
-        }
-        return value;
-    }
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return value;
     }
     public bool CanExecute(object? parameter)
     {
@@ -108,6 +79,15 @@ public partial class EnumField : UserControl, IValueConverter, ICommand, INotify
             }
         }
     }
+    public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        Console.WriteLine($"Convert: {value}");
+        return value;
+    }
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        return value;
+    }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
         if (e.Property == PropertyProperty)
@@ -115,6 +95,8 @@ public partial class EnumField : UserControl, IValueConverter, ICommand, INotify
             if (e.OldValue is Property oldProperty)
             {
                 ComboBox.DataContext = null;
+                oldProperty.PropertyChanged -= Property_PropertyChanged;
+                Items.Clear();
             }
             if (e.NewValue is Property newProperty)
             {
@@ -122,10 +104,35 @@ public partial class EnumField : UserControl, IValueConverter, ICommand, INotify
                 UndoButton.Visibility = Property is EntityProperty ep
                     && (ep.Entity.State is EntityState.Unchanged || ep.Entity.State is EntityState.Modified)
                     ? Visibility.Visible : Visibility.Collapsed;
+                newProperty.PropertyChanged += Property_PropertyChanged;
+                Type enumType = Property.Type;
+                if (enumType.IsGenericType && enumType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                {
+                    enumType = enumType.GetGenericArguments()[0];
+                    Items.Add(null);
+                }
+                if (enumType.IsEnum)
+                {
+                    foreach(object item in Enum.GetValues(enumType))
+                    {
+                        Items.Add(item);
+                    }
+                }
+                else
+                {
+                    Items.Add(true);
+                    Items.Add(false);
+                }
             }
         }
         base.OnPropertyChanged(e);
     }
+
+    private void Property_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+    }
+
     private void Clear()
     {
         if (Property is { })
@@ -152,4 +159,5 @@ public partial class EnumField : UserControl, IValueConverter, ICommand, INotify
         }
         return true;
     }
+
 }

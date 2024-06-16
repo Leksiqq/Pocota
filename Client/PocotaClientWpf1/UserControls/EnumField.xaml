@@ -37,8 +37,14 @@
         <ComboBox 
             x:Name="ComboBox"
             IsReadOnly="{Binding IsReadonly}"
-            ItemsSource="{Binding Converter={StaticResource Converter}, ConverterParameter=Enum, Mode=OneTime}"
-            SelectedItem="{Binding Value, Mode=TwoWay, Converter={StaticResource Converter}, UpdateSourceTrigger=PropertyChanged}"
-            />
+            ItemsSource="{Binding Items, ElementName=ef}"
+            SelectedItem="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            >
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
     </DockPanel>
 </UserControl>
