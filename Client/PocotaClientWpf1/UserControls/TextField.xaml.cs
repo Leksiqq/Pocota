@@ -134,6 +134,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         bool res = Property is { } 
         && (
             "Undo".Equals(parameter)
+            || "MultilineText".Equals(parameter)
             || ("Clear".Equals(parameter) && !IsClean())
         );
         return res;
@@ -144,6 +145,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             Property is { }
             && (
                 "Undo".Equals(parameter)
+                || "MultilineText".Equals(parameter)
                 || ("Clear".Equals(parameter) && !IsClean())
             )
         )
@@ -157,6 +159,10 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
                 _badFormat = null;
                 Clear();
                 PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+            }
+            else if("MultilineText".Equals(parameter))
+            {
+                TextBox.Height = 100;
             }
         }
     }
@@ -174,6 +180,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
                 UndoButton.Visibility = Property is EntityProperty ep 
                     && (ep.Entity.State is EntityState.Unchanged || ep.Entity.State is EntityState.Modified)
                     ? Visibility.Visible : Visibility.Collapsed;
+                MultilineTextButton.Visibility = Property.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
             }
         }
         base.OnPropertyChanged(e);

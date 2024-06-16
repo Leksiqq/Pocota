@@ -31,6 +31,7 @@ public class Localizer: LocalizationBase
     public string MethodsWindowTitle => GetString();
     public string Module => GetString();
     public string Move => GetString();
+    public string MultilineText => GetString();
     public string Overwrite => GetString();
     public string Owned => GetString();
     public string Owner => GetString();
