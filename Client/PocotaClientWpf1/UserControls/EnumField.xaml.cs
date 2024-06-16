@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.Globalization;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 namespace Net.Leksi.Pocota.Client.UserControls;
-public partial class EnumField : UserControl, ICommand, INotifyPropertyChanged, IValueConverter
+public partial class EnumField : UserControl, ICommand, INotifyPropertyChanged
 {
     public static readonly DependencyProperty PropertyProperty = DependencyProperty.Register(
        nameof(Property), typeof(Property),
@@ -78,15 +75,6 @@ public partial class EnumField : UserControl, ICommand, INotifyPropertyChanged, 
                 PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
             }
         }
-    }
-    public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        Console.WriteLine($"Convert: {value}");
-        return value;
-    }
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return value;
     }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
