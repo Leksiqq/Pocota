@@ -86,6 +86,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         }
         if ("Text".Equals(parameter))
         {
+            Console.WriteLine($"text: {value}, {Property.GetHashCode()}");
             _value = value;
             if(_badFormat is { })
             {
@@ -147,13 +148,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         && (
             "Undo".Equals(parameter)
             || "Increase".Equals(parameter)
-            || (
-                "Decrease".Equals(parameter)
-                && (
-                    _initialHeight >= TextBox.FontSize
-                    || (TextBox.ActualHeight - _initialHeight >= TextBox.FontSize * ChangeHeight)
-                )
-            )
+            || "Decrease".Equals(parameter)
             || ("Clear".Equals(parameter) && !IsClean())
         );
         return res;
@@ -165,13 +160,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             && (
                 "Undo".Equals(parameter)
                 || "Increase".Equals(parameter)
-                || (
-                    "Decrease".Equals(parameter) 
-                    && (
-                        _initialHeight >= TextBox.FontSize
-                        || (TextBox.ActualHeight - _initialHeight >= TextBox.FontSize * ChangeHeight)
-                    )
-                )
+                || "Decrease".Equals(parameter)
                 || ("Clear".Equals(parameter) && !IsClean())
             )
         )
@@ -195,24 +184,27 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
                         _initialHeight = TextBox.ActualHeight;
                     }
                     TextBox.Height = TextBox.ActualHeight + TextBox.FontSize * ChangeHeight;
-                    if(TextBox.Height >= Buttons.ActualWidth)
+                    if(TextBox.Height >= Buttons.ActualWidth && Buttons.Orientation is not Orientation.Vertical)
                     {
                         Buttons.Orientation = Orientation.Vertical;
                     }
                 }
                 else if ("Decrease".Equals(parameter))
                 {
-                    if (TextBox.ActualHeight - _initialHeight >= TextBox.FontSize * ChangeHeight)
+                    if(_initialHeight > 0.1)
                     {
-                        TextBox.Height = TextBox.ActualHeight - TextBox.FontSize * ChangeHeight;
-                    }
-                    else
-                    {
-                        TextBox.Height = _initialHeight;
-                    }
-                    if (TextBox.Height < Buttons.ActualHeight)
-                    {
-                        Buttons.Orientation = Orientation.Horizontal;
+                        if (TextBox.ActualHeight - _initialHeight >= TextBox.FontSize * ChangeHeight)
+                        {
+                            TextBox.Height = TextBox.ActualHeight - TextBox.FontSize * ChangeHeight;
+                        }
+                        else
+                        {
+                            TextBox.Height = _initialHeight;
+                        }
+                        if (TextBox.Height < Buttons.ActualHeight && Buttons.Orientation is not Orientation.Horizontal)
+                        {
+                            Buttons.Orientation = Orientation.Horizontal;
+                        }
                     }
                 }
             }
@@ -229,13 +221,14 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             if (e.NewValue is Property newProperty)
             {
                 TextBox.DataContext = this;
-                UndoButton.Visibility = Property is EntityProperty ep 
+                UndoButton.Visibility = newProperty is EntityProperty ep 
                     && (ep.Entity.State is EntityState.Unchanged || ep.Entity.State is EntityState.Modified)
                     ? Visibility.Visible : Visibility.Collapsed;
-                IncreaseTextButton.Visibility = Property.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
-                DecreaseTextButton.Visibility = Property.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
-                TextBox.AcceptsReturn = Property.Type == typeof(string);
-                TextBox.VerticalScrollBarVisibility = Property.Type == typeof(string) ? ScrollBarVisibility.Auto : ScrollBarVisibility.Hidden;
+                IncreaseTextButton.Visibility = newProperty.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
+                DecreaseTextButton.Visibility = newProperty.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
+                TextBox.AcceptsReturn = newProperty.Type == typeof(string);
+                TextBox.VerticalScrollBarVisibility = newProperty.Type == typeof(string) ? ScrollBarVisibility.Auto : ScrollBarVisibility.Hidden;
+                Console.WriteLine(newProperty.GetHashCode());
             }
         }
         base.OnPropertyChanged(e);
