@@ -49,6 +49,7 @@ public class Property : INotifyPropertyChanged
     }
     public virtual bool IsReadonly => IsSetReadOnly;
     public virtual bool IsNullable => false;
+    public virtual object? Declarator => null;
     public virtual PropertyState State { get => PropertyState.Unchanged; internal set => throw new InvalidOperationException(); }
     public virtual AccessKind Access { get => AccessKind.Full; internal set => throw new InvalidOperationException(); }
 

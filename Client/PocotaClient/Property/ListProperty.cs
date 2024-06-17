@@ -23,6 +23,7 @@ public class ListProperty : Property
     }
     public override bool IsReadonly => _source.IsReadonly;
     public override bool IsNullable => _source.IsNullable;
+    public override object? Declarator => _source.Declarator;
     public int Count
     {
         get

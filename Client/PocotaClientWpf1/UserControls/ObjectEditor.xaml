@@ -48,13 +48,11 @@
                     </GridView.ColumnHeaderContainerStyle>
                     <GridViewColumn 
                     x:Name="PropertyNameColumn"
-                    Header="{Binding Property, Source={StaticResource Localizer}}"
                     CellTemplate="{StaticResource NameTemplate}"
                     Width="Auto"
                     />
                     <GridViewColumn
                     x:Name="PropertyValueColumn"
-                    Header="{Binding Value, Source={StaticResource Localizer}}"
                     Width="Auto"
                     >
                     </GridViewColumn>

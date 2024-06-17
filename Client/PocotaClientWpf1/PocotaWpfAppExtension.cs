@@ -44,6 +44,7 @@ public static class PocotaWpfAppExtension
                 Application app = createApplication.Invoke(s);
                 app.Resources[ServiceProviderResourceKey] = s;
                 app.Resources[LocalizerResourceKey] = s.GetRequiredService<Localizer>();
+                app.Resources[NamesConverterResourceKey] = s.GetRequiredService<INamesConverter>();
                 return app;
             }
         );
@@ -62,6 +63,7 @@ public static class PocotaWpfAppExtension
             methods.Services = s;
             return methods;
         });
+        services.AddSingleton<INamesConverter, StubNamesConverter>();
         return services;
     }
     public static IServiceCollection AddPocotaWpfApp<TApplication>(
@@ -79,6 +81,14 @@ public static class PocotaWpfAppExtension
         where TWindow: Window, new()
     {
         return AddPocotaWpfApp(services, s => new TApplication(), typeof(TWindow));
+    }
+    public static IServiceCollection RemoveService(this IServiceCollection services, Type serviceType)
+    {
+        if (services.Where(sd => sd.ServiceType == serviceType).FirstOrDefault() is ServiceDescriptor sd)
+        {
+            services.Remove(sd);
+        }
+        return services;
     }
     public static void RunPocotaWpfApp(this IHost host, Action<Application>? config = null)
     {

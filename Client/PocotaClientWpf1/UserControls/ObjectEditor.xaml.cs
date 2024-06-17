@@ -84,7 +84,7 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     {
         if (Window.IsActive) 
         {
-            ScrollViewer scrollViewer = GetVisualDescendants(Window).OfType<ScrollViewer>().First();
+            ScrollViewer scrollViewer = GetVisualDescendants(PropertiesView).OfType<ScrollViewer>().First();
             PropertyValueColumn.Width = scrollViewer.ActualWidth - PropertyNameColumn.ActualWidth - 15;
             scrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
         }

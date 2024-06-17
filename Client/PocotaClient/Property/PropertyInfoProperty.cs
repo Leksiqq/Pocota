@@ -31,6 +31,7 @@ public class PropertyInfoProperty: Property
         }
     }
     public override bool IsNullable => _isNullable;
+    public override object? Declarator => _info.DeclaringType;
     internal PropertyInfoProperty(PropertyInfo info, object obj) : base(info.Name, info.PropertyType) 
     {
         _info = info;

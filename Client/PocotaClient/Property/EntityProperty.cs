@@ -61,4 +61,5 @@ public abstract class EntityProperty(IPocotaEntity entity, string name, Type typ
             return IsSetReadOnly;
         }
     }
+    public override object? Declarator => Entity?.GetType();
 }

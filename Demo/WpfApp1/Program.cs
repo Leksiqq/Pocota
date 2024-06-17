@@ -14,12 +14,11 @@ static class Program
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
         builder.Services.AddPizza(baseUri: new Uri("http://localhost:5000/Pizza/"));
         builder.Services.AddPocotaWpfApp<App>();
-        if(builder.Services.Where(sd => sd.ServiceType == typeof(Localizer)).FirstOrDefault() is ServiceDescriptor sd)
-        {
-            builder.Services.Remove(sd);
-        }
+        builder.Services.RemoveService(typeof(Localizer));
         builder.Services.AddSingleton<MyLocalizer>();
         builder.Services.AddSingleton<Localizer>(s => s.GetRequiredService<MyLocalizer>());
+        builder.Services.RemoveService(typeof(INamesConverter));
+        builder.Services.AddSingleton<INamesConverter, NamesConverter>();
         using IHost host = builder.Build();
         host.RunPocotaWpfApp(app =>
         {

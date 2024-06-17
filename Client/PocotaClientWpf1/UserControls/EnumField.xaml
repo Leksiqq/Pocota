@@ -39,9 +39,13 @@
             ItemsSource="{Binding Items, ElementName=ef}"
             SelectedItem="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             >
+            <ComboBox.Resources>
+                <l:BindingProxy x:Key="TypeBindingProxy" Value="{Binding Type}"/>
+                <l:BindingProxyMarkup x:Key="Type" BindingProxy="{StaticResource TypeBindingProxy}"/>
+            </ComboBox.Resources>
             <ComboBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding}"/>
+                    <TextBlock Text="{Binding Converter={StaticResource NamesConverter}, ConverterParameter={StaticResource Type}}"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>

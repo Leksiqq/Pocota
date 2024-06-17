@@ -198,7 +198,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
                 }
                 else if ("Decrease".Equals(parameter))
                 {
-                    if(TextBox.ActualHeight - _initialHeight >= TextBox.FontSize * ChangeHeight)
+                    if (TextBox.ActualHeight - _initialHeight >= TextBox.FontSize * ChangeHeight)
                     {
                         TextBox.Height = TextBox.ActualHeight - TextBox.FontSize * ChangeHeight;
                     }
