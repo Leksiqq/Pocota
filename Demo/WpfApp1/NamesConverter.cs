@@ -8,7 +8,7 @@ public class NamesConverter : INamesConverter
 {
     public object? Convert(object? value, Type targetType, object parameter, CultureInfo culture)
     {
-        Console.WriteLine($"{value}, {parameter}");
+        //Console.WriteLine($"{value}, {parameter}");
         return value?.ToString()!;
     }
 

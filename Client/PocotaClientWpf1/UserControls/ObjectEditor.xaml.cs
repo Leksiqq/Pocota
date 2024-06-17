@@ -82,10 +82,13 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     }
     public void CalcColumnsWidth()
     {
-        if (Window.IsActive) 
+        if ((Window?.IsActive ?? false) && Visibility is Visibility.Visible) 
         {
             ScrollViewer scrollViewer = GetVisualDescendants(PropertiesView).OfType<ScrollViewer>().First();
-            PropertyValueColumn.Width = scrollViewer.ActualWidth - PropertyNameColumn.ActualWidth - 15;
+            if(scrollViewer.ActualWidth - PropertyNameColumn.ActualWidth - 15 > 0)
+            {
+                PropertyValueColumn.Width = scrollViewer.ActualWidth - PropertyNameColumn.ActualWidth - 15;
+            }
             scrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
         }
     }
@@ -112,10 +115,27 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
                     oc1.CollectionChanged += Properties_CollectionChanged;
                 }
             }
+            else if(e.Property == WindowProperty)
+            {
+                if (e.OldValue is Window oldWindow)
+                {
+                    oldWindow.Activated -= Window_Activated;
+                }
+                if (e.NewValue is Window newWindow)
+                {
+                    newWindow.Activated += Window_Activated;
+                }
+            }
             SetTemplateSelector();
         }
         base.OnPropertyChanged(e);
     }
+
+    private void Window_Activated(object? sender, EventArgs e)
+    {
+        CalcColumnsWidth();
+    }
+
     private void Properties_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         CalcColumnsWidth();

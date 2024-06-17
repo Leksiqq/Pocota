@@ -19,7 +19,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
-        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top" x:Name="Buttons">
             <Button 
                 x:Name="IncreaseTextButton"
                 Margin="0" 

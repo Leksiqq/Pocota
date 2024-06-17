@@ -22,9 +22,9 @@ public class PropertyTemplateSelector: DataTemplateSelector
             {
                 result = ProvideValue(ClassDataTemplateKey);
             }
-            else if (property is ListProperty)
-            {
-            }
+            //else if (property is ListProperty)
+            //{
+            //}
             else if (property.Type.IsClass && property.Type != typeof(string))
             {
                 result = ProvideValue(ClassDataTemplateKey);

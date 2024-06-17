@@ -1,15 +1,18 @@
-﻿using Net.Leksi.Pocota.Client.UserControls;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Net.Leksi.Pocota.Client.UserControls;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Data;
+using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
 public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, INotifyPropertyChanged, IEditWindow, IValueConverter
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
+    private readonly INamesConverter _namesConverter;
     private Property? _property;
     private IInputElement? _currentInput = null;
     public WindowCore Core { get; private init; }
@@ -44,10 +47,11 @@ public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, IN
         } 
     }
     public ObservableCollection<Property> Properties { get; private init; } = [];
-    public string ObjectTitle => $"{(Core.Launcher?.Owner is IEditWindow ew ? $"{ew.ObjectTitle}/" : string.Empty)}{Property?.Name ?? string.Empty}";
+    public string ObjectTitle => $"{(Core.Launcher?.Owner is IEditWindow ew ? $"{ew.ObjectTitle}/" : string.Empty)}{ConvertName(Property?.Name, Property?.Type)}";
 
     public ObjectWindow(string serviceKey, Window owner)
     {
+        _namesConverter = (Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!.GetRequiredService<INamesConverter>();
         Core = new WindowCore(this);
         ServiceKey = serviceKey;
         Core.Launcher = (owner as IWindowWithCore)?.Core;
@@ -62,6 +66,10 @@ public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, IN
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
         throw new NotImplementedException();
+    }
+    private string? ConvertName(object? value, object? parameter = null)
+    {
+        return value is { } ? (string?)_namesConverter.Convert(value, typeof(string), parameter, CultureInfo.CurrentCulture) : string.Empty;
     }
     private void ObjectEditor_CurrentInputChanged(object sender, EventArgs e)
     {

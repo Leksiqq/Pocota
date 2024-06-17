@@ -14,11 +14,13 @@ public class Localizer: LocalizationBase
     public string CancelMove => GetString();
     public string Check => GetString();
     public string Clear => GetString();
+    public string CloseEdit => GetString();
     public string Connector => GetString();
     public string Count => GetString();
     public string Create => GetString();
     public string Descending => GetString();
     public string Edit => GetString();
+    public string EditExternal => GetString();
     public string Find => GetString();
     public string GoTo => GetString();
     public string HideNamespace => GetString();

@@ -4,11 +4,12 @@ using System.Reflection;
 
 namespace Net.Leksi.Pocota.Client;
 
-internal class ConnectorsMethodsList: IEnumerable<ConnectorMethod>
+public class ConnectorsMethodsList: IEnumerable<ConnectorMethod>
 {
     private List<ConnectorMethod>? _methods = null;
     private readonly List<Type> _types = [];
     internal IServiceProvider Services { get; set; } = null!;
+    public ConnectorMethod? this[MethodInfo methodInfo] => Methods.Where(cm => cm.Method == methodInfo).FirstOrDefault();
     public IEnumerator<ConnectorMethod> GetEnumerator()
     {
         return Methods.GetEnumerator();

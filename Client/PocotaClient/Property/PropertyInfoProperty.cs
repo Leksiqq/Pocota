@@ -13,6 +13,7 @@ public class PropertyInfoProperty: Property
         {
             if(_info.GetValue(_obj) != value)
             {
+                Console.WriteLine($"{GetHashCode()}, {value}");
                 _info.SetValue(_obj, value);
                 NotifyPropertyChanged();
             }

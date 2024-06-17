@@ -1,15 +1,19 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using static Net.Leksi.Pocota.Client.Constants;
 
 namespace Net.Leksi.Pocota.Client.UserControls;
-public partial class ObjectField : UserControl, ICommand, IValueConverter, IServiceRelated
+public partial class ObjectField : UserControl, ICommand, IValueConverter, IServiceRelated, INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler? CanExecuteChanged
     {
         add
@@ -43,6 +47,8 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
         set => SetValue(WindowProperty, value);
     }
     public string ServiceKey => _serviceKey;
+    public int Count => Property is ListProperty lp ? lp.Count : 0;
+    public bool EditorOpen => ObjectEditor?.Visibility is Visibility.Visible;
     public ObjectField()
     {
         InitializeComponent();
@@ -54,7 +60,11 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             && (
                 (
                     Property.Value is { } 
-                    && "Edit".Equals(parameter)
+                    && (
+                        "Edit".Equals(parameter)
+                        || "EditExternal".Equals(parameter)
+                        || "CloseEdit".Equals(parameter)
+                    )
                 )
                 || (
                     !Property.IsReadonly 
@@ -78,7 +88,12 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             
             if(!Property.IsReadonly && Property.Value is { } && "Clear".Equals(parameter))
             {
+                CloseEdit();
                 Property.Value = default;
+            }
+            else if (Property.Value is { } && "CloseEdit".Equals(parameter))
+            {
+                CloseEdit();
             }
             else if(
                 (
@@ -87,7 +102,10 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                 )
                 || (
                     Property.Value is { } 
-                    && "Edit".Equals(parameter)
+                    && (
+                        "Edit".Equals(parameter)
+                        || "EditExternal".Equals(parameter)
+                    )
                 )
             )
             {
@@ -96,17 +114,76 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                     Property.Value = ((IServiceProvider)FindResource(ServiceProviderResourceKey))
                         .GetRequiredKeyedService<PocotaContext>(ServiceKey).CreateInstance(Property.Type);
                 }
-                if (!_editWindow.TryGetTarget(out ObjectWindow? window) || !window.IsLoaded)
+                else if ("EditExternal".Equals(parameter))
                 {
-                    window = new ObjectWindow(_serviceKey, Window);
-                    _editWindow.SetTarget(window);
-                    window.Property = Property;
-                    window.Show();
+                    if (Property is ListProperty)
+                    {
+
+                    }
+                    else
+                    {
+                        if (!_editWindow.TryGetTarget(out ObjectWindow? window) || !window.IsLoaded)
+                        {
+                            window = new ObjectWindow(_serviceKey, Window);
+                            _editWindow.SetTarget(window);
+                            if(ObjectEditor.Visibility is Visibility.Visible)
+                            {
+                                foreach(Property property in ObjectEditor.Properties)
+                                {
+                                    window.Properties.Add(property);
+                                }
+                            }
+                            else
+                            {
+                                window.Property = Property;
+                            }
+                            window.Show();
+                        }
+                        else
+                        {
+                            window.Activate();
+                        }
+                    }
                 }
                 else
                 {
-                    //window.Property = Property;
-                    window.Activate();
+                    if (Property is ListProperty)
+                    {
+
+                    }
+                    else
+                    {
+                        if (Property.Value is IEntityOwner eo)
+                        {
+                        }
+                        else if (Property.Value is { })
+                        {
+                            for(DependencyObject dob = this; dob is not null; dob = VisualTreeHelper.GetParent(dob))
+                            {
+                                if(dob is ObjectEditor oe)
+                                {
+                                    if(_editWindow is { } && _editWindow.TryGetTarget(out ObjectWindow? window) && window.IsLoaded)
+                                    {
+                                        ObjectEditor.Properties = window.Properties;
+                                    }
+                                    else
+                                    {
+                                        ObservableCollection<Property> properties = [];
+                                        foreach (PropertyInfo pi in Property.Type.GetProperties())
+                                        {
+                                            properties.Add(Property.Create(pi, Property.Value)!);
+                                        }
+                                        ObjectEditor.Properties = properties;
+                                    }
+                                    ObjectEditor.Window = Window;
+                                    ObjectEditor.ServiceProviderCatcher = oe.ServiceProviderCatcher;
+                                    ObjectEditor.Visibility = Visibility.Visible;
+                                    PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -131,6 +208,18 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                 }
                 return ObjectState.IsNull;
             }
+            if ("CountVisibility".Equals(parameter))
+            {
+                return Property is ListProperty && Property.Value is { } ? Visibility.Visible : Visibility.Collapsed;
+            }
+            if ("EditVisibility".Equals(parameter))
+            {
+                return value is bool b && b ? Visibility.Collapsed : Visibility.Visible;
+            }
+            if ("CloseEditVisibility".Equals(parameter))
+            {
+                return value is bool b && b ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
         return value;
     }
@@ -146,11 +235,15 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             {
                 TextBlock.DataContext = null;
                 Find.Visibility = Visibility.Collapsed;
+                CountText.Visibility = Visibility.Collapsed;
+                oldProperty.PropertyChanged -= Property_PropertyChanged;
             }
             if (e.NewValue is Property newProperty)
             {
                 TextBlock.DataContext = newProperty;
                 Find.Visibility = typeof(IEntityOwner).IsAssignableFrom(Property.Type) ? Visibility.Visible : Visibility.Collapsed;
+                PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+                newProperty.PropertyChanged += Property_PropertyChanged;
             }
         }
         else if (e.Property == WindowProperty)
@@ -168,5 +261,18 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             }
         }
         base.OnPropertyChanged(e);
+    }
+    private void CloseEdit()
+    {
+        if (ObjectEditor.Visibility is Visibility.Visible)
+        {
+            ObjectEditor.Visibility = Visibility.Collapsed;
+            ObjectEditor.Properties = null!;
+            PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+        }
+    }
+    private void Property_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
     }
 }

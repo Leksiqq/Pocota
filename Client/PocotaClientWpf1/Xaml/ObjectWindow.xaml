@@ -9,6 +9,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     DataContext="{Binding RelativeSource={RelativeSource Self}}" 
+    MinWidth="450"
     >
     <Window.Title>
         <MultiBinding StringFormat="{}{0} {1}">

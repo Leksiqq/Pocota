@@ -20,28 +20,45 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
-        <Button 
+        <DockPanel LastChildFill="True" DockPanel.Dock="Top">
+            <Button 
             DockPanel.Dock="Right" 
             Margin="0" 
             Style="{StaticResource ClearButtonStyle}"
             Command="{Binding ElementName=of}"
             CommandParameter="Clear"
             />
-        <Button 
+            <Button 
+            DockPanel.Dock="Right" 
+            Margin="0" 
+            Style="{StaticResource EditExternalButtonStyle}"
+            Command="{Binding ElementName=of}"
+            CommandParameter="EditExternal"
+            />
+            <Button 
             DockPanel.Dock="Right" 
             Margin="0" 
             Style="{StaticResource EditButtonStyle}"
             Command="{Binding ElementName=of}"
             CommandParameter="Edit"
+            Visibility="{Binding EditorOpen, ElementName=of, Converter={StaticResource Converter}, ConverterParameter=EditVisibility}"
             />
-        <Button 
+            <Button 
+            DockPanel.Dock="Right" 
+            Margin="0" 
+            Style="{StaticResource CloseEditButtonStyle}"
+            Command="{Binding ElementName=of}"
+            CommandParameter="CloseEdit"
+            Visibility="{Binding EditorOpen, ElementName=of, Converter={StaticResource Converter}, ConverterParameter=CloseEditVisibility}"
+            />
+            <Button 
             DockPanel.Dock="Right" 
             Margin="0" 
             Style="{StaticResource CreateButtonStyle}"
             Command="{Binding ElementName=of}"
             CommandParameter="Create"
             />
-        <Button 
+            <Button 
             DockPanel.Dock="Right" 
             Margin="0" 
             Style="{StaticResource FindButtonStyle}"
@@ -49,34 +66,44 @@
             CommandParameter="Find"
             x:Name="Find"
             />
-        <TextBlock FontSize="12" FontWeight="Bold" x:Name="TextBlock">
-            <TextBlock.Style>
-                <Style TargetType="TextBlock">
-                    <Style.Triggers>
-                        <l:DataSwitch Binding="{Binding Value, Converter={StaticResource Converter}, ConverterParameter=ObjectState}">
-                            <DataTrigger Value="{x:Static uc:ObjectState.IsNull}">
-                                <Setter Property="Text" Value="∅"/>
-                                <Setter Property="Foreground" Value="Red"/>
-                                <Setter Property="ToolTip" Value="{Binding IsNotSet, Source={StaticResource Localizer}}"/>
-                            </DataTrigger>
-                            <DataTrigger Value="{x:Static uc:ObjectState.NotSet}">
-                                <Setter Property="Text" Value="❌"/>
-                                <Setter Property="ToolTip" Value="{Binding IsNotSet, Source={StaticResource Localizer}}"/>
-                            </DataTrigger>
-                            <DataTrigger Value="{x:Static uc:ObjectState.Forbidden}">
-                                <Setter Property="Text" Value="❌"/>
-                                <Setter Property="Foreground" Value="Red"/>
-                                <Setter Property="ToolTip" Value="{Binding IsNotSet, Source={StaticResource Localizer}}"/>
-                            </DataTrigger>
-                            <DataTrigger Value="{x:Static uc:ObjectState.IsNotNull}">
-                                <Setter Property="Text" Value="✓"/>
-                                <Setter Property="Foreground" Value="Green"/>
-                                <Setter Property="ToolTip" Value="{Binding IsSet, Source={StaticResource Localizer}}"/>
-                            </DataTrigger>
-                        </l:DataSwitch>
-                    </Style.Triggers>
-                </Style>
-            </TextBlock.Style>
-        </TextBlock>
+            <TextBlock DockPanel.Dock="Left" FontSize="12" FontWeight="Bold" x:Name="TextBlock">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <l:DataSwitch Binding="{Binding Value, Converter={StaticResource Converter}, ConverterParameter=ObjectState}">
+                                <DataTrigger Value="{x:Static uc:ObjectState.IsNull}">
+                                    <Setter Property="Text" Value="∅"/>
+                                    <Setter Property="Foreground" Value="Red"/>
+                                    <Setter Property="ToolTip" Value="{Binding IsNotSet, Source={StaticResource Localizer}}"/>
+                                </DataTrigger>
+                                <DataTrigger Value="{x:Static uc:ObjectState.NotSet}">
+                                    <Setter Property="Text" Value="❌"/>
+                                    <Setter Property="ToolTip" Value="{Binding IsNotSet, Source={StaticResource Localizer}}"/>
+                                </DataTrigger>
+                                <DataTrigger Value="{x:Static uc:ObjectState.Forbidden}">
+                                    <Setter Property="Text" Value="❌"/>
+                                    <Setter Property="Foreground" Value="Red"/>
+                                    <Setter Property="ToolTip" Value="{Binding IsNotSet, Source={StaticResource Localizer}}"/>
+                                </DataTrigger>
+                                <DataTrigger Value="{x:Static uc:ObjectState.IsNotNull}">
+                                    <Setter Property="Text" Value="✓"/>
+                                    <Setter Property="Foreground" Value="Green"/>
+                                    <Setter Property="ToolTip" Value="{Binding IsSet, Source={StaticResource Localizer}}"/>
+                                </DataTrigger>
+                            </l:DataSwitch>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBlock x:Name="CountText" Visibility="{Binding Count, Converter={StaticResource Converter}, ConverterParameter=CountVisibility}" Margin="10,0">
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="{}{0}: {1}">
+                        <Binding Path="Count" Source="{StaticResource Localizer}"/>
+                        <Binding Path="Count" Converter="{StaticResource Converter}"/>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </DockPanel>
+        <uc:ObjectEditor Visibility="Collapsed" x:Name="ObjectEditor"/>
     </DockPanel>
 </UserControl>

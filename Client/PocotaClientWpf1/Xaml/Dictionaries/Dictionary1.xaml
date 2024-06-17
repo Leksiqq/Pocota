@@ -57,6 +57,20 @@
             <Setter Property="ToolTip" Value="{Binding Edit, Source={StaticResource Localizer}}"/>
         </Style>
     </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="CloseEditButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="❌"/>
+            <Setter Property="ToolTip" Value="{Binding CloseEdit, Source={StaticResource Localizer}}"/>
+        </Style>
+    </l:StyleCombiner>
+    <l:StyleCombiner TargetType="Button" x:Key="EditExternalButtonStyle">
+        <StaticResource ResourceKey="ActionButtonStyle"/>
+        <Style TargetType="Button">
+            <Setter Property="Content" Value="⧉"/>
+            <Setter Property="ToolTip" Value="{Binding EditExternal, Source={StaticResource Localizer}}"/>
+        </Style>
+    </l:StyleCombiner>
     <l:StyleCombiner TargetType="Button" x:Key="CreateButtonStyle">
         <StaticResource ResourceKey="ActionButtonStyle"/>
         <Style TargetType="Button">

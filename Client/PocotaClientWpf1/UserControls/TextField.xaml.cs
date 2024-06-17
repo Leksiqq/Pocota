@@ -195,6 +195,10 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
                         _initialHeight = TextBox.ActualHeight;
                     }
                     TextBox.Height = TextBox.ActualHeight + TextBox.FontSize * ChangeHeight;
+                    if(TextBox.Height >= Buttons.ActualWidth)
+                    {
+                        Buttons.Orientation = Orientation.Vertical;
+                    }
                 }
                 else if ("Decrease".Equals(parameter))
                 {
@@ -205,6 +209,10 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
                     else
                     {
                         TextBox.Height = _initialHeight;
+                    }
+                    if (TextBox.Height < Buttons.ActualHeight)
+                    {
+                        Buttons.Orientation = Orientation.Horizontal;
                     }
                 }
             }
@@ -226,6 +234,8 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
                     ? Visibility.Visible : Visibility.Collapsed;
                 IncreaseTextButton.Visibility = Property.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
                 DecreaseTextButton.Visibility = Property.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
+                TextBox.AcceptsReturn = Property.Type == typeof(string);
+                TextBox.VerticalScrollBarVisibility = Property.Type == typeof(string) ? ScrollBarVisibility.Auto : ScrollBarVisibility.Hidden;
             }
         }
         base.OnPropertyChanged(e);
@@ -271,34 +281,41 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             if (DateOnly.TryParse(valueAsString, out DateOnly don))
             {
                 res = don;
-                return true;
             }
-            res = null;
-            return false;
+            else
+            {
+                res = null;
+            }
         }
-        if (type == typeof(TimeOnly))
+        else if (type == typeof(TimeOnly))
         {
             if (TimeOnly.TryParse(valueAsString, CultureInfo.CurrentCulture.DateTimeFormat, out TimeOnly ton))
             {
                 res = ton;
-                return true;
             }
-            res = null;
-            return false;
+            else
+            {
+                res = null;
+            }
         }
-        if (type == typeof(TimeSpan))
+        else if (type == typeof(TimeSpan))
         {
             if (TimeSpan.TryParse(valueAsString, out TimeSpan ts))
             {
                 res = ts;
-                return true;
             }
-            res = null;
-            return false;
+            else
+            {
+                res = null;
+            }
         }
-        res = System.Convert.ChangeType(valueAsString, type);
-        if (IsNumeric(res) && res.ToString() != valueAsString)
+        else
         {
+            res = System.Convert.ChangeType(valueAsString, type);
+        }
+        if (res?.ToString() != valueAsString)
+        {
+            Console.WriteLine($"{res?.ToString()} != {valueAsString}");
             return false;
         }
         return true;

@@ -35,8 +35,8 @@
             <TextBlock.Text>
                 <MultiBinding StringFormat="{}{0} {1}:{2}">
                     <Binding Path="ReturnType" Converter="{local:TypeNameConverter}" ConverterParameter="Short"/>
-                    <Binding Path="ServiceKey" Converter="{StaticResource NamesConverter}"/>
-                    <Binding Path="MethodName" Converter="{StaticResource NamesConverter}"/>
+                    <Binding Path="ServiceKey" Converter="{StaticResource NamesConverter}" Mode="OneTime"/>
+                    <Binding Path="MethodName" Converter="{StaticResource NamesConverter}" Mode="OneTime"/>
                 </MultiBinding>
             </TextBlock.Text>
         </TextBlock>

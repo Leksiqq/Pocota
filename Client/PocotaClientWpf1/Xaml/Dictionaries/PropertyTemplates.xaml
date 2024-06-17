@@ -29,7 +29,6 @@
         <DockPanel LastChildFill="True">
             <StackPanel Orientation="Vertical"  VerticalAlignment="Top">
                 <TextBlock 
-                    d:Text="{Binding Name, Converter={StaticResource NamesConverter}, ConverterParameter={StaticResource PropertyType}}" 
                     TextAlignment="Right" 
                     Margin="0,0,10,0" 
                     FontWeight="Bold" 
@@ -40,7 +39,7 @@
                         <l:BindingProxyMarkup x:Key="Declarator" BindingProxy="{StaticResource DeclaratorBindingProxy}"/>
                     </TextBlock.Resources>
                     <TextBlock.Text>
-                        <Binding Path="Name" Converter="{StaticResource NamesConverter}" ConverterParameter="{StaticResource Declarator}"/>
+                        <Binding Path="Name" Converter="{StaticResource NamesConverter}" ConverterParameter="{StaticResource Declarator}" Mode="OneTime"/>
                     </TextBlock.Text>
                 </TextBlock>
             </StackPanel>
