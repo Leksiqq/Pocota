@@ -124,6 +124,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                     {
                         if (!_editWindow.TryGetTarget(out ObjectWindow? window) || !window.IsLoaded)
                         {
+                            
                             window = new ObjectWindow(_serviceKey, Window);
                             _editWindow.SetTarget(window);
                             if(ObjectEditor.Visibility is Visibility.Visible)

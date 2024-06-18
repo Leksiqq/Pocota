@@ -19,6 +19,7 @@ public class Property : INotifyPropertyChanged
     }
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private bool _isSetReadonly = false;
+    protected List<Property>? _properties = null;
     protected object? _value;
 
     public string Name { get; private init; }
@@ -43,6 +44,7 @@ public class Property : INotifyPropertyChanged
             if (_value != value)
             {
                 _value = value;
+                SetPropertiesValues();
                 NotifyPropertyChanged();
             }
         }
@@ -52,8 +54,22 @@ public class Property : INotifyPropertyChanged
     public virtual object? Declarator => null;
     public virtual PropertyState State { get => PropertyState.Unchanged; internal set => throw new InvalidOperationException(); }
     public virtual AccessKind Access { get => AccessKind.Full; internal set => throw new InvalidOperationException(); }
-
-
+    public virtual List<Property>? Properties
+    {
+        get
+        {
+            if (_properties is null && Type.IsClass && Type != typeof(string))
+            {
+                _properties = [];
+                foreach (var property in Type.GetProperties())
+                {
+                    _properties.Add(Create(property)!);
+                }
+                SetPropertiesValues();
+            }
+            return _properties;
+        }
+    }
     public Property(string name, Type type)
     {
         Name = name;
@@ -97,5 +113,16 @@ public class Property : INotifyPropertyChanged
     public void NotifyPropertyChanged()
     {
         _propertyChanged?.Invoke(this, _propertyChangedEventArgs);
+    }
+    protected virtual void SetPropertiesValues()
+    {
+        if(_properties is { })
+        {
+            foreach(Property prop in _properties)
+            {
+                PropertyInfo pi = Type.GetProperty(prop.Name)!;
+                prop.Value = pi.GetValue(this);
+            }
+        }
     }
 }
