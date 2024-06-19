@@ -10,7 +10,7 @@ internal class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {st
 {
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>    private const string s_@{}@prop.Name = "@prop.Name";
+    <text>    private const string s_@{}@prop.Name = @Html.Raw($"nameof({Model.ContractName}.{prop.Name}"));
 </text>
 }
     private readonly IServiceProvider _services;
@@ -47,12 +47,15 @@ internal class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {st
         writer.WriteStartObject();
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>        if(!keysFilled || _context.IsKey(pocotaEntity@{}.@prop.Name@{})) 
+    @if(!prop.IsCollection)
+    {
+        <text>        if(!keysFilled || _context.IsKey(pocotaEntity@{}.@prop.Name@{})) 
         {
             writer.WritePropertyName(s_@{}@prop.Name);
             JsonSerializer.Serialize(writer, value@{}.@prop.Name, options);
         }
 </text>
+    }
 }
         writer.WriteEndObject();
     }

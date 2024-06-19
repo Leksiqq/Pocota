@@ -23,6 +23,8 @@ public class SourceGenerator : Runner, ICommand
     private readonly string[] _clientFolders = ["connectors", "client-models", "client-envelopes", "client-converters", "client-extensions"];
     private readonly string _clientLanguage = s_cSharp;
     private readonly string _fileExtension = s_cs;
+    private readonly HashSet<Type> _entityTypes = [];
+    private readonly HashSet<Type> _envelopeTypes = [];
     internal IClientSourceGenerator? ClientSourceGenerator { get; private init; }
     public SourceGenerator(IServiceProvider services) : base()
     {
@@ -375,6 +377,7 @@ public class SourceGenerator : Runner, ICommand
     }
     private async Task ProcessContractAsync(IConnector connector, Type contractType, string name)
     {
+        CheckContract(contractType);
         if (!string.IsNullOrEmpty(_configuration["server-base"]))
         {
             if (_configuration["db-contexts"] is string dbContextsFolder && !string.IsNullOrEmpty(dbContextsFolder))
@@ -449,18 +452,15 @@ public class SourceGenerator : Runner, ICommand
         }
         if (ClientSourceGenerator is IClientSourceGenerator clientSourceGenerator)
         {
-            HashSet<Type> envelopes = [];
-            HashSet<Type> entities = [];
-            FindEnvelopes(contractType, envelopes, entities);
             if (_configuration["connectors"] is string connectorsFolder && !string.IsNullOrEmpty(connectorsFolder))
             {
                 if (!Directory.Exists(connectorsFolder))
                 {
                     Directory.CreateDirectory(connectorsFolder);
                 }
-                    await clientSourceGenerator.GenerateConnectorAsync(connector, contractType, connectorsFolder, $"{name}Connector");
+                    await clientSourceGenerator.GenerateConnectorAsync(connector, contractType, connectorsFolder, $"{name}Connector", _envelopeTypes, _entityTypes);
             }
-            foreach (EntityAttribute entityAttribute in contractType.GetCustomAttributes<EntityAttribute>())
+            foreach (Type entityType in _entityTypes)
             {
                 if (_configuration["client-models"] is string clientModelsFolder && !string.IsNullOrEmpty(clientModelsFolder))
                 {
@@ -468,10 +468,10 @@ public class SourceGenerator : Runner, ICommand
                     {
                         Directory.CreateDirectory(clientModelsFolder);
                     }
-                    await clientSourceGenerator.GenerateModelAsync(connector, contractType, entityAttribute.EntityType, clientModelsFolder);
+                    await clientSourceGenerator.GenerateModelAsync(connector, contractType, entityType, clientModelsFolder);
                 }
             }
-            foreach(Type envelopeType in envelopes)
+            foreach(Type envelopeType in _envelopeTypes)
             {
                 if (_configuration["client-envelopes"] is string clientEnvelopesFolder && !string.IsNullOrEmpty(clientEnvelopesFolder))
                 {
@@ -479,68 +479,111 @@ public class SourceGenerator : Runner, ICommand
                     {
                         Directory.CreateDirectory(clientEnvelopesFolder);
                     }
-                    await clientSourceGenerator.GenerateEnvelopeAsync(connector, contractType, envelopeType, clientEnvelopesFolder, envelopes, entities);
+                    await clientSourceGenerator.GenerateEnvelopeAsync(connector, contractType, envelopeType, clientEnvelopesFolder, _envelopeTypes, _entityTypes);
                 }
             }
         }
     }
-
-    private void FindEnvelopes(Type contractType, HashSet<Type> envelopes, HashSet<Type> entities)
+    private bool IsSupportedType(Type type, bool allowGenerics, bool allowEnvelopes)
     {
-        HashSet<Type> visited = [];
-        foreach (EntityAttribute attribute in contractType.GetCustomAttributes<EntityAttribute>())
-        {
-            entities.Add(attribute.EntityType);
-        }
-        foreach (MethodInfo mi in contractType.GetMethods())
-        {
-            Type returnType = mi.ReturnType.IsGenericType ? mi.ReturnType.GetGenericArguments()[0] : mi.ReturnType;
-            WalkDependencies(returnType, envelopes, entities, visited);
-            foreach (ParameterInfo pi in mi.GetParameters())
-            {
-                Type paramType = pi.ParameterType.IsGenericType ? pi.ParameterType.GetGenericArguments()[0] : pi.ParameterType;
-                WalkDependencies(paramType, envelopes, entities, visited);
-            }
-        }
+        return type.IsPrimitive
+        || type.IsEnum
+        || SupportedTypes.Types.Contains(type)
+        || (
+            !allowEnvelopes
+            && _entityTypes.Contains(type)
+        )
+        || (
+            allowEnvelopes
+            && (
+                _entityTypes.Contains(type)
+                || _envelopeTypes.Contains(type)
+            )
+        )
+        || (
+            allowGenerics
+            && type.IsGenericType
+            && (
+                type.GetGenericTypeDefinition() == typeof(Nullable<>)
+                || type.GetGenericTypeDefinition() == typeof(ICollection<>)
+            )
+            && type.GetGenericArguments()[0] is Type type1
+            && IsSupportedType(type1, false, allowEnvelopes)
+        );
     }
-
-    private bool WalkDependencies(Type? type, HashSet<Type> envelopes, HashSet<Type> entities, HashSet<Type> visited)
+    private void CheckContract(Type contractType)
     {
-        if(type is null)
+        _entityTypes.Clear();
+        _envelopeTypes.Clear();
+        foreach (EntityAttribute entityAttribute in contractType.GetCustomAttributes<EntityAttribute>())
         {
-            return false;
+            _entityTypes.Add(entityAttribute.EntityType);
         }
-        if(envelopes.Contains(type) || entities.Contains(type))
+        foreach (EnvelopeAttribute envelopeAttribute in contractType.GetCustomAttributes<EnvelopeAttribute>())
         {
-            return true;
+            _envelopeTypes.Add(envelopeAttribute.EnvelopeType);
         }
-        if (!visited.Add(type))
+        foreach (Type type in _entityTypes)
         {
-            return false;
-        }
-        if (WalkDependencies(type.BaseType, envelopes, entities, visited))
-        {
-            if (!entities.Contains(type))
+            foreach (PropertyInfo pi in type.GetProperties())
             {
-                envelopes.Add(type);
-            }
-            return true;
-        }
-        foreach(PropertyInfo pi in type.GetProperties())
-        {
-            Type propertyType = pi.PropertyType.IsGenericType ? pi.PropertyType.GetGenericArguments()[0] : pi.PropertyType;
-            if (WalkDependencies(propertyType, envelopes, entities, visited))
-            {
-                if (!entities.Contains(type))
+                if (!IsSupportedType(pi.PropertyType, true, false))
                 {
-                    envelopes.Add(type);
+                    throw new Exception($"Entiti'es property {pi.PropertyType} {type}.{pi.Name} has unsupported type!");
                 }
-                return true;
             }
         }
-        return false;
+        foreach (Type type in _envelopeTypes)
+        {
+            foreach (PropertyInfo pi in type.GetProperties())
+            {
+                if (!IsSupportedType(pi.PropertyType, true, false))
+                {
+                    throw new Exception($"Envelope's property {pi.PropertyType} {type}.{pi.Name} has unsupported type!");
+                }
+            }
+        }
+        foreach(MethodInfo mi in contractType.GetMethods())
+        {
+            if (!IsSupportedReturnType(mi.ReturnType))
+            {
+                throw new Exception($"Method's {mi} return type is unsupported!");
+            }
+            foreach(ParameterInfo par in mi.GetParameters())
+            {
+                if (!IsSupportedParameterType(par.ParameterType))
+                {
+                    throw new Exception($"Method's {mi} parameter {par.Name} has unsupported type!");
+                }
+            }
+        }
     }
-
+    private bool IsSupportedParameterType(Type parameterType)
+    {
+        return IsSupportedType(parameterType, true, true) 
+            && (
+                !parameterType.IsGenericType
+                || parameterType.GetGenericTypeDefinition() != typeof(ICollection<>)
+            );
+    }
+    private bool IsSupportedReturnType(Type returnType)
+    {
+        return 
+            returnType == typeof(void)
+            || (
+                IsSupportedType(returnType, true, true)
+                && (
+                    !returnType.IsGenericType
+                    || returnType.GetGenericTypeDefinition() != typeof(ICollection<>)
+                )
+            )
+            || (
+                returnType.IsGenericType
+                && returnType.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                && returnType.GetGenericArguments()[0] is Type type1
+                && IsSupportedType(type1, false, true)
+            );
+    }
     private async Task GenerateModelPocotaEntityAsync(IConnector connector, Type contractType, Type entityType, string targetFolder, string name)
     {
         _logger?.LogInformation("Generating model's pocota {name} at {folder}.", name, targetFolder);

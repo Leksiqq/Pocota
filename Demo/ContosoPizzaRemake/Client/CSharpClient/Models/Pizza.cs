@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Pizza                        //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-15T08:59:47.                                 //
+// at 2024-06-19T16:46:35.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -11,6 +11,7 @@ using Net.Leksi.Pocota.Contract;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 
 namespace ContosoPizza.Models.Client;
@@ -18,192 +19,78 @@ namespace ContosoPizza.Models.Client;
 
 public class Pizza: IEntityOwner, INotifyPropertyChanged
 {
-    private class IdProperty(Pizza owner, IPocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
-    {
-        public override object? Value 
-        {
-            get 
-            {
-                if(Access is AccessKind.NotSet || Access is AccessKind.Forbidden)
-                {
-                    return default;
-                }
-                return _value;
-            }
-            set 
-            {
-                if (!IsReadonly)
-                {
-                    if(value is Int32 val && val != owner.Id)
-                    {
-                        _value = val;
-                        NotifyPropertyChanged();
-                        owner.PropertyChanged?.Invoke(owner, _IdPropertyChangedEventArgs);
-                    }
-                    else if((Int32)value! == default && (Int32)_value! != default)
-                    {
-                        _value = default(Int32);
-                        NotifyPropertyChanged();
-                        owner.PropertyChanged?.Invoke(owner, _IdPropertyChangedEventArgs);
-                    }
-                }
-            }
-        }
-        public override bool IsNullable => false;
-    }
-    private class NameProperty(Pizza owner, IPocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
-    {
-        public override object? Value 
-        {
-            get 
-            {
-                if(Access is AccessKind.NotSet || Access is AccessKind.Forbidden)
-                {
-                    return default;
-                }
-                return _value;
-            }
-            set 
-            {
-                if (!IsReadonly)
-                {
-                    if(value is String val && val != owner.Name)
-                    {
-                        _value = val;
-                        NotifyPropertyChanged();
-                        owner.PropertyChanged?.Invoke(owner, _NamePropertyChangedEventArgs);
-                    }
-                    else if((String)value! == default && (String)_value! != default)
-                    {
-                        _value = default(String);
-                        NotifyPropertyChanged();
-                        owner.PropertyChanged?.Invoke(owner, _NamePropertyChangedEventArgs);
-                    }
-                }
-            }
-        }
-        public override bool IsNullable => true;
-    }
-    private class SauceProperty(Pizza owner, IPocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
-    {
-        public override object? Value 
-        {
-            get 
-            {
-                if(Access is AccessKind.NotSet || Access is AccessKind.Forbidden)
-                {
-                    return default;
-                }
-                return _value;
-            }
-            set 
-            {
-                if (!IsReadonly)
-                {
-                    if(value is Sauce val && val != owner.Sauce)
-                    {
-                        _value = val;
-                        NotifyPropertyChanged();
-                        owner.PropertyChanged?.Invoke(owner, _SaucePropertyChangedEventArgs);
-                    }
-                    else if((Sauce)value! == default && (Sauce)_value! != default)
-                    {
-                        _value = default(Sauce);
-                        NotifyPropertyChanged();
-                        owner.PropertyChanged?.Invoke(owner, _SaucePropertyChangedEventArgs);
-                    }
-                }
-            }
-        }
-        public override bool IsNullable => true;
-    }
-    private class ToppingsProperty(Pizza owner, IPocotaEntity entity, string name, Type type): EntityProperty(entity, name, type)
-    {
-        public override object? Value 
-        {
-            get 
-            {
-                if(Access is AccessKind.NotSet || Access is AccessKind.Forbidden)
-                {
-                    return default;
-                }
-                return _value;
-            }
-            set 
-            {
-                if (!IsReadonly)
-                {
-                    if(value is ObservableCollection<Topping> val && val != owner.Toppings)
-                    {
-                        _value = val;
-                        NotifyPropertyChanged();
-                        owner.PropertyChanged?.Invoke(owner, _ToppingsPropertyChangedEventArgs);
-                    }
-                    else if((ObservableCollection<Topping>)value! == default && (ObservableCollection<Topping>)_value! != default)
-                    {
-                        _value = default(ObservableCollection<Topping>);
-                        NotifyPropertyChanged();
-                        owner.PropertyChanged?.Invoke(owner, _ToppingsPropertyChangedEventArgs);
-                    }
-                }
-            }
-        }
-        public override bool IsNullable => true;
-    }
     private class PizzaPocotaEntity: PocotaEntity, IPizzaPocotaEntity
     {
         public EntityProperty Id { get; private init;}
         public EntityProperty Name { get; private init;}
         public EntityProperty Sauce { get; private init;}
         public EntityProperty Toppings { get; private init;}
-        internal PizzaPocotaEntity(ulong pocotaId, PocotaContext context, Pizza owner): base(pocotaId, context) 
+        internal PizzaPocotaEntity(ulong pocotaId, PocotaContext context, Pizza owner): base(pocotaId, context, owner) 
         {
-            Id = new IdProperty(owner, this, s_Id, typeof(Int32));
-            Name = new NameProperty(owner, this, s_Name, typeof(String));
-            Sauce = new SauceProperty(owner, this, s_Sauce, typeof(Sauce));
-            Toppings = new ToppingsProperty(owner, this, s_Toppings, typeof(ObservableCollection<Topping>));
-        }
-        protected override IEnumerable<EntityProperty> GetProperties()
-        {
-            yield return Id;
-            yield return Name;
-            yield return Sauce;
-            yield return Toppings;
+            Id = new EntityProperty(this, s_Id, typeof(Int32));
+            Name = new EntityProperty(this, s_Name, typeof(String));
+            Sauce = new EntityProperty(this, s_Sauce, typeof(Sauce));
+            Toppings = new EntityProperty(this, s_Toppings, typeof(ObservableCollection<Topping>));
         }
     }
     public event PropertyChangedEventHandler? PropertyChanged;
-    private const string s_Id = "Id";
+    private const string s_Id = nameof(Id);
+    private const string s_Name = nameof(Name);
+    private const string s_Sauce = nameof(Sauce);
+    private const string s_Toppings = nameof(Toppings);
     private static readonly PropertyChangedEventArgs _IdPropertyChangedEventArgs = new(s_Id);
-    private const string s_Name = "Name";
     private static readonly PropertyChangedEventArgs _NamePropertyChangedEventArgs = new(s_Name);
-    private const string s_Sauce = "Sauce";
     private static readonly PropertyChangedEventArgs _SaucePropertyChangedEventArgs = new(s_Sauce);
-    private const string s_Toppings = "Toppings";
     private static readonly PropertyChangedEventArgs _ToppingsPropertyChangedEventArgs = new(s_Toppings);
     private readonly PizzaPocotaEntity _entity;
+    private Int32 _Id = default!;
+    private String? _Name = default;
+    private Sauce? _Sauce = default;
+    private readonly ObservableCollection<Topping> _Toppings;
     public Int32 Id 
     { 
-        get => (Int32)_entity.Id.Value!; 
-        set => _entity.Id.Value = value; 
+        get => _Id; 
+        set
+        {
+            if(_Id != value && !_entity.Id.IsReadonly)
+            {
+                _Id = value;
+                PropertyChanged?.Invoke(this, _IdPropertyChangedEventArgs);
+            }
+        }
     }
     public String? Name 
     { 
-        get => (String?)_entity.Name.Value; 
-        set => _entity.Name.Value = value; 
+        get => _Name; 
+        set
+        {
+            if(_Name != value && !_entity.Name.IsReadonly)
+            {
+                _Name = value;
+                PropertyChanged?.Invoke(this, _NamePropertyChangedEventArgs);
+            }
+        }
     }
     public Sauce? Sauce 
     { 
-        get => (Sauce?)_entity.Sauce.Value; 
-        set => _entity.Sauce.Value = value; 
+        get => _Sauce; 
+        set
+        {
+            if(_Sauce != value && !_entity.Sauce.IsReadonly)
+            {
+                _Sauce = value;
+                PropertyChanged?.Invoke(this, _SaucePropertyChangedEventArgs);
+            }
+        }
     }
-    public ObservableCollection<Topping>? Toppings 
+    public ObservableCollection<Topping> Toppings 
     { 
-        get => (ObservableCollection<Topping>?)_entity.Toppings.Value; 
-        set => _entity.Toppings.Value = value; 
+        get => _Toppings; 
     }
     IPocotaEntity IEntityOwner.Entity => _entity;
     internal Pizza(ulong pocotaId, PocotaContext context)
     {
         _entity = new PizzaPocotaEntity(pocotaId, context, this);
+       _Toppings = new MyObservableCollection<Topping>(_entity.Toppings); 
     }
 }

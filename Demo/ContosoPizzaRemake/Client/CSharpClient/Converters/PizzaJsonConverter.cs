@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.PizzaJsonConverter           //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-15T08:59:47.                                 //
+// at 2024-06-19T16:46:35.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -20,10 +20,10 @@ namespace ContosoPizza.Models.Client;
 
 internal class PizzaJsonConverter: JsonConverter<Pizza>
 {
-    private const string s_Id = "Id";
-    private const string s_Name = "Name";
-    private const string s_Sauce = "Sauce";
-    private const string s_Toppings = "Toppings";
+    private const string s_Id = nameof(Pizza.Id);
+    private const string s_Name = nameof(Pizza.Name);
+    private const string s_Sauce = nameof(Pizza.Sauce);
+    private const string s_Toppings = nameof(Pizza.Toppings);
     private readonly IServiceProvider _services;
     private readonly PizzaPocotaContext _context;
     public PizzaJsonConverter(IServiceProvider services)
@@ -70,11 +70,6 @@ internal class PizzaJsonConverter: JsonConverter<Pizza>
         {
             writer.WritePropertyName(s_Sauce);
             JsonSerializer.Serialize(writer, value.Sauce, options);
-        }
-        if(!keysFilled || _context.IsKey(pocotaEntity.Toppings)) 
-        {
-            writer.WritePropertyName(s_Toppings);
-            JsonSerializer.Serialize(writer, value.Toppings, options);
         }
         writer.WriteEndObject();
     }

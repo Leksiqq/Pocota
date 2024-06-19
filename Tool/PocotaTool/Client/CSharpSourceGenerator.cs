@@ -7,6 +7,7 @@ using Net.Leksi.Pocota.Contract;
 using Net.Leksi.Pocota.Tool.Pages.Client.CS;
 using Net.Leksi.Pocota.Tool.Pages.CS;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text;
@@ -23,6 +24,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
     {
         public HashSet<Type> Envelopes { get; set; }
         public HashSet<Type> Entities { get; set; }
+        internal MethodInfo? MethodInfo { get; set; }
     }
     private const string s_sourceFileExtention = ".cs";
     private const string s_dependencyInjectionNs = "Microsoft.Extensions.DependencyInjection";
@@ -66,7 +68,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         await Util.ProcessPageAsync(connector, options, "/Client/CS/IPocotaEntity", Util.BuildFilePath(targetFolder, name, s_sourceFileExtention));
         _logger?.LogInformation("Done.");
     }
-    public async Task GenerateConnectorAsync(IConnector connector, Type contractType, string targetFolder, string name)
+    public async Task GenerateConnectorAsync(IConnector connector, Type contractType, string targetFolder, string name, HashSet<Type> envelopes, HashSet<Type> entities)
     {
         _logger?.LogInformation("Generating c# connector {name} at {folder}.", name, targetFolder);
         PageOptions options = new()
@@ -77,6 +79,21 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         await Util.ProcessPageAsync(connector, options, "/Client/CS/Connector", Util.BuildFilePath(targetFolder, name, s_sourceFileExtention));
         _logger?.LogInformation("Done.");
         name = name.Replace("Connector", "JsonConverterFactory");
+        foreach (MethodInfo mi in contractType!.GetMethods())
+        {
+            string name1 = $"{mi.Name}Envelope";
+            _logger?.LogInformation("Generating c# connector's method envelope {name} at {folder}.", name1, targetFolder);
+            EnvelopePageOptions options1 = new()
+            {
+                ContractType = contractType,
+                ClassName = Util.BuildResutTypeName(contractType, name1),
+                Entities = entities,
+                Envelopes = envelopes,
+                MethodInfo = mi,
+            };
+            await Util.ProcessPageAsync(connector, options1, "/Client/CS/Envelope", Util.BuildFilePath(targetFolder, $"{mi.Name}Envelope", s_sourceFileExtention));
+            _logger?.LogInformation("Done.");
+        }
         options.ClassName = Util.BuildResutTypeName(contractType, name);
         targetFolder = Path.Combine(targetFolder, "..", "Converters");
         if(!Directory.Exists(targetFolder))
@@ -106,6 +123,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         _logger?.LogInformation("Generating c# extensions {name} at {folder}.", name, targetFolder);
         await Util.ProcessPageAsync(connector, options, "/Client/CS/Extensions", Util.BuildFilePath(targetFolder, name, s_sourceFileExtention));
         _logger?.LogInformation("Done.");
+
     }
     public async Task GenerateEnvelopeAsync(IConnector connector, Type contractType, Type envelopeType, string targetFolder, HashSet<Type> envelopes, HashSet<Type> entities)
     {
@@ -132,6 +150,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         model.AddInheritance(typeof(INotifyPropertyChanged));
         model.AddUsing(typeof(EntityProperty));
         model.AddUsing(typeof(AccessKind));
+        model.AddUsing(typeof(NotifyCollectionChangedEventArgs));
         NullabilityInfoContext nullabilityInfoContext = new();
         foreach (PropertyInfo pi in options.EntityType!.GetProperties())
         {
@@ -152,6 +171,65 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 pm.TypeName = Util.BuildTypeName(typeof(ObservableCollection<>).MakeGenericType([itemType]));
             }
             model.Properties.Add(pm);
+        }
+    }
+    internal static void PopulateClientEnvelope(EnvelopeModel model)
+    {
+        EnvelopePageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as EnvelopePageOptions)!;
+        model.Contract = Util.BuildTypeFullName(options.ContractType!);
+        model.ClassName = Util.GetTypeName(options.ClassName!);
+        model.NamespaceValue = BuildClientNamespace(options.ClassName!);
+        NullabilityInfoContext nullabilityInfoContext = new();
+        model.AddInheritance(typeof(INotifyPropertyChanged));
+        model.AddUsing(typeof(NotifyCollectionChangedEventArgs));
+        if(options.EntityType is { })
+        {
+            if (options.EntityType.BaseType != typeof(object))
+            {
+                model.AddInheritance(BuildTypeName(options.EntityType.BaseType!, options.Entities, options.Envelopes, model));
+            }
+            foreach (Type intf in options.EntityType.GetInterfaces())
+            {
+                model.AddInheritance(intf);
+            }
+            foreach (PropertyInfo pi in options.EntityType.GetProperties())
+            {
+                if (!pi.CanWrite || pi.SetMethod!.ReturnParameter.GetRequiredCustomModifiers().Contains(typeof(System.Runtime.CompilerServices.IsExternalInit)))
+                {
+                    throw new Exception("Readonly property!");
+                }
+                model.AddUsing(pi.PropertyType);
+                PropertyModel pm = new()
+                {
+                    Name = pi.Name,
+                    TypeName = BuildTypeName(pi.PropertyType, options.Entities, options.Envelopes, model),
+                    IsCollection = pi.PropertyType.IsGenericType && pi.PropertyType.GetGenericTypeDefinition() == typeof(ICollection<>),
+                    IsNullable = nullabilityInfoContext.Create(pi).ReadState is NullabilityState.Nullable,
+                };
+                if (pm.IsCollection)
+                {
+                    Type itemType = pi.PropertyType.GetGenericArguments()[0];
+                    model.AddUsing(itemType);
+                    model.AddUsing(typeof(ObservableCollection<>));
+                    pm.ItemTypeName = Util.BuildTypeName(itemType);
+                    pm.TypeName = Util.BuildTypeName(typeof(ObservableCollection<>).MakeGenericType([itemType]));
+                }
+                model.Properties.Add(pm);
+            }
+        }
+        else if(options.MethodInfo is { })
+        {
+            foreach (ParameterInfo pi in options.MethodInfo.GetParameters())
+            {
+                model.AddUsing(pi.ParameterType);
+                PropertyModel pm = new()
+                {
+                    Name = pi.Name!,
+                    TypeName = BuildTypeName(pi.ParameterType, options.Entities, options.Envelopes, model),
+                    IsNullable = nullabilityInfoContext.Create(pi).ReadState is NullabilityState.Nullable,
+                };
+                model.Properties.Add(pm);
+            }
         }
     }
     internal static void PopulateConnectorModel(ConnectorModel model)
@@ -264,6 +342,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 PropertyModel pm = new()
                 {
                     Name = pi.Name,
+                    IsCollection = pi.PropertyType.IsGenericType && pi.PropertyType.GetGenericTypeDefinition() == typeof(ICollection<>),
                 };
                 model.Properties.Add(pm);
             }
@@ -321,37 +400,6 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
             PropertyModel pm = new()
             {
                 Name = Util.BuildTypeName(attribute.EntityType),
-            };
-            model.Properties.Add(pm);
-        }
-    }
-    internal static void PopulateClientEnvelope(EnvelopeModel model)
-    {
-        EnvelopePageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as EnvelopePageOptions)!;
-        model.Contract = Util.BuildTypeFullName(options.ContractType!);
-        model.ClassName = Util.GetTypeName(options.ClassName!);
-        model.NamespaceValue = BuildClientNamespace(options.ClassName!);
-        NullabilityInfoContext nullabilityInfoContext = new();
-        if(options.EntityType!.BaseType != typeof(object))
-        {
-            model.AddInheritance(BuildTypeName(options.EntityType!.BaseType!, options.Entities, options.Envelopes, model));
-        }
-        foreach(Type intf in options.EntityType!.GetInterfaces())
-        {
-            model.AddInheritance(intf);
-        }
-        foreach (PropertyInfo pi in options.EntityType!.GetProperties())
-        {
-            if (!pi.CanWrite || pi.SetMethod!.ReturnParameter.GetRequiredCustomModifiers().Contains(typeof(System.Runtime.CompilerServices.IsExternalInit)))
-            {
-                throw new Exception("Readonly property!");
-            }
-            model.AddUsing(pi.PropertyType);
-            PropertyModel pm = new()
-            {
-                Name = pi.Name,
-                TypeName = BuildTypeName(pi.PropertyType, options.Entities, options.Envelopes, model),
-                IsNullable = nullabilityInfoContext.Create(pi).ReadState is NullabilityState.Nullable,
             };
             model.Properties.Add(pm);
         }

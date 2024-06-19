@@ -14,6 +14,7 @@ public abstract class Connector
     private readonly ExceptionJsonConverter _exceptionJsonConverter = new();
     protected readonly IServiceProvider _services;
     protected readonly JsonSerializerOptions _serializerOptions = new();
+    protected readonly Dictionary<Delegate, Type> _methodsEnvelopes = [];
     protected PocotaContext _context = null!;
     public HttpStatusCode StatusCode { get; private set; }
     public string ServiceKey {  get; private init; }
@@ -58,6 +59,14 @@ public abstract class Connector
         _baseAddress = _httpClient.BaseAddress;
         _serializationOptions.Converters.Add(_exceptionJsonConverter);
         ServiceKey = serviceKey;
+    }
+    public object? CreateMethodEnvelope(Delegate @delegate)
+    {
+        if(_methodsEnvelopes.TryGetValue(@delegate, out Type? envelopeType))
+        {
+            return Activator.CreateInstance(envelopeType);
+        }
+        return null;
     }
     public void AddConverter(JsonConverter converter)
     {

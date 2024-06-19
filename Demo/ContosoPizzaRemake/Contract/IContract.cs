@@ -7,6 +7,7 @@ namespace ContosoPizza;
 [Entity(typeof(Pizza))]
 [Entity(typeof(Sauce))]
 [Entity(typeof(Topping))]
+[Envelope(typeof(PizzaFilter))]
 public interface IContract
 {
     IEnumerable<Pizza> GetAllPizzas();

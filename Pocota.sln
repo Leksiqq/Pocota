@@ -45,7 +45,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp2", "..\Localizat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibrary1", "..\Localization\Test\ClassLibrary1\ClassLibrary1.csproj", "{7BF57B9B-1FF3-413B-BC9D-E4DFB2ED8B32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocotaClientWpf1", "Client\PocotaClientWpf1\PocotaClientWpf1.csproj", "{594E057A-DC85-43D8-8D87-9BAD3F354D6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PocotaClientWpf1", "Client\PocotaClientWpf1\PocotaClientWpf1.csproj", "{594E057A-DC85-43D8-8D87-9BAD3F354D6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

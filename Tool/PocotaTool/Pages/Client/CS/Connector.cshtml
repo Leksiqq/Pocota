@@ -15,6 +15,11 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
         _serializerOptions.Converters.Add(
             _services.GetRequiredService@{}@Html.Raw($"<{Model.JsonConverterFactoryClassName}>")@{}()
         );
+@foreach (MethodModel mm in @Model.Methods)
+{
+    <text>        _methodsEnvelopes.Add(@mm.Name, typeof(@Html.Raw($"{mm.Name.Replace("Async", string.Empty)}Envelope")));
+</text>
+}
     }
     public override async Task GetPocotaConfigAsync(CancellationToken cancellationToken)
     {

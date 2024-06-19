@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.SauceJsonConverter           //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-15T08:59:48.                                 //
+// at 2024-06-19T16:46:35.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -18,10 +18,10 @@ namespace ContosoPizza.Models.Client;
 
 internal class SauceJsonConverter: JsonConverter<Sauce>
 {
-    private const string s_Id = "Id";
-    private const string s_Id1 = "Id1";
-    private const string s_Name = "Name";
-    private const string s_IsVegan = "IsVegan";
+    private const string s_Id = nameof(Pizza.Id);
+    private const string s_Id1 = nameof(Pizza.Id1);
+    private const string s_Name = nameof(Pizza.Name);
+    private const string s_IsVegan = nameof(Pizza.IsVegan);
     private readonly IServiceProvider _services;
     private readonly PizzaPocotaContext _context;
     public SauceJsonConverter(IServiceProvider services)

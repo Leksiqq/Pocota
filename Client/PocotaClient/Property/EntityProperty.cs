@@ -1,13 +1,21 @@
 ﻿using Net.Leksi.Pocota.Contract;
+using System.ComponentModel;
 
 namespace Net.Leksi.Pocota.Client;
 
-public abstract class EntityProperty(IPocotaEntity entity, string name, Type type) : Property(name, type)
+public class EntityProperty(IPocotaEntity entity, string name, Type type): INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private static readonly PropertyChangedEventArgs _stateChangedEventArgs = new(nameof(State));
+    private static readonly PropertyChangedEventArgs _accessChangedEventArgs = new(nameof(Access));
+    private static readonly PropertyChangedEventArgs _isReadonlyChangedEventArgs = new(nameof(Access));
+    private bool _isSetReadonly = false;
     private AccessKind _access = AccessKind.Full;
     private PropertyState _state = PropertyState.Unchanged;
-    public IPocotaEntity Entity { get; private init; } = entity;
-    public override PropertyState State 
+    public string Name => name;
+    public Type Type => type;
+    public IPocotaEntity Entity => entity;
+    public PropertyState State 
     {
         get => _state;  
         internal set
@@ -15,11 +23,11 @@ public abstract class EntityProperty(IPocotaEntity entity, string name, Type typ
             if(_state != value)
             {
                 _state = value;
-                NotifyPropertyChanged();
+                PropertyChanged?.Invoke(this, _stateChangedEventArgs);
             }
         }
     }
-    public override AccessKind Access 
+    public AccessKind Access 
     { 
         get => _access;
         internal set
@@ -34,11 +42,23 @@ public abstract class EntityProperty(IPocotaEntity entity, string name, Type typ
                 {
                     _access = AccessKind.Readonly;
                 }
-                NotifyPropertyChanged();
+                PropertyChanged?.Invoke(this, _accessChangedEventArgs);
             }
         }
     }
-    public override bool IsReadonly 
+    public bool IsSetReadOnly
+    {
+        get => _isSetReadonly;
+        set
+        {
+            if (_isSetReadonly != value)
+            {
+                _isSetReadonly = value;
+                PropertyChanged?.Invoke(this, _isReadonlyChangedEventArgs);
+            }
+        }
+    }
+    public bool IsReadonly 
     {
         get
         {
@@ -61,5 +81,4 @@ public abstract class EntityProperty(IPocotaEntity entity, string name, Type typ
             return IsSetReadOnly;
         }
     }
-    public override object? Declarator => Entity?.GetType();
 }

@@ -8,9 +8,35 @@
 @Html.Partial("Header", Model)
 public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {string.Join(", ", Model.Inheritances)}") : string.Empty)
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>    public @Html.Raw(prop.TypeName)@(prop.IsNullable ? "?" : string.Empty) @prop.Name { get; set; }
+    <text>    private static readonly PropertyChangedEventArgs _@{}@prop.Name@{}PropertyChangedEventArgs = new(nameof(@prop.Name));
+</text>
+}
+@foreach (PropertyModel prop in Model.Properties)
+{
+    <text>    private @(prop.IsCollection ? "readonly " : string.Empty)@Html.Raw(prop.TypeName)@(prop.IsNullable && !prop.IsCollection ? "?" : string.Empty) _@{}@prop.Name = @(prop.IsCollection ? "[]" : "default")@(prop.IsNullable || prop.IsCollection ? string.Empty : "!");
+</text>
+}
+@foreach (PropertyModel prop in Model.Properties)
+{
+    <text>    public @Html.Raw(prop.TypeName)@(prop.IsNullable ? "?" : string.Empty) @prop.Name 
+    { 
+        get => _@{}@prop.Name; 
+    @if(!prop.IsCollection) 
+    {
+        <text>        set
+        {
+            if(_@{}@prop.Name != value)
+            {
+                _@{}@prop.Name = value;
+                PropertyChanged?.Invoke(this, _@{}@prop.Name@{}PropertyChangedEventArgs);
+            }
+        }
+</text>
+    }
+    }
 </text>
 }
 }
