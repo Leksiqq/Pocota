@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
@@ -63,7 +64,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
         set => SetValue(WindowProperty, value);
     }
     public string ServiceKey => _serviceKey;
-    public int Count => IsAssigned && _isCollection ? lp.Count : 0;
+    public int Count => IsAssigned && _isCollection ? (Value as IList)?.Count ?? 0 : 0;
     public bool EditorOpen => ObjectEditor?.Visibility is Visibility.Visible;
     public object? Value
     {
@@ -100,36 +101,36 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                     && (
                         (
                             "Find".Equals(parameter) 
-                            && typeof(IEntityOwner).IsAssignableFrom(Property.Type)
+                            && typeof(IEntityOwner).IsAssignableFrom(Type)
                         ) 
                         || "Create".Equals(parameter)
                     )
                 )
-                || (!Property.IsReadonly && Property.Value is { } && "Clear".Equals(parameter))
+                || (!IsReadonly && Value is { } && "Clear".Equals(parameter))
             )
             ;
     }
     public void Execute(object? parameter)
     {
-        if(Property is { })
+        if(IsAssigned)
         {
             
-            if(!Property.IsReadonly && Property.Value is { } && "Clear".Equals(parameter))
+            if(!IsReadonly && Value is { } && "Clear".Equals(parameter))
             {
                 CloseEdit();
-                Property.Value = default;
+                Value = default;
             }
-            else if (Property.Value is { } && "CloseEdit".Equals(parameter))
+            else if (Value is { } && "CloseEdit".Equals(parameter))
             {
                 CloseEdit();
             }
             else if(
                 (
-                    !Property.IsReadonly 
+                    !IsReadonly 
                     && "Create".Equals(parameter)
                 )
                 || (
-                    Property.Value is { } 
+                    Value is { } 
                     && (
                         "Edit".Equals(parameter)
                         || "EditExternal".Equals(parameter)
@@ -139,12 +140,12 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             {
                 if ("Create".Equals(parameter))
                 {
-                    Property.Value = ((IServiceProvider)FindResource(ServiceProviderResourceKey))
-                        .GetRequiredKeyedService<PocotaContext>(ServiceKey).CreateInstance(Property.Type);
+                    Value = ((IServiceProvider)FindResource(ServiceProviderResourceKey))
+                        .GetRequiredKeyedService<PocotaContext>(ServiceKey).CreateInstance(Type);
                 }
                 else if ("EditExternal".Equals(parameter))
                 {
-                    if (Property is ListProperty)
+                    if (_isCollection)
                     {
 
                     }
@@ -155,17 +156,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                             
                             window = new ObjectWindow(_serviceKey, Window);
                             _editWindow.SetTarget(window);
-                            if(ObjectEditor.Visibility is Visibility.Visible)
-                            {
-                                foreach(Property property in ObjectEditor.Properties)
-                                {
-                                    window.Properties.Add(property);
-                                }
-                            }
-                            else
-                            {
-                                window.Target = Property;
-                            }
+                            window.Target = Target;
                             window.Show();
                         }
                         else
@@ -176,16 +167,16 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                 }
                 else
                 {
-                    if (Property is ListProperty)
+                    if (_isCollection)
                     {
 
                     }
                     else
                     {
-                        if (Property.Value is IEntityOwner eo)
+                        if (Value is IEntityOwner eo)
                         {
                         }
-                        else if (_propertyInfo!.GetValue(Target) is object value)
+                        else if (Value is object value)
                         {
                             for(DependencyObject dob = this; dob is not null; dob = VisualTreeHelper.GetParent(dob))
                             {
