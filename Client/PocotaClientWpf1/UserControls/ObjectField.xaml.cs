@@ -25,21 +25,37 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             CommandManager.RequerySuggested -= value;
         }
     }
-    public static readonly DependencyProperty PropertyProperty = DependencyProperty.Register(
-       nameof(Property), typeof(Property),
-       typeof(ObjectField)
+    public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(
+       nameof(Target), typeof(object),
+       typeof(TextField)
+    );
+    public static readonly DependencyProperty PropertyNameProperty = DependencyProperty.Register(
+       nameof(PropertyName), typeof(string),
+       typeof(TextField)
     );
     public static readonly DependencyProperty WindowProperty = DependencyProperty.Register(
        nameof(Window), typeof(Window),
        typeof(ObjectField)
     );
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
-    private string _serviceKey = string.Empty;
     private readonly WeakReference<ObjectWindow> _editWindow = new(null!);
-    public Property Property
+    private string _serviceKey = string.Empty;
+    private PropertyInfo? _propertyInfo = null;
+    private NullabilityInfoContext _nullability = new();
+    private bool _isNullable = false;
+    private bool _isCollection = false;
+    private EntityProperty? _entityProperty;
+    private bool IsAssigned => Target is { } && PropertyName is { };
+    public bool IsReadonly => _entityProperty?.IsReadonly ?? false;
+    public object Target
     {
-        get => (Property)GetValue(PropertyProperty);
-        set => SetValue(PropertyProperty, value);
+        get => GetValue(TargetProperty);
+        set => SetValue(TargetProperty, value);
+    }
+    public string PropertyName
+    {
+        get => (string)GetValue(PropertyNameProperty);
+        set => SetValue(PropertyNameProperty, value);
     }
     public Window Window
     {
@@ -47,8 +63,20 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
         set => SetValue(WindowProperty, value);
     }
     public string ServiceKey => _serviceKey;
-    public int Count => Property is ListProperty lp ? lp.Count : 0;
+    public int Count => IsAssigned && _isCollection ? lp.Count : 0;
     public bool EditorOpen => ObjectEditor?.Visibility is Visibility.Visible;
+    public object? Value
+    {
+        get => IsAssigned ? _propertyInfo!.GetValue(Target) : null;
+        set
+        {
+            if (IsAssigned)
+            {
+                _propertyInfo!.SetValue(Target, value);
+            }
+        }
+    }
+    public Type Type => IsAssigned ? _propertyInfo?.PropertyType ?? typeof(object) : typeof(object);
     public ObjectField()
     {
         InitializeComponent();
@@ -56,10 +84,10 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     public bool CanExecute(object? parameter)
     {
         return 
-            Property is { } 
+            IsAssigned 
             && (
                 (
-                    Property.Value is { } 
+                    Value is { } 
                     && (
                         "Edit".Equals(parameter)
                         || "EditExternal".Equals(parameter)
@@ -67,8 +95,8 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                     )
                 )
                 || (
-                    !Property.IsReadonly 
-                    && Property.Value is null
+                    !IsReadonly 
+                    && Value is null
                     && (
                         (
                             "Find".Equals(parameter) 
@@ -136,7 +164,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                             }
                             else
                             {
-                                window.Property = Property;
+                                window.Target = Property;
                             }
                             window.Show();
                         }
@@ -157,7 +185,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                         if (Property.Value is IEntityOwner eo)
                         {
                         }
-                        else if (Property.Value is { })
+                        else if (_propertyInfo!.GetValue(Target) is object value)
                         {
                             for(DependencyObject dob = this; dob is not null; dob = VisualTreeHelper.GetParent(dob))
                             {
@@ -165,7 +193,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                                 {
                                     if(_editWindow is { } && _editWindow.TryGetTarget(out ObjectWindow? window) && window.IsLoaded)
                                     {
-                                        ObjectEditor.Properties = window.Properties;
+                                        ObjectEditor.Target = value;
                                     }
                                     else
                                     {
@@ -191,19 +219,19 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     }
     public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if(Property is {})
+        if(IsAssigned)
         {
             if ("ObjectState".Equals(parameter))
             {
-                if (Property.Access is Contract.AccessKind.NotSet)
+                if (_entityProperty?.Entity.Access is Contract.AccessKind.NotSet)
                 {
                     return ObjectState.NotSet;
                 }
-                if (Property.Access is Contract.AccessKind.Forbidden)
+                if (_entityProperty?.Entity.Access is Contract.AccessKind.Forbidden)
                 {
                     return ObjectState.Forbidden;
                 }
-                if (Property.Value is { })
+                if (_propertyInfo?.GetValue(Target) is { })
                 {  
                     return ObjectState.IsNotNull;
                 }
@@ -211,7 +239,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             }
             if ("CountVisibility".Equals(parameter))
             {
-                return Property is ListProperty && Property.Value is { } ? Visibility.Visible : Visibility.Collapsed;
+                return IsAssigned && _isCollection ? Visibility.Visible : Visibility.Collapsed;
             }
             if ("EditVisibility".Equals(parameter))
             {
@@ -230,22 +258,21 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
-        if (e.Property == PropertyProperty)
+        if (e.Property == TargetProperty)
         {
-            if (e.OldValue is Property oldProperty)
+            if (e.OldValue is { })
             {
                 TextBlock.DataContext = null;
-                Find.Visibility = Visibility.Collapsed;
-                CountText.Visibility = Visibility.Collapsed;
-                oldProperty.PropertyChanged -= Property_PropertyChanged;
             }
-            if (e.NewValue is Property newProperty)
+            if (e.NewValue is { })
             {
-                TextBlock.DataContext = newProperty;
-                Find.Visibility = typeof(IEntityOwner).IsAssignableFrom(Property.Type) ? Visibility.Visible : Visibility.Collapsed;
-                PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
-                newProperty.PropertyChanged += Property_PropertyChanged;
+                TextBlock.DataContext = e.NewValue;
             }
+            ProcessProperties();
+        }
+        else if (e.Property == PropertyNameProperty)
+        {
+            ProcessProperties();
         }
         else if (e.Property == WindowProperty)
         {
@@ -263,12 +290,26 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
         }
         base.OnPropertyChanged(e);
     }
+
+    private void ProcessProperties()
+    {
+        if (IsAssigned)
+        {
+            _entityProperty = Target is IEntityOwner eo ? eo.Entity.GetEntityProperty(PropertyName) : null;
+            _propertyInfo = Target.GetType().GetProperty(PropertyName);
+            _isNullable = _nullability.Create(_propertyInfo!).ReadState is NullabilityState.Nullable;
+            _isCollection = Type.IsGenericType && typeof(ObservableCollection<>).IsAssignableFrom(Type.GetGenericTypeDefinition());
+            Find.Visibility = typeof(IEntityOwner).IsAssignableFrom(Type) ? Visibility.Visible : Visibility.Collapsed;
+            PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+        }
+    }
+
     private void CloseEdit()
     {
         if (ObjectEditor.Visibility is Visibility.Visible)
         {
             ObjectEditor.Visibility = Visibility.Collapsed;
-            ObjectEditor.Properties = null!;
+            ObjectEditor.Target = null!;
             PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
         }
     }

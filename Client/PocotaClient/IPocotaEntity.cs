@@ -7,4 +7,5 @@ public interface IPocotaEntity
     ulong PocotaId { get; }
     EntityState State { get; }
     AccessKind Access { get; }
+    EntityProperty? GetEntityProperty(string propertyName);
 }

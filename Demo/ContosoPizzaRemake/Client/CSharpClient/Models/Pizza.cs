@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Pizza                        //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-19T16:46:35.                                 //
+// at 2024-06-19T17:22:13.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -31,6 +31,10 @@ public class Pizza: IEntityOwner, INotifyPropertyChanged
             Name = new EntityProperty(this, s_Name, typeof(String));
             Sauce = new EntityProperty(this, s_Sauce, typeof(Sauce));
             Toppings = new EntityProperty(this, s_Toppings, typeof(ObservableCollection<Topping>));
+            _properties.Add(s_Id, Id);
+            _properties.Add(s_Name, Name);
+            _properties.Add(s_Sauce, Sauce);
+            _properties.Add(s_Toppings, Toppings);
         }
     }
     public event PropertyChangedEventHandler? PropertyChanged;

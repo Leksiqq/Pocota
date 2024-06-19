@@ -47,15 +47,14 @@
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
                     <GridViewColumn 
-                    x:Name="PropertyNameColumn"
-                    CellTemplate="{StaticResource NameTemplate}"
-                    Width="Auto"
-                    />
+                        x:Name="PropertyNameColumn"
+                        CellTemplate="{StaticResource NameTemplate}"
+                        Width="Auto"
+                        />
                     <GridViewColumn
-                    x:Name="PropertyValueColumn"
-                    Width="Auto"
-                    >
-                    </GridViewColumn>
+                        x:Name="PropertyValueColumn"
+                        Width="Auto"
+                        />
                 </GridView>
             </ListView.View>
         </ListView>

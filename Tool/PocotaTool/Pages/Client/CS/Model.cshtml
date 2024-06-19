@@ -23,6 +23,11 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
     <text>            @prop.Name = new @nameof(EntityProperty)@{}(this, s_@{}@prop.Name, typeof(@Html.Raw(prop.TypeName)));
 </text>
 }
+@foreach (PropertyModel prop in Model.Properties)
+{
+    <text>            _properties.Add(s_@{}@prop.Name, @prop.Name);
+</text>
+}
         }
     }
     public event PropertyChangedEventHandler? PropertyChanged;

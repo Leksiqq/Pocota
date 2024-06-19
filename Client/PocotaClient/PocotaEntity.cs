@@ -14,6 +14,7 @@ public abstract class PocotaEntity: IPocotaEntity, INotifyPropertyChanged
     private AccessKind _access = AccessKind.Full;
     private EntityState _state = EntityState.Detached;
     protected readonly PocotaContext _context;
+    protected readonly Dictionary<string, EntityProperty> _properties = [];
     public ulong PocotaId {  get; private init; }
     public EntityState State 
     { 
@@ -51,5 +52,14 @@ public abstract class PocotaEntity: IPocotaEntity, INotifyPropertyChanged
         PocotaId = pocotaId;
         _context = context;
         _owner = owner;
+    }
+
+    public EntityProperty? GetEntityProperty(string propertyName)
+    {
+        if(_properties.TryGetValue(propertyName, out EntityProperty? entityProperty))
+        {
+            return entityProperty;
+        }
+        return null;
     }
 }

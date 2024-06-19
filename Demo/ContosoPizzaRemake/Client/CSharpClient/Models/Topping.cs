@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.Topping                      //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-19T16:46:35.                                 //
+// at 2024-06-19T17:22:13.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -31,6 +31,10 @@ public class Topping: IEntityOwner, INotifyPropertyChanged
             Name = new EntityProperty(this, s_Name, typeof(String));
             Calories = new EntityProperty(this, s_Calories, typeof(Decimal));
             Pizzas = new EntityProperty(this, s_Pizzas, typeof(ObservableCollection<Pizza>));
+            _properties.Add(s_Id, Id);
+            _properties.Add(s_Name, Name);
+            _properties.Add(s_Calories, Calories);
+            _properties.Add(s_Pizzas, Pizzas);
         }
     }
     public event PropertyChangedEventHandler? PropertyChanged;

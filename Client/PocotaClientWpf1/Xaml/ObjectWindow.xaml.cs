@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Net.Leksi.Pocota.Client.UserControls;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Data;
 using static Net.Leksi.Pocota.Client.Constants;
@@ -13,42 +11,36 @@ public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, IN
     public event PropertyChangedEventHandler? PropertyChanged;
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private readonly INamesConverter _namesConverter;
-    private Property? _property;
+    private object? _target;
+    private string? _name;
     private IInputElement? _currentInput = null;
     public WindowCore Core { get; private init; }
     public string ServiceKey { get; private init; }
-    public Property? Property 
-    { 
-        get => _property; 
+    public object? Target
+    {
+        get => _target;
         internal set
         {
-            if (_property != value)
+            if (_target != value)
             {
-                if (_property is { })
-                {
-                    Properties.Clear();
-                }
-                _property = value;
-                if (_property is { })
-                {
-                    if (_property.Value is IEntityOwner eo)
-                    {
-                    }
-                    else if (_property.Value is {})
-                    {
-                        foreach(PropertyInfo pi in _property.Type.GetProperties())
-                        {
-                            Properties.Add(Property.Create(pi, _property.Value)!);
-                        }
-                    }
-                }
+                _target = value;
                 PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
             }
-        } 
+        }
     }
-    public ObservableCollection<Property> Properties { get; private init; } = [];
-    public string ObjectTitle => $"{(Core.Launcher?.Owner is IEditWindow ew ? $"{ew.ObjectTitle}/" : string.Empty)}{ConvertName(Property?.Name, Property?.Type)}";
-
+    public string? Name
+    {
+        get => _name;
+        internal set
+        {
+            if (_name != value)
+            {
+                _name = value;
+                PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+            }
+        }
+    }
+    public string ObjectTitle => $"{(Core.Launcher?.Owner is IEditWindow ew ? $"{ew.ObjectTitle}/" : string.Empty)}{ConvertName(Name, Target?.GetType())}";
     public ObjectWindow(string serviceKey, Window owner)
     {
         _namesConverter = (Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!.GetRequiredService<INamesConverter>();
@@ -57,7 +49,6 @@ public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, IN
         Core.Launcher = (owner as IWindowWithCore)?.Core;
         InitializeComponent();
     }
-
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         Console.WriteLine(value);

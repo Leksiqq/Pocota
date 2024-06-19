@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Client.FindPizzasEnvelope                  //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-19T16:46:35.                                 //
+// at 2024-06-19T17:22:13.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 

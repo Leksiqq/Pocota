@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
 using System.Numerics;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -22,8 +23,12 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     }
     public event PropertyChangedEventHandler? PropertyChanged;
     private const int s_defaultChangeHeight = 5;
-    public static readonly DependencyProperty PropertyProperty = DependencyProperty.Register(
-       nameof(Property), typeof(Property),
+    public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(
+       nameof(Target), typeof(object),
+       typeof(TextField)
+    );
+    public static readonly DependencyProperty PropertyNameProperty = DependencyProperty.Register(
+       nameof(PropertyName), typeof(string),
        typeof(TextField)
     );
     public static readonly DependencyProperty ChangeHeightProperty = DependencyProperty.Register(
@@ -36,29 +41,39 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     private ObjectEditor? _objectEditor = null;
     private int _expectedCaretIndex = -1;
     private double _initialHeight = 0;
-    public Property Property
+    private PropertyInfo? _propertyInfo = null;
+    private NullabilityInfoContext _nullability = new();
+    private bool _isNullable = false;
+    private EntityProperty? _entityProperty = null;
+    private bool IsAssigned => Target is { } && PropertyName is { };
+    public object Target
     {
-        get => (Property)GetValue(PropertyProperty);
-        set => SetValue(PropertyProperty, value);
+        get => GetValue(TargetProperty);
+        set => SetValue(TargetProperty, value);
+    }
+    public string PropertyName
+    {
+        get => (string)GetValue(PropertyNameProperty);
+        set => SetValue(PropertyNameProperty, value);
     }
     public int ChangeHeight
     {
         get => (int)GetValue(ChangeHeightProperty);
         set => SetValue(ChangeHeightProperty, value);
     }
+    public bool IsReadonly => _entityProperty?.IsReadonly ?? false;
+    public bool IsInsertMode { get; private set; } = true;
     public object? Value
     {
-        get => Property?.Value;
-        set {
-            if(Property is { })
+        get => IsAssigned ? _propertyInfo!.GetValue(Target) : null;
+        set
+        {
+            if (IsAssigned)
             {
-                Property.Value = value;
-                PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+                _propertyInfo!.SetValue(Target, value);
             }
         }
     }
-    public bool IsReadonly => Property?.IsReadonly ?? true;
-    public bool IsInsertMode { get; private set; } = true;
     private ObjectEditor? Editor
     {
         get
@@ -86,13 +101,12 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         }
         if ("Text".Equals(parameter))
         {
-            Console.WriteLine($"text: {value}, {Property.GetHashCode()}");
             _value = value;
             if(_badFormat is { })
             {
                 return _badFormat;
             }
-            return ToString(value, Property.Type);
+            return ToString(value, _propertyInfo!.PropertyType);
         }
         return value;
     }
@@ -103,8 +117,8 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             if (value is string valueAsString)
             {
                 object? res;
-                Type type = Property.Type;
-                if (Property.IsNullable)
+                Type type = _propertyInfo!.PropertyType;
+                if (_isNullable)
                 {
                     if(string.IsNullOrWhiteSpace(valueAsString))
                     {
@@ -144,24 +158,24 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     }
     public bool CanExecute(object? parameter)
     {
-        bool res = Property is { } 
+        bool res = Target is { } && PropertyName is { } 
         && (
             "Undo".Equals(parameter)
             || "Increase".Equals(parameter)
             || "Decrease".Equals(parameter)
-            || ("Clear".Equals(parameter) && !IsClean())
+            || ("Clear".Equals(parameter) && !IsClean() && !IsReadonly)
         );
         return res;
     }
     public void Execute(object? parameter)
     {
         if(
-            Property is { }
+            Target is { } && PropertyName is { }
             && (
                 "Undo".Equals(parameter)
                 || "Increase".Equals(parameter)
                 || "Decrease".Equals(parameter)
-                || ("Clear".Equals(parameter) && !IsClean())
+                || ("Clear".Equals(parameter) && !IsClean() && !IsReadonly)
             )
         )
         {
@@ -212,50 +226,63 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
-        if (e.Property == PropertyProperty)
+        if (e.Property == TargetProperty)
         {
-            if (e.OldValue is Property oldProperty)
+            if (e.OldValue is {})
             {
                 TextBox.DataContext = null;
             }
-            if (e.NewValue is Property newProperty)
+            if (e.NewValue is {})
             {
-                TextBox.DataContext = this;
-                UndoButton.Visibility = newProperty is EntityProperty ep 
-                    && (ep.Entity.State is EntityState.Unchanged || ep.Entity.State is EntityState.Modified)
-                    ? Visibility.Visible : Visibility.Collapsed;
-                IncreaseTextButton.Visibility = newProperty.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
-                DecreaseTextButton.Visibility = newProperty.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
-                TextBox.AcceptsReturn = newProperty.Type == typeof(string);
-                TextBox.VerticalScrollBarVisibility = newProperty.Type == typeof(string) ? ScrollBarVisibility.Auto : ScrollBarVisibility.Hidden;
-                Console.WriteLine(newProperty.GetHashCode());
+                TextBox.DataContext = e.NewValue;
             }
+            ProcessProperties();
+        }
+        else if(e.Property == PropertyNameProperty)
+        {
+            ProcessProperties();
         }
         base.OnPropertyChanged(e);
     }
+    private void ProcessProperties()
+    {
+        if(Target is { } && PropertyName is { })
+        {
+            _entityProperty = Target is IEntityOwner eo ? eo.Entity.GetEntityProperty(PropertyName) : null;
+            _propertyInfo = Target.GetType().GetProperty(PropertyName);
+            _isNullable = _nullability.Create(_propertyInfo!).ReadState is NullabilityState.Nullable;
+            UndoButton.Visibility = _entityProperty?.Entity.State is EntityState.Unchanged || _entityProperty?.Entity.State is EntityState.Modified
+                ? Visibility.Visible : Visibility.Collapsed;
+            IncreaseTextButton.Visibility = _propertyInfo!.PropertyType == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
+            DecreaseTextButton.Visibility = _propertyInfo.PropertyType == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
+            TextBox.AcceptsReturn = _propertyInfo.PropertyType == typeof(string);
+            TextBox.VerticalScrollBarVisibility = _propertyInfo.PropertyType == typeof(string) ? ScrollBarVisibility.Auto : ScrollBarVisibility.Hidden;
+            PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+        }
+    }
     private void Clear()
     {
-        if(Property is { })
+        if(IsAssigned)
         {
-            if(Property.IsNullable || Property.Type.IsClass)
+            if(_isNullable || _propertyInfo!.PropertyType.IsClass)
             {
                 Value = null;
             }
             else
             {
-                Value = Activator.CreateInstance(Property.Type);
+                Value = Activator.CreateInstance(_propertyInfo.PropertyType);
             }
         }
     }
     private bool IsClean()
     {
-        if (Property is { })
+        if (IsAssigned)
         {
-            if (Property.IsNullable || Property.Type.IsClass)
+            if (_isNullable || _propertyInfo!.PropertyType.IsClass)
             {
                 return Value is null;
             }
-            return Value?.Equals(Activator.CreateInstance(Property.Type)) ?? true;
+            return Value?.Equals(Activator.CreateInstance(_propertyInfo.PropertyType)) ?? true;
         }
         return true;
     }

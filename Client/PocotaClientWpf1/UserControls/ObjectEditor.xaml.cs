@@ -22,8 +22,8 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
        nameof(ServiceProviderCatcher), typeof(XamlServiceProviderCatcher),
        typeof(ObjectEditor)
     );
-    public static readonly DependencyProperty PropertiesProperty = DependencyProperty.Register(
-       nameof(Properties), typeof(ObservableCollection<Property>),
+    public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(
+       nameof(Target), typeof(object),
        typeof(ObjectEditor)
     );
     public static readonly DependencyProperty WindowProperty = DependencyProperty.Register(
@@ -36,10 +36,10 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
         get => (XamlServiceProviderCatcher)GetValue(ServiceProviderCatcherProperty); 
         set => SetValue(ServiceProviderCatcherProperty, value);
     }
-    public ObservableCollection<Property> Properties
+    public object? Target
     {
-        get => (ObservableCollection<Property>)GetValue(PropertiesProperty);
-        set => SetValue(PropertiesProperty, value);
+        get => GetValue(TargetProperty);
+        set => SetValue(TargetProperty, value);
     }
     public Window Window
     {
@@ -104,15 +104,13 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
 
         if (e.Property.OwnerType == GetType())
         {
-            if(e.Property == PropertiesProperty)
+            if(e.Property == TargetProperty)
             {
-                if (e.OldValue is ObservableCollection<Property> oc)
+                if (e.OldValue is {})
                 {
-                    oc.CollectionChanged -= Properties_CollectionChanged;
                 }
-                if (e.NewValue is ObservableCollection<Property> oc1)
+                if (e.NewValue is {})
                 {
-                    oc1.CollectionChanged += Properties_CollectionChanged;
                 }
             }
             else if(e.Property == WindowProperty)
@@ -142,7 +140,7 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     }
     private void SetTemplateSelector()
     {
-        if (ServiceProviderCatcher is { } && Properties is { } && Window is { } && PropertyValueColumn.CellTemplateSelector is null)
+        if (ServiceProviderCatcher is { } && Target is { } && Window is { } && PropertyValueColumn.CellTemplateSelector is null)
         {
             string spName = $"sp{Guid.NewGuid()}";
             ParameterizedResourceExtension pre = new("PropertyTemplateSelector")
@@ -152,7 +150,7 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
             this.Window.Resources.Add(spName, ServiceProviderCatcher);
             PropertyValueColumn.CellTemplateSelector = pre.ProvideValue(ServiceProviderCatcher.ServiceProvider!) as DataTemplateSelector;
             this.Window.Resources.Remove(spName);
-            PropertiesViewSource.Source = Properties;
+            PropertiesViewSource.Source = Target.GetType().GetProperties().Select(p => p.GetValue(Target));
         }
     }
     private void oe_Loaded(object sender, RoutedEventArgs e)
