@@ -11,6 +11,7 @@ public class CommonJsonConverterFactory : JsonConverterFactory
         {
             return true;
         }
+        return false;
     }
 
     public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)

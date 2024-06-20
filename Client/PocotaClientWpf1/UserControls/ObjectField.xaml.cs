@@ -72,7 +72,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     }
     public bool CanExecute(object? parameter)
     {
-        Console.WriteLine($"CanExecute: {parameter}, {JsonSerializer.Serialize(Field, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");
+        Console.WriteLine($"CanExecute: {parameter}, {JsonSerializer.Serialize(Field)}");
         return 
             Field?.IsReady ?? false
             && (
