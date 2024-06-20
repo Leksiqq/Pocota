@@ -43,7 +43,7 @@
         <uc:ObjectEditor 
             x:Name="ObjectEditor"
             DockPanel.Dock="Top"
-            Properties="{Binding Parameters}" 
+            Target="{Binding Target}" 
             Window="{Binding}" 
             ServiceProviderCatcher="{StaticResource WindowSP}" 
             />

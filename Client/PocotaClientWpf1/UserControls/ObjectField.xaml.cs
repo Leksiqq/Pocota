@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Collections;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Globalization;
-using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -12,9 +11,8 @@ using System.Windows.Media;
 using static Net.Leksi.Pocota.Client.Constants;
 
 namespace Net.Leksi.Pocota.Client.UserControls;
-public partial class ObjectField : UserControl, ICommand, IValueConverter, IServiceRelated, INotifyPropertyChanged
+public partial class ObjectField : UserControl, ICommand, IValueConverter, IServiceRelated, IFieldOwner
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler? CanExecuteChanged
     {
         add
@@ -26,36 +24,38 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             CommandManager.RequerySuggested -= value;
         }
     }
+    public static readonly DependencyProperty FieldProperty = DependencyProperty.Register(
+       nameof(Field), typeof(IField),
+       typeof(ObjectField)
+    );
     public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(
        nameof(Target), typeof(object),
-       typeof(TextField)
+       typeof(ObjectField)
     );
     public static readonly DependencyProperty PropertyNameProperty = DependencyProperty.Register(
        nameof(PropertyName), typeof(string),
-       typeof(TextField)
+       typeof(ObjectField)
     );
     public static readonly DependencyProperty WindowProperty = DependencyProperty.Register(
        nameof(Window), typeof(Window),
        typeof(ObjectField)
     );
-    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private readonly WeakReference<ObjectWindow> _editWindow = new(null!);
     private string _serviceKey = string.Empty;
-    private PropertyInfo? _propertyInfo = null;
-    private NullabilityInfoContext _nullability = new();
-    private bool _isNullable = false;
-    private bool _isCollection = false;
-    private EntityProperty? _entityProperty;
-    private bool IsAssigned => Target is { } && PropertyName is { };
-    public bool IsReadonly => _entityProperty?.IsReadonly ?? false;
-    public object Target
+    private IField.WaitingForFlags _waitingFor = IField.WaitingForFlags.Any;
+    public IField? Field
     {
-        get => GetValue(TargetProperty);
+        get => (IField?)GetValue(FieldProperty);
+        set => SetValue(FieldProperty, value);
+    }
+    public object? Target
+    {
+        get => (object?)GetValue(TargetProperty);
         set => SetValue(TargetProperty, value);
     }
-    public string PropertyName
+    public string? PropertyName
     {
-        get => (string)GetValue(PropertyNameProperty);
+        get => (string?)GetValue(PropertyNameProperty);
         set => SetValue(PropertyNameProperty, value);
     }
     public Window Window
@@ -64,31 +64,20 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
         set => SetValue(WindowProperty, value);
     }
     public string ServiceKey => _serviceKey;
-    public int Count => IsAssigned && _isCollection ? (Value as IList)?.Count ?? 0 : 0;
+    public int Count => Field?.IsReady ?? false && Field.IsCollection ? (Field.Value as IList)?.Count ?? 0 : 0;
     public bool EditorOpen => ObjectEditor?.Visibility is Visibility.Visible;
-    public object? Value
-    {
-        get => IsAssigned ? _propertyInfo!.GetValue(Target) : null;
-        set
-        {
-            if (IsAssigned)
-            {
-                _propertyInfo!.SetValue(Target, value);
-            }
-        }
-    }
-    public Type Type => IsAssigned ? _propertyInfo?.PropertyType ?? typeof(object) : typeof(object);
     public ObjectField()
     {
         InitializeComponent();
     }
     public bool CanExecute(object? parameter)
     {
+        Console.WriteLine($"CanExecute: {parameter}, {JsonSerializer.Serialize(Field, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");
         return 
-            IsAssigned 
+            Field?.IsReady ?? false
             && (
                 (
-                    Value is { } 
+                    Field.Value is { } 
                     && (
                         "Edit".Equals(parameter)
                         || "EditExternal".Equals(parameter)
@@ -96,41 +85,41 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                     )
                 )
                 || (
-                    !IsReadonly 
-                    && Value is null
+                    !Field.IsReadonly 
+                    && Field.Value is null
                     && (
                         (
                             "Find".Equals(parameter) 
-                            && typeof(IEntityOwner).IsAssignableFrom(Type)
+                            && typeof(IEntityOwner).IsAssignableFrom(Field.Type)
                         ) 
                         || "Create".Equals(parameter)
                     )
                 )
-                || (!IsReadonly && Value is { } && "Clear".Equals(parameter))
+                || (!Field.IsReadonly && Field.Value is { } && "Clear".Equals(parameter))
             )
             ;
     }
     public void Execute(object? parameter)
     {
-        if(IsAssigned)
+        if(Field?.IsReady ?? false)
         {
             
-            if(!IsReadonly && Value is { } && "Clear".Equals(parameter))
+            if(!Field.IsReadonly && Field.Value is { } && "Clear".Equals(parameter))
             {
                 CloseEdit();
-                Value = default;
+                Field.Value = null;
             }
-            else if (Value is { } && "CloseEdit".Equals(parameter))
+            else if (Field.Value is { } && "CloseEdit".Equals(parameter))
             {
                 CloseEdit();
             }
             else if(
                 (
-                    !IsReadonly 
+                    !Field.IsReadonly 
                     && "Create".Equals(parameter)
                 )
                 || (
-                    Value is { } 
+                    Field.Value is { } 
                     && (
                         "Edit".Equals(parameter)
                         || "EditExternal".Equals(parameter)
@@ -140,12 +129,12 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             {
                 if ("Create".Equals(parameter))
                 {
-                    Value = ((IServiceProvider)FindResource(ServiceProviderResourceKey))
-                        .GetRequiredKeyedService<PocotaContext>(ServiceKey).CreateInstance(Type);
+                    Field.Value = ((IServiceProvider)FindResource(ServiceProviderResourceKey))
+                        .GetRequiredKeyedService<PocotaContext>(ServiceKey).CreateInstance(Field.Type);
                 }
                 else if ("EditExternal".Equals(parameter))
                 {
-                    if (_isCollection)
+                    if (Field.IsCollection)
                     {
 
                     }
@@ -156,7 +145,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                             
                             window = new ObjectWindow(_serviceKey, Window);
                             _editWindow.SetTarget(window);
-                            window.Target = Target;
+                            window.Target = Field.Target;
                             window.Show();
                         }
                         else
@@ -167,38 +156,25 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                 }
                 else
                 {
-                    if (_isCollection)
+                    if (Field.IsCollection)
                     {
 
                     }
                     else
                     {
-                        if (Value is IEntityOwner eo)
+                        if (Field.Value is IEntityOwner eo)
                         {
                         }
-                        else if (Value is object value)
+                        else if (Field.Value is object value)
                         {
                             for(DependencyObject dob = this; dob is not null; dob = VisualTreeHelper.GetParent(dob))
                             {
                                 if(dob is ObjectEditor oe)
                                 {
-                                    if(_editWindow is { } && _editWindow.TryGetTarget(out ObjectWindow? window) && window.IsLoaded)
-                                    {
-                                        ObjectEditor.Target = value;
-                                    }
-                                    else
-                                    {
-                                        ObservableCollection<Property> properties = [];
-                                        foreach (PropertyInfo pi in Property.Type.GetProperties())
-                                        {
-                                            properties.Add(Property.Create(pi, Property.Value)!);
-                                        }
-                                        ObjectEditor.Properties = properties;
-                                    }
+                                    ObjectEditor.Target = value;
                                     ObjectEditor.Window = Window;
                                     ObjectEditor.ServiceProviderCatcher = oe.ServiceProviderCatcher;
                                     ObjectEditor.Visibility = Visibility.Visible;
-                                    PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
                                     break;
                                 }
                             }
@@ -210,19 +186,19 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     }
     public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if(IsAssigned)
+        if(Field?.IsReady ?? false)
         {
             if ("ObjectState".Equals(parameter))
             {
-                if (_entityProperty?.Entity.Access is Contract.AccessKind.NotSet)
+                if (Field.EntityProperty?.Entity.Access is Contract.AccessKind.NotSet)
                 {
                     return ObjectState.NotSet;
                 }
-                if (_entityProperty?.Entity.Access is Contract.AccessKind.Forbidden)
+                if (Field.EntityProperty?.Entity.Access is Contract.AccessKind.Forbidden)
                 {
                     return ObjectState.Forbidden;
                 }
-                if (_propertyInfo?.GetValue(Target) is { })
+                if (Field.Value is { })
                 {  
                     return ObjectState.IsNotNull;
                 }
@@ -230,7 +206,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             }
             if ("CountVisibility".Equals(parameter))
             {
-                return IsAssigned && _isCollection ? Visibility.Visible : Visibility.Collapsed;
+                return Field.IsReady && Field.IsCollection ? Visibility.Visible : Visibility.Collapsed;
             }
             if ("EditVisibility".Equals(parameter))
             {
@@ -247,23 +223,49 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     {
         return value;
     }
+    public void OnFieldAssigned()
+    {
+        if(Field is { })
+        {
+            TextBlock.DataContext = Field;
+            Find.Visibility = typeof(IEntityOwner).IsAssignableFrom(Field.Type) ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+    public void OnFieldDeassigned()
+    {
+        TextBlock.DataContext = null;
+    }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
-        if (e.Property == TargetProperty)
+        if (e.Property == FieldProperty)
         {
-            if (e.OldValue is { })
+            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.Field))
             {
-                TextBlock.DataContext = null;
+                if (e.NewValue is IField newField)
+                {
+                    newField.Owner = this;
+                }
             }
-            if (e.NewValue is { })
-            {
-                TextBlock.DataContext = e.NewValue;
-            }
-            ProcessProperties();
         }
         else if (e.Property == PropertyNameProperty)
         {
-            ProcessProperties();
+            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.PropertyName))
+            {
+                if (_waitingFor is IField.WaitingForFlags.None)
+                {
+                    Field = new Field { Target = Target, PropertyName = PropertyName, Owner = this };
+                }
+            }
+        }
+        else if (e.Property == TargetProperty)
+        {
+            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.Target))
+            {
+                if (_waitingFor is IField.WaitingForFlags.None)
+                {
+                    Field = new Field { Target = Target, PropertyName = PropertyName, Owner = this };
+                }
+            }
         }
         else if (e.Property == WindowProperty)
         {
@@ -281,31 +283,12 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
         }
         base.OnPropertyChanged(e);
     }
-
-    private void ProcessProperties()
-    {
-        if (IsAssigned)
-        {
-            _entityProperty = Target is IEntityOwner eo ? eo.Entity.GetEntityProperty(PropertyName) : null;
-            _propertyInfo = Target.GetType().GetProperty(PropertyName);
-            _isNullable = _nullability.Create(_propertyInfo!).ReadState is NullabilityState.Nullable;
-            _isCollection = Type.IsGenericType && typeof(ObservableCollection<>).IsAssignableFrom(Type.GetGenericTypeDefinition());
-            Find.Visibility = typeof(IEntityOwner).IsAssignableFrom(Type) ? Visibility.Visible : Visibility.Collapsed;
-            PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
-        }
-    }
-
     private void CloseEdit()
     {
         if (ObjectEditor.Visibility is Visibility.Visible)
         {
             ObjectEditor.Visibility = Visibility.Collapsed;
             ObjectEditor.Target = null!;
-            PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
         }
-    }
-    private void Property_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
     }
 }

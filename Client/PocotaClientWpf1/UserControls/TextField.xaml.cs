@@ -1,14 +1,12 @@
-﻿using System.ComponentModel;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Numerics;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 namespace Net.Leksi.Pocota.Client.UserControls;
-public partial class TextField : UserControl, IValueConverter, INotifyPropertyChanged, ICommand, IInputElement
+public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICommand, IInputElement
 {
     public event EventHandler? CanExecuteChanged
     {
@@ -21,8 +19,11 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             CommandManager.RequerySuggested -= value;
         }
     }
-    public event PropertyChangedEventHandler? PropertyChanged;
     private const int s_defaultChangeHeight = 5;
+    public static readonly DependencyProperty FieldProperty = DependencyProperty.Register(
+       nameof(Field), typeof(IField),
+       typeof(TextField)
+    );
     public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(
        nameof(Target), typeof(object),
        typeof(TextField)
@@ -35,25 +36,25 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
        nameof(ChangeHeight), typeof(int),
        typeof(TextField)
     );
-    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private object? _value;
     private string? _badFormat = null;
     private ObjectEditor? _objectEditor = null;
     private int _expectedCaretIndex = -1;
     private double _initialHeight = 0;
-    private PropertyInfo? _propertyInfo = null;
-    private NullabilityInfoContext _nullability = new();
-    private bool _isNullable = false;
-    private EntityProperty? _entityProperty = null;
-    private bool IsAssigned => Target is { } && PropertyName is { };
-    public object Target
+    private IField.WaitingForFlags _waitingFor = IField.WaitingForFlags.Any;
+    public IField? Field 
     {
-        get => GetValue(TargetProperty);
+        get => (IField?)GetValue(FieldProperty);
+        set => SetValue(FieldProperty, value);
+    }
+    public object? Target
+    {
+        get => (object?)GetValue(TargetProperty);
         set => SetValue(TargetProperty, value);
     }
-    public string PropertyName
+    public string? PropertyName
     {
-        get => (string)GetValue(PropertyNameProperty);
+        get => (string?)GetValue(PropertyNameProperty);
         set => SetValue(PropertyNameProperty, value);
     }
     public int ChangeHeight
@@ -61,19 +62,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
         get => (int)GetValue(ChangeHeightProperty);
         set => SetValue(ChangeHeightProperty, value);
     }
-    public bool IsReadonly => _entityProperty?.IsReadonly ?? false;
     public bool IsInsertMode { get; private set; } = true;
-    public object? Value
-    {
-        get => IsAssigned ? _propertyInfo!.GetValue(Target) : null;
-        set
-        {
-            if (IsAssigned)
-            {
-                _propertyInfo!.SetValue(Target, value);
-            }
-        }
-    }
     private ObjectEditor? Editor
     {
         get
@@ -88,6 +77,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             return _objectEditor;
         }
     }
+
     public TextField()
     {
         ChangeHeight = s_defaultChangeHeight;
@@ -95,62 +85,59 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     }
     public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if ("Foreground".Equals(parameter))
+        if(Field?.IsReady ?? false)
         {
-            return _badFormat is { } ? Brushes.Red : Brushes.Black;
-        }
-        if ("Text".Equals(parameter))
-        {
-            _value = value;
-            if(_badFormat is { })
+            if ("Foreground".Equals(parameter))
             {
-                return _badFormat;
+                return _badFormat is { } ? Brushes.Red : Brushes.Black;
             }
-            return ToString(value, _propertyInfo!.PropertyType);
+            if ("Text".Equals(parameter))
+            {
+                _value = value;
+                if (_badFormat is { })
+                {
+                    return _badFormat;
+                }
+                return ToString(value, Field.Type);
+            }
         }
         return value;
     }
     public object? ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if ("Text".Equals(parameter))
+        if (Field?.IsReady ?? false)
         {
-            if (value is string valueAsString)
+            if ("Text".Equals(parameter))
             {
-                object? res;
-                Type type = _propertyInfo!.PropertyType;
-                if (_isNullable)
+                if (value is string valueAsString)
                 {
-                    if(string.IsNullOrWhiteSpace(valueAsString))
+                    if (Field.IsNullable)
+                    {
+                        if (string.IsNullOrWhiteSpace(valueAsString))
+                        {
+                            _badFormat = null;
+                            return null;
+                        }
+                    }
+                    else if (string.IsNullOrWhiteSpace(valueAsString))
                     {
                         _badFormat = null;
-                        PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
-                        return null;
+                        return Activator.CreateInstance(Field.Type);
                     }
-                    if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    try
                     {
-                        type = type.GetGenericArguments()[0];
+                        if (TryParse(valueAsString, Field.Type, out object? res))
+                        {
+                            _badFormat = null;
+                            return res;
+                        }
+                        return BadFormat(valueAsString);
                     }
-                }
-                else if (string.IsNullOrWhiteSpace(valueAsString))
-                {
-                    _badFormat = null;
-                    PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
-                    return Activator.CreateInstance(type);
-                }
-                try
-                {
-                    if(TryParse(valueAsString, type, out res))
+                    catch (Exception ex)
                     {
-                        _badFormat = null;
-                        PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
-                        return res;
+                        Console.WriteLine(ex);
+                        return BadFormat(valueAsString);
                     }
-                    return BadFormat(valueAsString);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                    return BadFormat(valueAsString);
                 }
             }
         }
@@ -158,24 +145,24 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     }
     public bool CanExecute(object? parameter)
     {
-        bool res = Target is { } && PropertyName is { } 
+        bool res = Field?.IsReady ?? false
         && (
             "Undo".Equals(parameter)
             || "Increase".Equals(parameter)
             || "Decrease".Equals(parameter)
-            || ("Clear".Equals(parameter) && !IsClean() && !IsReadonly)
+            || ("Clear".Equals(parameter) && !Field.IsClean && !Field.IsReadonly)
         );
         return res;
     }
     public void Execute(object? parameter)
     {
         if(
-            Target is { } && PropertyName is { }
+            Field?.IsReady ?? false
             && (
                 "Undo".Equals(parameter)
                 || "Increase".Equals(parameter)
                 || "Decrease".Equals(parameter)
-                || ("Clear".Equals(parameter) && !IsClean() && !IsReadonly)
+                || ("Clear".Equals(parameter) && !Field.IsClean && !Field.IsReadonly)
             )
         )
         {
@@ -186,8 +173,7 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             else if ("Clear".Equals(parameter))
             {
                 _badFormat = null;
-                Clear();
-                PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+                Field.Clear();
             }
             else if ("Increase".Equals(parameter) || "Decrease".Equals(parameter))
             {
@@ -224,67 +210,52 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
             }
         }
     }
+    public void OnFieldAssigned()
+    {
+        if(Field is { })
+        {
+            TextBox.DataContext = Field;
+            UndoButton.Visibility = Field.EntityProperty?.Entity.State is EntityState.Unchanged || Field.EntityProperty?.Entity.State is EntityState.Modified
+                ? Visibility.Visible : Visibility.Collapsed;
+            IncreaseTextButton.Visibility = Field.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
+            DecreaseTextButton.Visibility = Field.Type == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
+            TextBox.AcceptsReturn = Field.Type == typeof(string);
+            TextBox.VerticalScrollBarVisibility = Field.Type == typeof(string) ? ScrollBarVisibility.Auto : ScrollBarVisibility.Hidden;
+        }
+    }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
-        if (e.Property == TargetProperty)
+        if (e.Property == FieldProperty)
         {
-            if (e.OldValue is {})
+            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.Field))
             {
-                TextBox.DataContext = null;
+                if (e.NewValue is IField newField)
+                {
+                    newField.Owner = this;
+                }
             }
-            if (e.NewValue is {})
-            {
-                TextBox.DataContext = e.NewValue;
-            }
-            ProcessProperties();
         }
-        else if(e.Property == PropertyNameProperty)
+        else if (e.Property == PropertyNameProperty)
         {
-            ProcessProperties();
+            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.PropertyName))
+            {
+                if (_waitingFor is IField.WaitingForFlags.None)
+                {
+                    Field = new Field { Target = Target, PropertyName = PropertyName, Owner = this };
+                }
+            }
+        }
+        else if (e.Property == TargetProperty)
+        {
+            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.Target))
+            {
+                if (_waitingFor is IField.WaitingForFlags.None)
+                {
+                    Field = new Field { Target = Target, PropertyName = PropertyName, Owner = this };
+                }
+            }
         }
         base.OnPropertyChanged(e);
-    }
-    private void ProcessProperties()
-    {
-        if(Target is { } && PropertyName is { })
-        {
-            _entityProperty = Target is IEntityOwner eo ? eo.Entity.GetEntityProperty(PropertyName) : null;
-            _propertyInfo = Target.GetType().GetProperty(PropertyName);
-            _isNullable = _nullability.Create(_propertyInfo!).ReadState is NullabilityState.Nullable;
-            UndoButton.Visibility = _entityProperty?.Entity.State is EntityState.Unchanged || _entityProperty?.Entity.State is EntityState.Modified
-                ? Visibility.Visible : Visibility.Collapsed;
-            IncreaseTextButton.Visibility = _propertyInfo!.PropertyType == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
-            DecreaseTextButton.Visibility = _propertyInfo.PropertyType == typeof(string) ? Visibility.Visible : Visibility.Collapsed;
-            TextBox.AcceptsReturn = _propertyInfo.PropertyType == typeof(string);
-            TextBox.VerticalScrollBarVisibility = _propertyInfo.PropertyType == typeof(string) ? ScrollBarVisibility.Auto : ScrollBarVisibility.Hidden;
-            PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
-        }
-    }
-    private void Clear()
-    {
-        if(IsAssigned)
-        {
-            if(_isNullable || _propertyInfo!.PropertyType.IsClass)
-            {
-                Value = null;
-            }
-            else
-            {
-                Value = Activator.CreateInstance(_propertyInfo.PropertyType);
-            }
-        }
-    }
-    private bool IsClean()
-    {
-        if (IsAssigned)
-        {
-            if (_isNullable || _propertyInfo!.PropertyType.IsClass)
-            {
-                return Value is null;
-            }
-            return Value?.Equals(Activator.CreateInstance(_propertyInfo.PropertyType)) ?? true;
-        }
-        return true;
     }
     private static string? ToString(object value, Type type)
     {
@@ -343,14 +314,13 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     private object? BadFormat(string s)
     {
         _badFormat = s;
-        PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
         Console.WriteLine($"_badFormat: {_badFormat}");
         return _value;
     }
 
     private void TextBox_KeyUp(object sender, KeyEventArgs e)
     {
-        if(sender is TextBox tb)
+        if(sender is TextBox)
         {
             if (e.Key is Key.Insert)
             {
@@ -364,14 +334,14 @@ public partial class TextField : UserControl, IValueConverter, INotifyPropertyCh
     }
     private void TextBox_GotFocus(object sender, RoutedEventArgs e)
     {
-        if(sender is TextBox tb && Editor is { })
+        if(sender is TextBox && Editor is { })
         {
             Editor.CurrentInput = this;
         }
     }
     private void TextBox_LostFocus(object sender, RoutedEventArgs e)
     {
-        if (sender is TextBox tb && Editor is { })
+        if (sender is TextBox && Editor is { })
         {
             Editor.CurrentInput = null;
         }

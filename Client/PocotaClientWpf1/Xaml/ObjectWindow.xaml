@@ -52,7 +52,7 @@
         </StatusBar>
         <uc:ObjectEditor 
             DockPanel.Dock="Top"
-            Properties="{Binding Properties}" 
+            Target="{Binding Target}" 
             Window="{Binding}" 
             ServiceProviderCatcher="{StaticResource WindowSP}" 
             CurrentInputChanged="ObjectEditor_CurrentInputChanged"

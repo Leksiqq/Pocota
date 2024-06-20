@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaController                            //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-19T17:22:13.                                 //
+// at 2024-06-20T18:20:03.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -56,7 +56,7 @@ public class PizzaController: ControllerBase
         HttpContext.Response.ContentType = "application/json";
         PizzaFilter _filterFilter = JsonSerializer.Deserialize<PizzaFilter>(filter, _serializerOptions)!;
         Int32 _stageFilter = JsonSerializer.Deserialize<Int32>(stage, _serializerOptions)!;
-        Nullable`1 _sureFilter = JsonSerializer.Deserialize<Nullable`1>(sure, _serializerOptions)!;
+        Boolean? _sureFilter = JsonSerializer.Deserialize<Boolean>(sure, _serializerOptions)!;
         await JsonSerializer.SerializeAsync(
             HttpContext.Response.Body, 
             PocotaContext.ProcessEntitiesAsync<Pizza>(accessCalculator, _storageService.FindPizzasAsync(_filterFilter, _stageFilter, _sureFilter)), 

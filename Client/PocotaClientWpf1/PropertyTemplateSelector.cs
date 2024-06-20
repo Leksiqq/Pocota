@@ -16,25 +16,25 @@ public class PropertyTemplateSelector: DataTemplateSelector
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
         DataTemplate? result = null;
-        if (item is Property property)
+        if (item is IField field)
         {
-            if(property.Access is Contract.AccessKind.NotSet || property.Access is Contract.AccessKind.Forbidden)
+            if(field.EntityProperty?.Access is Contract.AccessKind.NotSet || field.EntityProperty?.Access is Contract.AccessKind.Forbidden)
             {
                 result = ProvideValue(ClassDataTemplateKey);
             }
             //else if (property is ListProperty)
             //{
             //}
-            else if (property.Type.IsClass && property.Type != typeof(string))
+            else if (field.Type.IsClass && field.Type != typeof(string))
             {
                 result = ProvideValue(ClassDataTemplateKey);
             }
             else if (
-                (property.Type.IsEnum || property.Type == typeof(bool))
+                (field.Type.IsEnum || field.Type == typeof(bool))
                 || (
-                    property.Type.IsGenericType
-                    && property.Type.GetGenericTypeDefinition() == typeof(Nullable<>)
-                    && (property.Type.GetGenericArguments()[0].IsEnum || property.Type.GetGenericArguments()[0] == typeof(bool))
+                    field.Type.IsGenericType
+                    && field.Type.GetGenericTypeDefinition() == typeof(Nullable<>)
+                    && (field.Type.GetGenericArguments()[0].IsEnum || field.Type.GetGenericArguments()[0] == typeof(bool))
                 )
             )
             {

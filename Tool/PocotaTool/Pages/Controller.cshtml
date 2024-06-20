@@ -37,7 +37,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
         HttpContext.Response.ContentType = "application/json";
     @foreach(ParameterModel pm in mm.Parameters)
     {
-        <text>        @Html.Raw(pm.TypeName) _@pm.Name@{}Filter = JsonSerializer.Deserialize@{}@Html.Raw($"<{pm.TypeName}>")@{}(@pm.Name, _serializerOptions)!;
+        <text>        @Html.Raw(pm.TypeName)@(pm.IsNullable ? "?" : string.Empty) _@pm.Name@{}Filter = JsonSerializer.Deserialize@{}@Html.Raw($"<{pm.TypeName}>")@{}(@pm.Name, _serializerOptions)!;
 </text>
     }
     @if(mm.IsEnumeration)

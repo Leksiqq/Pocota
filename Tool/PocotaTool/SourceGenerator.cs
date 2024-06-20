@@ -190,10 +190,22 @@ public class SourceGenerator : Runner, ICommand
             foreach(ParameterInfo pi in mi.GetParameters())
             {
                 model.AddUsing(pi.ParameterType);
+                bool isNullable = false;
+                Type type = pi.ParameterType;
+                if (type.IsGenericType && typeof(Nullable<>).IsAssignableFrom(type.GetGenericTypeDefinition()))
+                {
+                    type = type.GetGenericArguments()[0];
+                    isNullable = true;
+                }
+                else if (new NullabilityInfoContext().Create(pi).ReadState is NullabilityState.Nullable)
+                {
+                    isNullable = true;
+                }
                 ParameterModel pm = new()
                 {
                     Name = pi.Name!,
-                    TypeName = pi.ParameterType.Name,
+                    TypeName = Util.BuildTypeName(type),
+                    IsNullable = isNullable
                 };
                 mm.Parameters.Add(pm);
             }
@@ -231,10 +243,22 @@ public class SourceGenerator : Runner, ICommand
             foreach (ParameterInfo pi in mi.GetParameters())
             {
                 model.AddUsing(pi.ParameterType);
+                bool isNullable = false;
+                Type type = pi.ParameterType;
+                if(type.IsGenericType && typeof(Nullable<>).IsAssignableFrom(type.GetGenericTypeDefinition()))
+                {
+                    type = type.GetGenericArguments()[0];
+                    isNullable = true;
+                }
+                else if(new NullabilityInfoContext().Create(pi).ReadState is NullabilityState.Nullable)
+                {
+                    isNullable = true;
+                }
                 ParameterModel pm = new()
                 {
                     Name = pi.Name!,
-                    TypeName = pi.ParameterType.Name,
+                    TypeName = Util.BuildTypeName(type),
+                    IsNullable = isNullable
                 };
                 mm.Parameters.Add(pm);
             }

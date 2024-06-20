@@ -1,12 +1,19 @@
-﻿using System.ComponentModel;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 namespace Net.Leksi.Pocota.Client.UserControls;
-public partial class EnumField : UserControl, ICommand, INotifyPropertyChanged
+public partial class EnumField : UserControl, ICommand, IFieldOwner
 {
-    public static readonly DependencyProperty PropertyProperty = DependencyProperty.Register(
-       nameof(Property), typeof(Property),
+    public static readonly DependencyProperty FieldProperty = DependencyProperty.Register(
+       nameof(Field), typeof(IField),
+       typeof(EnumField)
+    );
+    public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(
+       nameof(Target), typeof(object),
+       typeof(EnumField)
+    );
+    public static readonly DependencyProperty PropertyNameProperty = DependencyProperty.Register(
+       nameof(PropertyName), typeof(string),
        typeof(EnumField)
     );
     public event EventHandler? CanExecuteChanged
@@ -20,48 +27,43 @@ public partial class EnumField : UserControl, ICommand, INotifyPropertyChanged
             CommandManager.RequerySuggested -= value;
         }
     }
-    public event PropertyChangedEventHandler? PropertyChanged;
-    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
+    private IField.WaitingForFlags _waitingFor = IField.WaitingForFlags.Any;
+    public IField? Field
+    {
+        get => (IField?)GetValue(FieldProperty);
+        set => SetValue(FieldProperty, value);
+    }
+    public object? Target
+    {
+        get => (object?)GetValue(TargetProperty);
+        set => SetValue(TargetProperty, value);
+    }
+    public string? PropertyName
+    {
+        get => (string?)GetValue(PropertyNameProperty);
+        set => SetValue(PropertyNameProperty, value);
+    }
     public List<object?> Items { get; private init; } = [];
-    public Property Property
-    {
-        get => (Property)GetValue(PropertyProperty);
-        set => SetValue(PropertyProperty, value);
-    }
-    public object? Value
-    {
-        get => Property?.Value;
-        set
-        {
-            Console.WriteLine("here");
-            if (Property is { })
-            {
-                Console.WriteLine(value);
-                Property.Value = value;
-                PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
-            }
-        }
-    }
     public EnumField()
     {
         InitializeComponent();
     }
     public bool CanExecute(object? parameter)
     {
-        bool res = Property is { }
+        bool res = Field?.IsReady ?? false
         && (
             "Undo".Equals(parameter)
-            || ("Clear".Equals(parameter) && !IsClean())
+            || ("Clear".Equals(parameter) && !Field.IsClean)
         );
         return res;
     }
     public void Execute(object? parameter)
     {
         if (
-            Property is { }
+            Field?.IsReady ?? false
             && (
                 "Undo".Equals(parameter)
-                || ("Clear".Equals(parameter) && !IsClean())
+                || ("Clear".Equals(parameter) && !Field.IsClean)
             )
         )
         {
@@ -71,81 +73,63 @@ public partial class EnumField : UserControl, ICommand, INotifyPropertyChanged
             }
             else if ("Clear".Equals(parameter))
             {
-                Clear();
-                PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+                Field.Clear();
+            }
+        }
+    }
+    public void OnFieldAssigned()
+    {
+        if(Field is { })
+        {
+            ComboBox.DataContext = Field;
+            UndoButton.Visibility = Field.EntityProperty?.Entity.State is EntityState.Unchanged || Field.EntityProperty?.Entity.State is EntityState.Modified
+                ? Visibility.Visible : Visibility.Collapsed;
+            if (Field.Type.IsEnum)
+            {
+                foreach (object item in Enum.GetValues(Field.Type))
+                {
+                    Items.Add(item);
+                }
+            }
+            else
+            {
+                Items.Add(true);
+                Items.Add(false);
             }
         }
     }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
-        if (e.Property == PropertyProperty)
+        if (e.Property == FieldProperty)
         {
-            if (e.OldValue is Property oldProperty)
+            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.Field))
             {
-                ComboBox.DataContext = null;
-                oldProperty.PropertyChanged -= Property_PropertyChanged;
-                Items.Clear();
+                if (e.NewValue is IField newField)
+                {
+                    newField.Owner = this;
+                }
             }
-            if (e.NewValue is Property newProperty)
+        }
+        else if (e.Property == PropertyNameProperty)
+        {
+            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.PropertyName))
             {
-                ComboBox.DataContext = newProperty;
-                UndoButton.Visibility = Property is EntityProperty ep
-                    && (ep.Entity.State is EntityState.Unchanged || ep.Entity.State is EntityState.Modified)
-                    ? Visibility.Visible : Visibility.Collapsed;
-                newProperty.PropertyChanged += Property_PropertyChanged;
-                Type enumType = Property.Type;
-                if (enumType.IsGenericType && enumType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                if (_waitingFor is IField.WaitingForFlags.None)
                 {
-                    enumType = enumType.GetGenericArguments()[0];
-                    Items.Add(null);
+                    Field = new Field { Target = Target, PropertyName = PropertyName, Owner = this };
                 }
-                if (enumType.IsEnum)
+            }
+        }
+        else if (e.Property == TargetProperty)
+        {
+            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.Target))
+            {
+                if (_waitingFor is IField.WaitingForFlags.None)
                 {
-                    foreach(object item in Enum.GetValues(enumType))
-                    {
-                        Items.Add(item);
-                    }
-                }
-                else
-                {
-                    Items.Add(true);
-                    Items.Add(false);
+                    Field = new Field { Target = Target, PropertyName = PropertyName, Owner = this };
                 }
             }
         }
         base.OnPropertyChanged(e);
     }
-
-    private void Property_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
-    }
-
-    private void Clear()
-    {
-        if (Property is { })
-        {
-            if (Property.IsNullable || Property.Type.IsClass)
-            {
-                Value = null;
-            }
-            else
-            {
-                Value = Activator.CreateInstance(Property.Type);
-            }
-        }
-    }
-    private bool IsClean()
-    {
-        if (Property is { })
-        {
-            if (Property.IsNullable || Property.Type.IsClass)
-            {
-                return Value is null;
-            }
-            return Value?.Equals(Activator.CreateInstance(Property.Type)) ?? true;
-        }
-        return true;
-    }
-
 }

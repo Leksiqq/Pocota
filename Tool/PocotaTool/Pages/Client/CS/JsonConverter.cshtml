@@ -10,7 +10,7 @@ internal class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {st
 {
 @foreach (PropertyModel prop in Model.Properties)
 {
-    <text>    private const string s_@{}@prop.Name = @Html.Raw($"nameof({Model.ContractName}.{prop.Name}"));
+    <text>    private const string s_@{}@prop.Name = @Html.Raw($"nameof({Model.EntityTypeName}.{prop.Name}"));
 </text>
 }
     private readonly IServiceProvider _services;

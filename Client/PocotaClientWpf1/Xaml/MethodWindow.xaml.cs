@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
-using System.Reflection;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,7 +12,21 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated, IE
     private const string s_target = "target";
     private readonly ConnectorMethod _connectorMethod;
     private readonly INamesConverter _namesConverter;
-    public ObservableCollection<Property> Parameters { get; private init; } = [];
+    private object? _target;
+    private PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
+
+    public object? Target
+    {
+        get => _target;
+        internal set
+        {
+            if (_target != value)
+            {
+                _target = value;
+                PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
+            }
+        }
+    }
     public WindowCore Core { get; private init; }
     public string MethodName => _connectorMethod.Method.Name;
     public string ServiceKey => _connectorMethod.ServiceKey;
@@ -51,14 +63,12 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated, IE
     }
     private void Init()
     {
-        InitializeComponent();
-        foreach (ParameterInfo parameter in _connectorMethod.Method.GetParameters())
+        if((Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!
+            .GetRequiredKeyedService<Connector>(ServiceKey).GetMethodOptionsType(_connectorMethod.Method) is Type methodOptionsType)
         {
-            if (parameter.ParameterType != typeof(CancellationToken) && parameter.Name != s_target)
-            {
-                Parameters.Add(Property.Create(parameter)!);
-            }
+            Target = Activator.CreateInstance(methodOptionsType);
         }
+        InitializeComponent();
     }
 
     protected override void OnActivated(EventArgs e)
@@ -68,7 +78,7 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated, IE
     }
     private void Button_Click(object sender, RoutedEventArgs e)
     {
-        Console.WriteLine(JsonSerializer.Serialize(Parameters.Select(p => p.Value)));
+        Console.WriteLine(JsonSerializer.Serialize(Target));
     }
 
     private void MenuItem_SubmenuOpened(object sender, RoutedEventArgs e)

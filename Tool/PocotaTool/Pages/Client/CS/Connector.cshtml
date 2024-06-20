@@ -17,7 +17,8 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
         );
 @foreach (MethodModel mm in @Model.Methods)
 {
-    <text>        _methodsEnvelopes.Add(@mm.Name, typeof(@Html.Raw($"{mm.Name.Replace("Async", string.Empty)}Envelope")));
+    ParameterModel? pm = mm.Parameters.SkipWhile(p => p.Name == "target").FirstOrDefault();
+    <text>        _methodsOptionsTypes.Add(((Delegate)@mm.Name).Method, @if(pm is {}){<text>typeof(@Html.Raw(pm.TypeName))</text>} else {<text>null</text>});
 </text>
 }
     }
@@ -33,23 +34,42 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
         try 
         {
             ResetContext();
-    @foreach(ParameterModel pm in mm.Parameters.Skip(mm.IsEnumeration ? 1 : 0)) {
-        <text>            string _@{}@pm.Name = HttpUtility.UrlEncode(JsonSerializer.Serialize(@pm.Name, _serializerOptions));
+    @if(mm.ConvertingParameters is {})
+    {
+        foreach(ParameterModel pm in mm.ConvertingParameters) 
+        {
+            <text>            string _@{}@pm.Name.Replace(".", string.Empty) = HttpUtility.UrlEncode(JsonSerializer.Serialize(@pm.Name, _serializerOptions));
+</text>
+        }
+        <text>
+            HttpRequestMessage _request = new(
+                HttpMethod.Get,
+                $"/@Model.ContractName/@mm.Name.Replace("Async", string.Empty)@(mm.ConvertingParameters.Count > 0 ? "/" : string.Empty)@string.Join('/', mm.ConvertingParameters.Select(p => $"{{_{p.Name.Replace(".", string.Empty)}}}"))"
+            );
 </text>
     }
+    else {
+        foreach(ParameterModel pm in mm.Parameters.Skip(mm.IsEnumeration ? 1 : 0)) 
+        {
+            <text>            string _@{}@pm.Name = HttpUtility.UrlEncode(JsonSerializer.Serialize(@pm.Name, _serializerOptions));
+</text>
+        }
+        <text>
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
                 $"/@Model.ContractName/@mm.Name.Replace("Async", string.Empty)@(mm.Parameters.Count > (mm.IsEnumeration ? 1 : 0) ? "/" : string.Empty)@string.Join('/', mm.Parameters.Skip(mm.IsEnumeration ? 1 : 0).Select(p => $"{{_{p.Name}}}"))"
             );
-        @if(mm.IsEnumeration)
-        {
-            <text>            await GetResponseAsyncEnumerable@{}@Html.Raw($"<{mm.Parameters.First().ItemTypeName}>")@{}(@mm.Parameters.First().Name, _request, _serializerOptions, cancellationToken);
 </text>
-        }
-        else {
+    }
+    @if(mm.IsEnumeration)
+    {
+            <text>            await GetResponseAsyncEnumerable@{}(@mm.Parameters.First().Name, _request, _serializerOptions, cancellationToken);
+</text>
+    }
+    else {
             <text>            return await GetResponseAsync@{}@Html.Raw($"<{mm.ReturnItemTypeName}>")@{}(_request, _serializerOptions, cancellationToken);
 </text>
-        }
+    }
         }
         finally 
         {

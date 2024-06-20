@@ -11,11 +11,10 @@ public class PizzaService : PizzaServiceBase
         _services = services;
         _dbContext = _services.GetRequiredService<PizzaDbContext>();
     }
-    public override IAsyncEnumerable<Pizza> FindPizzasAsync(PizzaFilter filter)
+    public override IAsyncEnumerable<Pizza> FindPizzasAsync(PizzaFilter filter, int stage, bool? sure)
     {
         throw new NotImplementedException();
     }
-
     public override IAsyncEnumerable<Pizza> GetAllPizzasAsync()
     {
         return _dbContext.SetOfPizza

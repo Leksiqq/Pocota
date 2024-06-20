@@ -1,8 +1,8 @@
 ﻿using Net.Leksi.Pocota.Contract;
 using System.Net;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.Extensions.DependencyInjection;
 namespace Net.Leksi.Pocota.Client;
 
 public abstract class Connector
@@ -14,7 +14,7 @@ public abstract class Connector
     private readonly ExceptionJsonConverter _exceptionJsonConverter = new();
     protected readonly IServiceProvider _services;
     protected readonly JsonSerializerOptions _serializerOptions = new();
-    protected readonly Dictionary<Delegate, Type> _methodsEnvelopes = [];
+    protected readonly Dictionary<MethodInfo, Type?> _methodsOptionsTypes = [];
     protected PocotaContext _context = null!;
     public HttpStatusCode StatusCode { get; private set; }
     public string ServiceKey {  get; private init; }
@@ -60,11 +60,11 @@ public abstract class Connector
         _serializationOptions.Converters.Add(_exceptionJsonConverter);
         ServiceKey = serviceKey;
     }
-    public object? CreateMethodEnvelope(Delegate @delegate)
+    public Type? GetMethodOptionsType(MethodInfo methodInfo)
     {
-        if(_methodsEnvelopes.TryGetValue(@delegate, out Type? envelopeType))
+        if(_methodsOptionsTypes.TryGetValue(methodInfo, out Type? type))
         {
-            return Activator.CreateInstance(envelopeType);
+            return type;
         }
         return null;
     }

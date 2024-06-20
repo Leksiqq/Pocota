@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaConnector          //
 // was generated automatically from            //
-// at 2024-06-19T17:22:13.                     //
+// at 2024-06-20T18:20:03.                     //
 // Modifying this file will break the program! //
 /////////////////////////////////////////////////
 
@@ -27,13 +27,13 @@ public class PizzaConnector: Connector
         _serializerOptions.Converters.Add(
             _services.GetRequiredService<PizzaJsonConverterFactory>()
         );
-        _methodsEnvelopes.Add(GetAllPizzasAsync, typeof(GetAllPizzasEnvelope));
-        _methodsEnvelopes.Add(FindPizzasAsync, typeof(FindPizzasEnvelope));
-        _methodsEnvelopes.Add(GetPizzaAsync, typeof(GetPizzaEnvelope));
-        _methodsEnvelopes.Add(GetAllSaucesAsync, typeof(GetAllSaucesEnvelope));
-        _methodsEnvelopes.Add(GetSauceAsync, typeof(GetSauceEnvelope));
-        _methodsEnvelopes.Add(GetAllToppingsAsync, typeof(GetAllToppingsEnvelope));
-        _methodsEnvelopes.Add(GetToppingAsync, typeof(GetToppingEnvelope));
+        _methodsOptionsTypes.Add(((Delegate)GetAllPizzasAsync).Method, null);
+        _methodsOptionsTypes.Add(((Delegate)FindPizzasAsync).Method, typeof(FindPizzasOptions));
+        _methodsOptionsTypes.Add(((Delegate)GetPizzaAsync).Method, typeof(Pizza));
+        _methodsOptionsTypes.Add(((Delegate)GetAllSaucesAsync).Method, null);
+        _methodsOptionsTypes.Add(((Delegate)GetSauceAsync).Method, typeof(Sauce));
+        _methodsOptionsTypes.Add(((Delegate)GetAllToppingsAsync).Method, null);
+        _methodsOptionsTypes.Add(((Delegate)GetToppingAsync).Method, typeof(Topping));
     }
     public override async Task GetPocotaConfigAsync(CancellationToken cancellationToken)
     {
@@ -45,31 +45,33 @@ public class PizzaConnector: Connector
         try 
         {
             ResetContext();
+
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
                 $"/Pizza/GetAllPizzas"
             );
-            await GetResponseAsyncEnumerable<Pizza>(target, _request, _serializerOptions, cancellationToken);
+            await GetResponseAsyncEnumerable(target, _request, _serializerOptions, cancellationToken);
         }
         finally 
         {
             _asyncLock.Release();
         }
     }
-    public async Task FindPizzasAsync(ICollection<Pizza> target, PizzaFilter filter, Int32 stage, Boolean? sure, CancellationToken cancellationToken) 
+    public async Task FindPizzasAsync(ICollection<Pizza> target, FindPizzasOptions options, CancellationToken cancellationToken) 
     {
         await _asyncLock.WaitAsync(cancellationToken);
         try 
         {
             ResetContext();
-            string _filter = HttpUtility.UrlEncode(JsonSerializer.Serialize(filter, _serializerOptions));
-            string _stage = HttpUtility.UrlEncode(JsonSerializer.Serialize(stage, _serializerOptions));
-            string _sure = HttpUtility.UrlEncode(JsonSerializer.Serialize(sure, _serializerOptions));
+            string _optionsFilter = HttpUtility.UrlEncode(JsonSerializer.Serialize(options.Filter, _serializerOptions));
+            string _optionsStage = HttpUtility.UrlEncode(JsonSerializer.Serialize(options.Stage, _serializerOptions));
+            string _optionsSure = HttpUtility.UrlEncode(JsonSerializer.Serialize(options.Sure, _serializerOptions));
+
             HttpRequestMessage _request = new(
-                HttpMethod.Get, 
-                $"/Pizza/FindPizzas/{_filter}/{_stage}/{_sure}"
+                HttpMethod.Get,
+                $"/Pizza/FindPizzas/{_optionsFilter}/{_optionsStage}/{_optionsSure}"
             );
-            await GetResponseAsyncEnumerable<Pizza>(target, _request, _serializerOptions, cancellationToken);
+            await GetResponseAsyncEnumerable(target, _request, _serializerOptions, cancellationToken);
         }
         finally 
         {
@@ -83,6 +85,7 @@ public class PizzaConnector: Connector
         {
             ResetContext();
             string _pizza = HttpUtility.UrlEncode(JsonSerializer.Serialize(pizza, _serializerOptions));
+
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
                 $"/Pizza/GetPizza/{_pizza}"
@@ -100,11 +103,12 @@ public class PizzaConnector: Connector
         try 
         {
             ResetContext();
+
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
                 $"/Pizza/GetAllSauces"
             );
-            await GetResponseAsyncEnumerable<Sauce>(target, _request, _serializerOptions, cancellationToken);
+            await GetResponseAsyncEnumerable(target, _request, _serializerOptions, cancellationToken);
         }
         finally 
         {
@@ -118,6 +122,7 @@ public class PizzaConnector: Connector
         {
             ResetContext();
             string _sauce = HttpUtility.UrlEncode(JsonSerializer.Serialize(sauce, _serializerOptions));
+
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
                 $"/Pizza/GetSauce/{_sauce}"
@@ -135,11 +140,12 @@ public class PizzaConnector: Connector
         try 
         {
             ResetContext();
+
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
                 $"/Pizza/GetAllToppings"
             );
-            await GetResponseAsyncEnumerable<Topping>(target, _request, _serializerOptions, cancellationToken);
+            await GetResponseAsyncEnumerable(target, _request, _serializerOptions, cancellationToken);
         }
         finally 
         {
@@ -153,6 +159,7 @@ public class PizzaConnector: Connector
         {
             ResetContext();
             string _topping = HttpUtility.UrlEncode(JsonSerializer.Serialize(topping, _serializerOptions));
+
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
                 $"/Pizza/GetTopping/{_topping}"

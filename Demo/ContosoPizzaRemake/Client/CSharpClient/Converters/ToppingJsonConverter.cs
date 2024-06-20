@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.ToppingJsonConverter         //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-19T17:22:13.                                 //
+// at 2024-06-20T18:20:03.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -19,10 +19,10 @@ namespace ContosoPizza.Models.Client;
 
 internal class ToppingJsonConverter: JsonConverter<Topping>
 {
-    private const string s_Id = nameof(Pizza.Id);
-    private const string s_Name = nameof(Pizza.Name);
-    private const string s_Calories = nameof(Pizza.Calories);
-    private const string s_Pizzas = nameof(Pizza.Pizzas);
+    private const string s_Id = nameof(Topping.Id);
+    private const string s_Name = nameof(Topping.Name);
+    private const string s_Calories = nameof(Topping.Calories);
+    private const string s_Pizzas = nameof(Topping.Pizzas);
     private readonly IServiceProvider _services;
     private readonly PizzaPocotaContext _context;
     public ToppingJsonConverter(IServiceProvider services)

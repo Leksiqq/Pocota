@@ -8,4 +8,5 @@ internal class MethodModel
     internal List<string> Attributes { get; private init; } = [];
     internal bool IsEnumeration { get; set; }
     internal string? ReturnItemTypeName { get; set; } = null!;
+    internal List<ParameterModel>? ConvertingParameters { get; set; }
 }

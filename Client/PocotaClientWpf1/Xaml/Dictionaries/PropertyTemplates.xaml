@@ -9,13 +9,13 @@
     mc:Ignorable="d"
     >
     <DataTemplate x:Key="ClassDataTemplate">
-        <uc:ObjectField Property="{Binding}" Window="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"/>
+        <uc:ObjectField Field="{Binding}" Window="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"/>
     </DataTemplate>
     <DataTemplate x:Key="EnumDataTemplate">
-        <uc:EnumField Property="{Binding}"/>
+        <uc:EnumField Field="{Binding}"/>
     </DataTemplate>
     <DataTemplate x:Key="TextDataTemplate">
-        <uc:TextField Property="{Binding}"/>
+        <uc:TextField Field="{Binding}"/>
     </DataTemplate>
     <local:PropertyTemplateSelector 
         x:Key="PropertyTemplateSelector"
@@ -39,7 +39,7 @@
                         <l:BindingProxyMarkup x:Key="Declarator" BindingProxy="{StaticResource DeclaratorBindingProxy}"/>
                     </TextBlock.Resources>
                     <TextBlock.Text>
-                        <Binding Path="Name" Converter="{StaticResource NamesConverter}" ConverterParameter="{StaticResource Declarator}" Mode="OneTime"/>
+                        <Binding Path="PropertyName" Converter="{StaticResource NamesConverter}" ConverterParameter="{StaticResource Declarator}" Mode="OneTime"/>
                     </TextBlock.Text>
                 </TextBlock>
             </StackPanel>

@@ -22,50 +22,50 @@
     <DockPanel LastChildFill="True">
         <DockPanel LastChildFill="True" DockPanel.Dock="Top">
             <Button 
-            DockPanel.Dock="Right" 
-            Margin="0" 
-            Style="{StaticResource ClearButtonStyle}"
-            Command="{Binding ElementName=of}"
-            CommandParameter="Clear"
-            />
+                DockPanel.Dock="Right" 
+                Margin="0" 
+                Style="{StaticResource ClearButtonStyle}"
+                Command="{Binding ElementName=of}"
+                CommandParameter="Clear"
+                />
             <Button 
-            DockPanel.Dock="Right" 
-            Margin="0" 
-            Style="{StaticResource EditExternalButtonStyle}"
-            Command="{Binding ElementName=of}"
-            CommandParameter="EditExternal"
-            />
+                DockPanel.Dock="Right" 
+                Margin="0" 
+                Style="{StaticResource EditExternalButtonStyle}"
+                Command="{Binding ElementName=of}"
+                CommandParameter="EditExternal"
+                />
             <Button 
-            DockPanel.Dock="Right" 
-            Margin="0" 
-            Style="{StaticResource EditButtonStyle}"
-            Command="{Binding ElementName=of}"
-            CommandParameter="Edit"
-            Visibility="{Binding EditorOpen, ElementName=of, Converter={StaticResource Converter}, ConverterParameter=EditVisibility}"
-            />
+                DockPanel.Dock="Right" 
+                Margin="0" 
+                Style="{StaticResource EditButtonStyle}"
+                Command="{Binding ElementName=of}"
+                CommandParameter="Edit"
+                Visibility="{Binding EditorOpen, ElementName=of, Converter={StaticResource Converter}, ConverterParameter=EditVisibility}"
+                />
             <Button 
-            DockPanel.Dock="Right" 
-            Margin="0" 
-            Style="{StaticResource CloseEditButtonStyle}"
-            Command="{Binding ElementName=of}"
-            CommandParameter="CloseEdit"
-            Visibility="{Binding EditorOpen, ElementName=of, Converter={StaticResource Converter}, ConverterParameter=CloseEditVisibility}"
-            />
+                DockPanel.Dock="Right" 
+                Margin="0" 
+                Style="{StaticResource CloseEditButtonStyle}"
+                Command="{Binding ElementName=of}"
+                CommandParameter="CloseEdit"
+                Visibility="{Binding EditorOpen, ElementName=of, Converter={StaticResource Converter}, ConverterParameter=CloseEditVisibility}"
+                />
             <Button 
-            DockPanel.Dock="Right" 
-            Margin="0" 
-            Style="{StaticResource CreateButtonStyle}"
-            Command="{Binding ElementName=of}"
-            CommandParameter="Create"
-            />
+                DockPanel.Dock="Right" 
+                Margin="0" 
+                Style="{StaticResource CreateButtonStyle}"
+                Command="{Binding ElementName=of}"
+                CommandParameter="Create"
+                />
             <Button 
-            DockPanel.Dock="Right" 
-            Margin="0" 
-            Style="{StaticResource FindButtonStyle}"
-            Command="{Binding ElementName=of}"
-            CommandParameter="Find"
-            x:Name="Find"
-            />
+                DockPanel.Dock="Right" 
+                Margin="0" 
+                Style="{StaticResource FindButtonStyle}"
+                Command="{Binding ElementName=of}"
+                CommandParameter="Find"
+                x:Name="Find"
+                />
             <TextBlock DockPanel.Dock="Left" FontSize="12" FontWeight="Bold" x:Name="TextBlock">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">

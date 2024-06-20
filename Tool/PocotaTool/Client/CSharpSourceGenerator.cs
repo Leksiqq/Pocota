@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
-using Net.Leksi.E6dWebApp;
+﻿using Net.Leksi.E6dWebApp;
 using Net.Leksi.Pocota.Client;
 using Net.Leksi.Pocota.Contract;
 using Net.Leksi.Pocota.Tool.Pages.Client.CS;
@@ -14,13 +11,12 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
-using System.Xml.Linq;
 
 namespace Net.Leksi.Pocota.Tool.Client;
 
 internal class CSharpSourceGenerator: IClientSourceGenerator
 {
-    private class EnvelopePageOptions: PageOptions
+    private class CSharpPageOptions: PageOptions
     {
         public HashSet<Type> Envelopes { get; set; }
         public HashSet<Type> Entities { get; set; }
@@ -71,28 +67,42 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
     public async Task GenerateConnectorAsync(IConnector connector, Type contractType, string targetFolder, string name, HashSet<Type> envelopes, HashSet<Type> entities)
     {
         _logger?.LogInformation("Generating c# connector {name} at {folder}.", name, targetFolder);
-        PageOptions options = new()
+        CSharpPageOptions options = new()
         {
             ContractType = contractType,
             ClassName = Util.BuildResutTypeName(contractType, name),
+            Entities = entities,
+            Envelopes = envelopes,
         };
         await Util.ProcessPageAsync(connector, options, "/Client/CS/Connector", Util.BuildFilePath(targetFolder, name, s_sourceFileExtention));
         _logger?.LogInformation("Done.");
         name = name.Replace("Connector", "JsonConverterFactory");
         foreach (MethodInfo mi in contractType!.GetMethods())
         {
-            string name1 = $"{mi.Name}Envelope";
-            _logger?.LogInformation("Generating c# connector's method envelope {name} at {folder}.", name1, targetFolder);
-            EnvelopePageOptions options1 = new()
+            if(
+                mi.GetParameters().Count() > 0
+                && (
+                    mi.GetParameters().Count() > 1
+                    || (
+                        !entities.Contains(mi.GetParameters().First().ParameterType)
+                        && !envelopes.Contains(mi.GetParameters().First().ParameterType)
+                    )
+                )
+            )
             {
-                ContractType = contractType,
-                ClassName = Util.BuildResutTypeName(contractType, name1),
-                Entities = entities,
-                Envelopes = envelopes,
-                MethodInfo = mi,
-            };
-            await Util.ProcessPageAsync(connector, options1, "/Client/CS/Envelope", Util.BuildFilePath(targetFolder, $"{mi.Name}Envelope", s_sourceFileExtention));
-            _logger?.LogInformation("Done.");
+                string name1 = $"{mi.Name}Options";
+                _logger?.LogInformation("Generating c# connector's method options {name} at {folder}.", name1, targetFolder);
+                CSharpPageOptions options1 = new()
+                {
+                    ContractType = contractType,
+                    ClassName = Util.BuildResutTypeName(contractType, name1),
+                    Entities = entities,
+                    Envelopes = envelopes,
+                    MethodInfo = mi,
+                };
+                await Util.ProcessPageAsync(connector, options1, "/Client/CS/Envelope", Util.BuildFilePath(targetFolder, $"{mi.Name}Options", s_sourceFileExtention));
+                _logger?.LogInformation("Done.");
+            }
         }
         options.ClassName = Util.BuildResutTypeName(contractType, name);
         targetFolder = Path.Combine(targetFolder, "..", "Converters");
@@ -129,7 +139,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
     {
         string name = Util.BuildTypeName(envelopeType);
         _logger?.LogInformation("Generating c# envelope {type} at {folder}.", envelopeType, targetFolder);
-        EnvelopePageOptions options = new()
+        CSharpPageOptions options = new()
         {
             ContractType = contractType,
             EntityType = envelopeType,
@@ -175,7 +185,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
     }
     internal static void PopulateClientEnvelope(EnvelopeModel model)
     {
-        EnvelopePageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as EnvelopePageOptions)!;
+        CSharpPageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as CSharpPageOptions)!;
         model.Contract = Util.BuildTypeFullName(options.ContractType!);
         model.ClassName = Util.GetTypeName(options.ClassName!);
         model.NamespaceValue = BuildClientNamespace(options.ClassName!);
@@ -224,7 +234,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 model.AddUsing(pi.ParameterType);
                 PropertyModel pm = new()
                 {
-                    Name = pi.Name!,
+                    Name = $"{pi.Name![..1].ToUpper()}{pi.Name[1..]}",
                     TypeName = BuildTypeName(pi.ParameterType, options.Entities, options.Envelopes, model),
                     IsNullable = nullabilityInfoContext.Create(pi).ReadState is NullabilityState.Nullable,
                 };
@@ -234,7 +244,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
     }
     internal static void PopulateConnectorModel(ConnectorModel model)
     {
-        PageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as PageOptions)!;
+        CSharpPageOptions options = (model.HttpContext.RequestServices.GetRequiredService<RequestParameter>()?.Parameter as CSharpPageOptions)!;
         model.ClassName = Util.GetTypeName(options.ClassName!);
         model.NamespaceValue = BuildClientNamespace(options.ClassName!);
         model.ContractName = options.ContractType!.GetCustomAttribute<PocotaContractAttribute>()!.ContractName!;
@@ -279,6 +289,25 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 mm.ReturnTypeName = mm.ReturnTypeName.Replace(">", "?>");
                 model.AddUsing(typeof(ValueTask));
             }
+            if (
+                mi.GetParameters().Count() > 0
+                && (
+                    mi.GetParameters().Count() > 1
+                    || (
+                        !options.Entities.Contains(mi.GetParameters().First().ParameterType)
+                        && !options.Envelopes.Contains(mi.GetParameters().First().ParameterType)
+                    )
+                )
+            )
+            {
+                ParameterModel pm = new()
+                {
+                    Name = "options",
+                    TypeName = $"{mm.Name.Replace("Async", string.Empty)}Options",
+                };
+                mm.Parameters.Add(pm);
+                mm.ConvertingParameters = [];
+            }
             foreach (ParameterInfo pi in mi.GetParameters())
             {
                 if (options.ContractType.GetCustomAttributes<EntityAttribute>().Where(a => a.EntityType.Name == pi.ParameterType.Name).FirstOrDefault() is null)
@@ -295,7 +324,15 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                     TypeName = Util.BuildTypeName(pi.ParameterType),
                     IsNullable = nullabilityInfoContext.Create(pi).ReadState is NullabilityState.Nullable,
                 };
-                mm.Parameters.Add(pm);
+                if(mm.ConvertingParameters is { })
+                {
+                    pm.Name = $"{mm.Parameters.Last().Name}.{pm.Name[..1].ToUpper()}{pm.Name[1..]}";
+                    mm.ConvertingParameters.Add(pm);
+                }
+                else
+                {
+                    mm.Parameters.Add(pm);
+                }
             }
             model.Methods.Add(mm);
         }

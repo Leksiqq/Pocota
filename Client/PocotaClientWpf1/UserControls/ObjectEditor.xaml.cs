@@ -150,7 +150,7 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
             this.Window.Resources.Add(spName, ServiceProviderCatcher);
             PropertyValueColumn.CellTemplateSelector = pre.ProvideValue(ServiceProviderCatcher.ServiceProvider!) as DataTemplateSelector;
             this.Window.Resources.Remove(spName);
-            PropertiesViewSource.Source = Target.GetType().GetProperties().Select(p => p.GetValue(Target));
+            PropertiesViewSource.Source = Target.GetType().GetProperties().Select(p => new Field { PropertyName = p.Name, Target = Target });
         }
     }
     private void oe_Loaded(object sender, RoutedEventArgs e)

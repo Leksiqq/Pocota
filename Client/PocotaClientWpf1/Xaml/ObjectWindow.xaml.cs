@@ -12,7 +12,7 @@ public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, IN
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private readonly INamesConverter _namesConverter;
     private object? _target;
-    private string? _name;
+    private string? _propertyName;
     private IInputElement? _currentInput = null;
     public WindowCore Core { get; private init; }
     public string ServiceKey { get; private init; }
@@ -28,19 +28,19 @@ public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, IN
             }
         }
     }
-    public string? Name
+    public string? PropertyName
     {
-        get => _name;
+        get => _propertyName;
         internal set
         {
-            if (_name != value)
+            if (_propertyName != value)
             {
-                _name = value;
+                _propertyName = value;
                 PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
             }
         }
     }
-    public string ObjectTitle => $"{(Core.Launcher?.Owner is IEditWindow ew ? $"{ew.ObjectTitle}/" : string.Empty)}{ConvertName(Name, Target?.GetType())}";
+    public string ObjectTitle => $"{(Core.Launcher?.Owner is IEditWindow ew ? $"{ew.ObjectTitle}/" : string.Empty)}{ConvertName(PropertyName, Target?.GetType())}";
     public ObjectWindow(string serviceKey, Window owner)
     {
         _namesConverter = (Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!.GetRequiredService<INamesConverter>();
