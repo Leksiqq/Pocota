@@ -1,9 +1,9 @@
 ﻿namespace Net.Leksi.Pocota.Client;
 
-internal static class Util
+public static class Util
 {
     private const string s_void = "void";
-    internal static string BuildTypeName(Type type)
+    public static string BuildTypeName(Type type)
     {
         if (type == typeof(void))
         {
@@ -24,7 +24,7 @@ internal static class Util
             ">"
         );
     }
-    internal static string BuildTypeFullName(Type type)
+    public static string BuildTypeFullName(Type type)
     {
         if (type == typeof(void))
         {

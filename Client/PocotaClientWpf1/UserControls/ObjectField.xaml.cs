@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Globalization;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -41,8 +40,9 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
        typeof(ObjectField)
     );
     private readonly WeakReference<ObjectWindow> _editWindow = new(null!);
+    private readonly IField.WaitingForFlags _waitingFor = IField.WaitingForFlags.Any;
     private string _serviceKey = string.Empty;
-    private IField.WaitingForFlags _waitingFor = IField.WaitingForFlags.Any;
+    private bool IsReady => Field?.IsReady ?? false;
     public IField? Field
     {
         get => (IField?)GetValue(FieldProperty);
@@ -64,7 +64,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
         set => SetValue(WindowProperty, value);
     }
     public string ServiceKey => _serviceKey;
-    public int Count => Field?.IsReady ?? false && Field.IsCollection ? (Field.Value as IList)?.Count ?? 0 : 0;
+    public int Count => IsReady && Field!.IsCollection ? (Field.Value as IList)?.Count ?? 0 : 0;
     public bool EditorOpen => ObjectEditor?.Visibility is Visibility.Visible;
     public ObjectField()
     {
@@ -72,12 +72,11 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     }
     public bool CanExecute(object? parameter)
     {
-        Console.WriteLine($"CanExecute: {parameter}, {JsonSerializer.Serialize(Field)}");
-        return 
-            Field?.IsReady ?? false
+        return
+            IsReady
             && (
                 (
-                    Field.Value is { } 
+                    Field!.Value is { } 
                     && (
                         "Edit".Equals(parameter)
                         || "EditExternal".Equals(parameter)
@@ -101,10 +100,10 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     }
     public void Execute(object? parameter)
     {
-        if(Field?.IsReady ?? false)
+        if(IsReady)
         {
             
-            if(!Field.IsReadonly && Field.Value is { } && "Clear".Equals(parameter))
+            if(!Field!.IsReadonly && Field.Value is { } && "Clear".Equals(parameter))
             {
                 CloseEdit();
                 Field.Value = null;
@@ -162,7 +161,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                     }
                     else
                     {
-                        if (Field.Value is IEntityOwner eo)
+                        if (Field.Value is IEntityOwner)
                         {
                         }
                         else if (Field.Value is object value)
@@ -186,11 +185,11 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     }
     public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if(Field?.IsReady ?? false)
+        if(IsReady)
         {
             if ("ObjectState".Equals(parameter))
             {
-                if (Field.EntityProperty?.Entity.Access is Contract.AccessKind.NotSet)
+                if (Field!.EntityProperty?.Entity.Access is Contract.AccessKind.NotSet)
                 {
                     return ObjectState.NotSet;
                 }
@@ -206,7 +205,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             }
             if ("CountVisibility".Equals(parameter))
             {
-                return Field.IsReady && Field.IsCollection ? Visibility.Visible : Visibility.Collapsed;
+                return Field!.IsReady && Field.IsCollection ? Visibility.Visible : Visibility.Collapsed;
             }
             if ("EditVisibility".Equals(parameter))
             {

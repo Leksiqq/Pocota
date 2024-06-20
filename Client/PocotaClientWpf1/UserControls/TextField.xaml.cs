@@ -36,12 +36,13 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
        nameof(ChangeHeight), typeof(int),
        typeof(TextField)
     );
+    private readonly IField.WaitingForFlags _waitingFor = IField.WaitingForFlags.Any;
     private object? _value;
     private string? _badFormat = null;
     private ObjectEditor? _objectEditor = null;
     private int _expectedCaretIndex = -1;
     private double _initialHeight = 0;
-    private IField.WaitingForFlags _waitingFor = IField.WaitingForFlags.Any;
+    private bool IsReady => Field?.IsReady ?? false;
     public IField? Field 
     {
         get => (IField?)GetValue(FieldProperty);
@@ -85,7 +86,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     }
     public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if(Field?.IsReady ?? false)
+        if(IsReady)
         {
             if ("Foreground".Equals(parameter))
             {
@@ -98,20 +99,20 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
                 {
                     return _badFormat;
                 }
-                return ToString(value, Field.Type);
+                return ToString(value, Field!.Type);
             }
         }
         return value;
     }
     public object? ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (Field?.IsReady ?? false)
+        if (IsReady)
         {
             if ("Text".Equals(parameter))
             {
                 if (value is string valueAsString)
                 {
-                    if (Field.IsNullable)
+                    if (Field!.IsNullable)
                     {
                         if (string.IsNullOrWhiteSpace(valueAsString))
                         {
@@ -145,24 +146,24 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     }
     public bool CanExecute(object? parameter)
     {
-        bool res = Field?.IsReady ?? false
+        bool res = IsReady
         && (
             "Undo".Equals(parameter)
             || "Increase".Equals(parameter)
             || "Decrease".Equals(parameter)
-            || ("Clear".Equals(parameter) && !Field.IsClean && !Field.IsReadonly)
+            || ("Clear".Equals(parameter) && !Field!.IsClean && !Field.IsReadonly)
         );
         return res;
     }
     public void Execute(object? parameter)
     {
         if(
-            Field?.IsReady ?? false
+            IsReady
             && (
                 "Undo".Equals(parameter)
                 || "Increase".Equals(parameter)
                 || "Decrease".Equals(parameter)
-                || ("Clear".Equals(parameter) && !Field.IsClean && !Field.IsReadonly)
+                || ("Clear".Equals(parameter) && !Field!.IsClean && !Field.IsReadonly)
             )
         )
         {
@@ -173,7 +174,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
             else if ("Clear".Equals(parameter))
             {
                 _badFormat = null;
-                Field.Clear();
+                Field!.Clear();
             }
             else if ("Increase".Equals(parameter) || "Decrease".Equals(parameter))
             {

@@ -27,7 +27,8 @@ public partial class EnumField : UserControl, ICommand, IFieldOwner
             CommandManager.RequerySuggested -= value;
         }
     }
-    private IField.WaitingForFlags _waitingFor = IField.WaitingForFlags.Any;
+    private readonly IField.WaitingForFlags _waitingFor = IField.WaitingForFlags.Any;
+    private bool IsReady => Field?.IsReady ?? false;
     public IField? Field
     {
         get => (IField?)GetValue(FieldProperty);
@@ -50,20 +51,20 @@ public partial class EnumField : UserControl, ICommand, IFieldOwner
     }
     public bool CanExecute(object? parameter)
     {
-        bool res = Field?.IsReady ?? false
+        bool res = IsReady
         && (
             "Undo".Equals(parameter)
-            || ("Clear".Equals(parameter) && !Field.IsClean)
+            || ("Clear".Equals(parameter) && !Field!.IsClean)
         );
         return res;
     }
     public void Execute(object? parameter)
     {
         if (
-            Field?.IsReady ?? false
+            IsReady
             && (
                 "Undo".Equals(parameter)
-                || ("Clear".Equals(parameter) && !Field.IsClean)
+                || ("Clear".Equals(parameter) && !Field!.IsClean)
             )
         )
         {
@@ -73,7 +74,7 @@ public partial class EnumField : UserControl, ICommand, IFieldOwner
             }
             else if ("Clear".Equals(parameter))
             {
-                Field.Clear();
+                Field!.Clear();
             }
         }
     }

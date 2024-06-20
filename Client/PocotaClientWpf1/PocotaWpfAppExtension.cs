@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Markup;
 using static Net.Leksi.Pocota.Client.Constants;
@@ -45,6 +47,12 @@ public static class PocotaWpfAppExtension
                 app.Resources[ServiceProviderResourceKey] = s;
                 app.Resources[LocalizerResourceKey] = s.GetRequiredService<Localizer>();
                 app.Resources[NamesConverterResourceKey] = s.GetRequiredService<INamesConverter>();
+                JsonSerializerOptions commonJSO = new()
+                {
+                    ReferenceHandler = ReferenceHandler.Preserve
+                };
+                commonJSO.Converters.Add(new CommonJsonConverterFactory());
+                app.Resources[CommonJsonSerializerOptionsResourceKey] = commonJSO;
                 return app;
             }
         );

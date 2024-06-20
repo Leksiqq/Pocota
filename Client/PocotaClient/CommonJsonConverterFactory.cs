@@ -33,7 +33,7 @@ public class CommonJsonConverterFactory : JsonConverterFactory
         public override void Write(Utf8JsonWriter writer, Type value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
-            writer.WriteStringValue(Util.BuildTypeFullName(value));
+            writer.WriteString(nameof(Type.FullName), Util.BuildTypeFullName(value));
             writer.WriteEndObject();
         }
     }
