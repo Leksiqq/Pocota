@@ -36,7 +36,7 @@
             <TextBlock.Text>
                 <MultiBinding StringFormat="{}{0}:{1}">
                     <Binding Path="ServiceKey"/>
-                    <Binding Path="Property.Type" Converter="{local:TypeNameConverter}" ConverterParameter="Short" Mode="OneWay"/>
+                    <Binding Path="Target" Converter="{local:TypeNameConverter}" ConverterParameter="Short" Mode="OneWay"/>
                 </MultiBinding>
             </TextBlock.Text>
         </TextBlock>
@@ -53,7 +53,6 @@
         <uc:ObjectEditor 
             DockPanel.Dock="Top"
             Target="{Binding Target}" 
-            Window="{Binding}" 
             ServiceProviderCatcher="{StaticResource WindowSP}" 
             CurrentInputChanged="ObjectEditor_CurrentInputChanged"
             />

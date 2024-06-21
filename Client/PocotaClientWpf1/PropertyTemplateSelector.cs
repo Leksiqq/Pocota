@@ -16,11 +16,12 @@ public class PropertyTemplateSelector: DataTemplateSelector
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
         DataTemplate? result = null;
-        if (item is IField field)
+        if (item is Field field)
         {
             if(field.EntityProperty?.Access is Contract.AccessKind.NotSet || field.EntityProperty?.Access is Contract.AccessKind.Forbidden)
             {
                 result = ProvideValue(ClassDataTemplateKey);
+                
             }
             //else if (property is ListProperty)
             //{

@@ -21,7 +21,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     }
     private const int s_defaultChangeHeight = 5;
     public static readonly DependencyProperty FieldProperty = DependencyProperty.Register(
-       nameof(Field), typeof(IField),
+       nameof(Field), typeof(Field),
        typeof(TextField)
     );
     public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(
@@ -36,16 +36,16 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
        nameof(ChangeHeight), typeof(int),
        typeof(TextField)
     );
-    private readonly IField.WaitingForFlags _waitingFor = IField.WaitingForFlags.Any;
+    private readonly FieldOwnerCore _fieldOwnerCore;
     private object? _value;
     private string? _badFormat = null;
     private ObjectEditor? _objectEditor = null;
     private int _expectedCaretIndex = -1;
     private double _initialHeight = 0;
-    private bool IsReady => Field?.IsReady ?? false;
-    public IField? Field 
+    FieldOwnerCore IFieldOwner.FieldOwnerCore => _fieldOwnerCore;
+    public Field? Field 
     {
-        get => (IField?)GetValue(FieldProperty);
+        get => (Field?)GetValue(FieldProperty);
         set => SetValue(FieldProperty, value);
     }
     public object? Target
@@ -81,12 +81,13 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
 
     public TextField()
     {
+        _fieldOwnerCore = new FieldOwnerCore(this, FieldProperty, TargetProperty, PropertyNameProperty);
         ChangeHeight = s_defaultChangeHeight;
         InitializeComponent();
     }
-    public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object? value, Type targetType, object parameter, CultureInfo culture)
     {
-        if(IsReady)
+        if(Field is { } && Field.IsReady)
         {
             if ("Foreground".Equals(parameter))
             {
@@ -106,7 +107,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     }
     public object? ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (IsReady)
+        if (Field is { } && Field.IsReady)
         {
             if ("Text".Equals(parameter))
             {
@@ -146,7 +147,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     }
     public bool CanExecute(object? parameter)
     {
-        bool res = IsReady
+        bool res = Field is { } && Field.IsReady
         && (
             "Undo".Equals(parameter)
             || "Increase".Equals(parameter)
@@ -158,7 +159,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     public void Execute(object? parameter)
     {
         if(
-            IsReady
+            Field is { } && Field.IsReady
             && (
                 "Undo".Equals(parameter)
                 || "Increase".Equals(parameter)
@@ -215,6 +216,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     {
         if(Field is { })
         {
+            Field.PropertyChanged += Field_PropertyChanged;
             TextBox.DataContext = Field;
             UndoButton.Visibility = Field.EntityProperty?.Entity.State is EntityState.Unchanged || Field.EntityProperty?.Entity.State is EntityState.Modified
                 ? Visibility.Visible : Visibility.Collapsed;
@@ -224,41 +226,18 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
             TextBox.VerticalScrollBarVisibility = Field.Type == typeof(string) ? ScrollBarVisibility.Auto : ScrollBarVisibility.Hidden;
         }
     }
+
+    private void Field_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        TextBox.Text = (string?)Convert(Field!.Value, typeof(string), "Text", CultureInfo.CurrentCulture);
+    }
+
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
-        if (e.Property == FieldProperty)
-        {
-            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.Field))
-            {
-                if (e.NewValue is IField newField)
-                {
-                    newField.Owner = this;
-                }
-            }
-        }
-        else if (e.Property == PropertyNameProperty)
-        {
-            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.PropertyName))
-            {
-                if (_waitingFor is IField.WaitingForFlags.None)
-                {
-                    Field = new Field { Target = Target, PropertyName = PropertyName, Owner = this };
-                }
-            }
-        }
-        else if (e.Property == TargetProperty)
-        {
-            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.Target))
-            {
-                if (_waitingFor is IField.WaitingForFlags.None)
-                {
-                    Field = new Field { Target = Target, PropertyName = PropertyName, Owner = this };
-                }
-            }
-        }
+        ((IFieldOwner)this).FieldOwnerCore!.OnPropertyChanged(e);
         base.OnPropertyChanged(e);
     }
-    private static string? ToString(object value, Type type)
+    private static string? ToString(object? value, Type type)
     {
         if (value is { })
         {

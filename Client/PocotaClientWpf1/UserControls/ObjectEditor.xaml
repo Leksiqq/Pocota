@@ -8,10 +8,7 @@
     xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
     xmlns:uc="clr-namespace:Net.Leksi.Pocota.Client.UserControls"
     mc:Ignorable="d" 
-    d:DesignHeight="450" 
-    d:DesignWidth="800"
     x:Name="oe"
-    Loaded="oe_Loaded"
     >
     <UserControl.Resources>
         <ResourceDictionary>

@@ -4,18 +4,6 @@ using System.Windows.Input;
 namespace Net.Leksi.Pocota.Client.UserControls;
 public partial class EnumField : UserControl, ICommand, IFieldOwner
 {
-    public static readonly DependencyProperty FieldProperty = DependencyProperty.Register(
-       nameof(Field), typeof(IField),
-       typeof(EnumField)
-    );
-    public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(
-       nameof(Target), typeof(object),
-       typeof(EnumField)
-    );
-    public static readonly DependencyProperty PropertyNameProperty = DependencyProperty.Register(
-       nameof(PropertyName), typeof(string),
-       typeof(EnumField)
-    );
     public event EventHandler? CanExecuteChanged
     {
         add
@@ -27,11 +15,23 @@ public partial class EnumField : UserControl, ICommand, IFieldOwner
             CommandManager.RequerySuggested -= value;
         }
     }
-    private readonly IField.WaitingForFlags _waitingFor = IField.WaitingForFlags.Any;
-    private bool IsReady => Field?.IsReady ?? false;
-    public IField? Field
+    public static readonly DependencyProperty FieldProperty = DependencyProperty.Register(
+       nameof(Field), typeof(Field),
+       typeof(EnumField)
+    );
+    public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(
+       nameof(Target), typeof(object),
+       typeof(EnumField)
+    );
+    public static readonly DependencyProperty PropertyNameProperty = DependencyProperty.Register(
+       nameof(PropertyName), typeof(string),
+       typeof(EnumField)
+    );
+    private readonly FieldOwnerCore _fieldOwnerCore;
+    FieldOwnerCore IFieldOwner.FieldOwnerCore => _fieldOwnerCore;
+    public Field? Field
     {
-        get => (IField?)GetValue(FieldProperty);
+        get => (Field?)GetValue(FieldProperty);
         set => SetValue(FieldProperty, value);
     }
     public object? Target
@@ -47,11 +47,12 @@ public partial class EnumField : UserControl, ICommand, IFieldOwner
     public List<object?> Items { get; private init; } = [];
     public EnumField()
     {
+        _fieldOwnerCore = new FieldOwnerCore(this, FieldProperty, TargetProperty, PropertyNameProperty);
         InitializeComponent();
     }
     public bool CanExecute(object? parameter)
     {
-        bool res = IsReady
+        bool res = Field is { } && Field.IsReady
         && (
             "Undo".Equals(parameter)
             || ("Clear".Equals(parameter) && !Field!.IsClean)
@@ -61,7 +62,7 @@ public partial class EnumField : UserControl, ICommand, IFieldOwner
     public void Execute(object? parameter)
     {
         if (
-            IsReady
+            Field is { } && Field.IsReady
             && (
                 "Undo".Equals(parameter)
                 || ("Clear".Equals(parameter) && !Field!.IsClean)
@@ -85,6 +86,10 @@ public partial class EnumField : UserControl, ICommand, IFieldOwner
             ComboBox.DataContext = Field;
             UndoButton.Visibility = Field.EntityProperty?.Entity.State is EntityState.Unchanged || Field.EntityProperty?.Entity.State is EntityState.Modified
                 ? Visibility.Visible : Visibility.Collapsed;
+            if (Field.IsNullable)
+            {
+                Items.Add(null);
+            }
             if (Field.Type.IsEnum)
             {
                 foreach (object item in Enum.GetValues(Field.Type))
@@ -101,36 +106,7 @@ public partial class EnumField : UserControl, ICommand, IFieldOwner
     }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
-        if (e.Property == FieldProperty)
-        {
-            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.Field))
-            {
-                if (e.NewValue is IField newField)
-                {
-                    newField.Owner = this;
-                }
-            }
-        }
-        else if (e.Property == PropertyNameProperty)
-        {
-            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.PropertyName))
-            {
-                if (_waitingFor is IField.WaitingForFlags.None)
-                {
-                    Field = new Field { Target = Target, PropertyName = PropertyName, Owner = this };
-                }
-            }
-        }
-        else if (e.Property == TargetProperty)
-        {
-            if (IField.CanProcessProperty(_waitingFor, IField.WaitingForFlags.Target))
-            {
-                if (_waitingFor is IField.WaitingForFlags.None)
-                {
-                    Field = new Field { Target = Target, PropertyName = PropertyName, Owner = this };
-                }
-            }
-        }
+        ((IFieldOwner)this).FieldOwnerCore!.OnPropertyChanged(e);
         base.OnPropertyChanged(e);
     }
 }

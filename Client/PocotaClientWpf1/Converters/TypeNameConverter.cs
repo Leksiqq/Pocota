@@ -6,10 +6,11 @@ namespace Net.Leksi.Pocota.Client;
 
 public class TypeNameConverter : MarkupExtension, IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object? value, Type targetType, object parameter, CultureInfo culture)
     {
-        if(value is Type type)
+        if(value is { })
         {
+            Type type = value as Type ?? value.GetType();
             if ("Short".Equals(parameter))
             {
                 return Util.BuildTypeName(type);

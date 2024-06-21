@@ -1,6 +1,4 @@
 ﻿using Net.Leksi.WpfMarkup;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
@@ -15,6 +13,9 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler? CurrentInputChanged;
+
+    private const int s_HeaderWidthTreshold = 10;
+    private const int s_ValueWidthParameter = 15;
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private readonly Localizer _localizer;
     private IInputElement? _currentInput = null;
@@ -24,10 +25,6 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     );
     public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(
        nameof(Target), typeof(object),
-       typeof(ObjectEditor)
-    );
-    public static readonly DependencyProperty WindowProperty = DependencyProperty.Register(
-       nameof(Window), typeof(Window),
        typeof(ObjectEditor)
     );
     public CollectionViewSource PropertiesViewSource { get; private init; } = new();
@@ -41,11 +38,7 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
         get => GetValue(TargetProperty);
         set => SetValue(TargetProperty, value);
     }
-    public Window Window
-    {
-        get => (Window)GetValue(WindowProperty);
-        set => SetValue(WindowProperty, value);
-    }
+    public Window Window { get; private set; } = null!;
     public bool? IsInsertMode {  get; private set; }
     public IInputElement? CurrentInput 
     { 
@@ -60,6 +53,7 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     {
         _localizer = (Application.Current.Resources[LocalizerResourceKey] as Localizer)!;
         InitializeComponent();
+        Loaded += ObjectEditor_Loaded;
     }
     public object? Convert(object? value, Type targetType, object parameter, CultureInfo culture)
     {
@@ -82,12 +76,12 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     }
     public void CalcColumnsWidth()
     {
-        if ((Window?.IsActive ?? false) && Visibility is Visibility.Visible) 
+        if ((Window?.IsActive ?? false) && Visibility is Visibility.Visible && PropertyNameColumn.ActualWidth > s_HeaderWidthTreshold) 
         {
             ScrollViewer scrollViewer = GetVisualDescendants(PropertiesView).OfType<ScrollViewer>().First();
-            if(scrollViewer.ActualWidth - PropertyNameColumn.ActualWidth - 15 > 0)
+            if (scrollViewer.ActualWidth - PropertyNameColumn.ActualWidth - s_ValueWidthParameter > 0)
             {
-                PropertyValueColumn.Width = scrollViewer.ActualWidth - PropertyNameColumn.ActualWidth - 15;
+                PropertyValueColumn.Width = scrollViewer.ActualWidth - PropertyNameColumn.ActualWidth - s_ValueWidthParameter;
             }
             scrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
         }
@@ -106,56 +100,32 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
         {
             if(e.Property == TargetProperty)
             {
-                if (e.OldValue is {})
+                if(e.NewValue is null)
                 {
-                }
-                if (e.NewValue is {})
-                {
-                }
-            }
-            else if(e.Property == WindowProperty)
-            {
-                if (e.OldValue is Window oldWindow)
-                {
-                    oldWindow.Activated -= Window_Activated;
-                }
-                if (e.NewValue is Window newWindow)
-                {
-                    newWindow.Activated += Window_Activated;
+                    PropertiesViewSource.Source = null;
                 }
             }
             SetTemplateSelector();
         }
         base.OnPropertyChanged(e);
     }
-
-    private void Window_Activated(object? sender, EventArgs e)
-    {
-        CalcColumnsWidth();
-    }
-
-    private void Properties_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        CalcColumnsWidth();
-    }
     private void SetTemplateSelector()
     {
-        if (ServiceProviderCatcher is { } && Target is { } && Window is { } && PropertyValueColumn.CellTemplateSelector is null)
+        if (ServiceProviderCatcher is { } && Target is { } && Window is { })
         {
-            string spName = $"sp{Guid.NewGuid()}";
-            ParameterizedResourceExtension pre = new("PropertyTemplateSelector")
+            if(PropertyValueColumn.CellTemplateSelector is null)
             {
-                Replaces = new string[] { $"$serviceProviderCatcher:{spName}" },
-            };
-            this.Window.Resources.Add(spName, ServiceProviderCatcher);
-            PropertyValueColumn.CellTemplateSelector = pre.ProvideValue(ServiceProviderCatcher.ServiceProvider!) as DataTemplateSelector;
-            this.Window.Resources.Remove(spName);
+                string spName = $"sp{Guid.NewGuid()}";
+                ParameterizedResourceExtension pre = new("PropertyTemplateSelector")
+                {
+                    Replaces = new string[] { $"$serviceProviderCatcher:{spName}" },
+                };
+                this.Window.Resources.Add(spName, ServiceProviderCatcher);
+                PropertyValueColumn.CellTemplateSelector = pre.ProvideValue(ServiceProviderCatcher.ServiceProvider!) as DataTemplateSelector;
+                this.Window.Resources.Remove(spName);
+            }
             PropertiesViewSource.Source = Target.GetType().GetProperties().Select(p => new Field { PropertyName = p.Name, Target = Target });
         }
-    }
-    private void oe_Loaded(object sender, RoutedEventArgs e)
-    {
-        CalcColumnsWidth();
     }
     private static IEnumerable<DependencyObject> GetVisualDescendants(DependencyObject obj)
     {
@@ -170,18 +140,28 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
             }
         }
     }
-    private static IEnumerable<DependencyObject> GetLogicalDescendants(DependencyObject obj)
+    private void CheckColumnWidth()
     {
-        foreach (var child in LogicalTreeHelper.GetChildren(obj))
+        if (PropertyNameColumn.ActualWidth > s_HeaderWidthTreshold)
         {
-            if(child is DependencyObject dob)
+            Dispatcher.Invoke(CalcColumnsWidth);
+        }
+        else
+        {
+            Task.Delay(1).ContinueWith(t => Task.Run(CheckColumnWidth));
+        }
+    }
+    private void ObjectEditor_Loaded(object sender, RoutedEventArgs e)
+    {
+        for (DependencyObject dop = this; dop is { }; dop = VisualTreeHelper.GetParent(dop))
+        {
+            if (dop is Window window)
             {
-                yield return dob;
-                foreach (var descendant in GetLogicalDescendants(dob))
-                {
-                    yield return descendant;
-                }
+                Window = window;
+                SetTemplateSelector();
+                break;
             }
         }
+        CheckColumnWidth();
     }
 }

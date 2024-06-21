@@ -2,8 +2,9 @@
 
 public interface IFieldOwner
 {
-    IField? Field { get; set; }
+    Field? Field { get; set; }
     object? Target { get; set; }
     string? PropertyName { get; set; }
+    FieldOwnerCore? FieldOwnerCore { get; }
     void OnFieldAssigned();
 }

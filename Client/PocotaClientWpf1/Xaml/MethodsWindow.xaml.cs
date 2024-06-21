@@ -34,7 +34,7 @@ public partial class MethodsWindow : Window, IWindowWithCore, ICommand
     {
         if (parameter is ConnectorMethod cm)
         {
-            MethodWindow methodWindow = new(cm);
+            MethodWindow methodWindow = new(cm, this);
             methodWindow.Show();
         }
     }

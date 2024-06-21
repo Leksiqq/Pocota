@@ -8,8 +8,8 @@ public class WindowCore : IValueConverter
 {
     private readonly Window _owner;
     private readonly Localizer _localizer;
+    private readonly List<WeakReference<WindowCore>> _launched = [];
     private WindowCore? _launcher = null;
-    private List<WeakReference<WindowCore>> _launched = [];
     public ApplicationCore ApplicationCore => Services.GetRequiredService<ApplicationCore>();
     public IServiceProvider Services => (IServiceProvider)Application.Current.Resources[ServiceProviderResourceKey];
     public WindowCore? Launcher
@@ -20,6 +20,7 @@ public class WindowCore : IValueConverter
             if(_launcher is null && value is { })
             {
                 _launcher = value;
+                _owner.Owner = _launcher._owner;
                 _launcher._launched.Add(new WeakReference<WindowCore>(this));
             }
         }
@@ -30,18 +31,20 @@ public class WindowCore : IValueConverter
     {
         _owner = owner;
         _owner.SizeToContent = SizeToContent.WidthAndHeight;
-        _owner.Closed += _owner_Closed;
-        _owner.Activated += _owner_Activated;
+        _owner.Closed += Owner_Closed;
+        _owner.Activated += Owner_Activated;
+        _owner.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         _localizer = Services.GetRequiredService<Localizer>();
         Services.GetRequiredService<ApplicationCore>().Touch();
     }
 
-    private void _owner_Activated(object? sender, EventArgs e)
+    private void Owner_Activated(object? sender, EventArgs e)
     {
         ApplicationCore.ActiveWindow = _owner;
+        _owner.Owner = null;
     }
 
-    private void _owner_Closed(object? sender, EventArgs e)
+    private void Owner_Closed(object? sender, EventArgs e)
     {
         foreach(WeakReference<WindowCore> wr in _launched)
         {

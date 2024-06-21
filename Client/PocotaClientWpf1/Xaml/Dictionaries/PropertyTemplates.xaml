@@ -9,7 +9,7 @@
     mc:Ignorable="d"
     >
     <DataTemplate x:Key="ClassDataTemplate">
-        <uc:ObjectField Field="{Binding}" Window="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"/>
+        <uc:ObjectField Field="{Binding}" d:Window="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"/>
     </DataTemplate>
     <DataTemplate x:Key="EnumDataTemplate">
         <uc:EnumField Field="{Binding}"/>

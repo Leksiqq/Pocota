@@ -1,15 +1,14 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
-
 namespace Net.Leksi.Pocota.Client;
-
-public class Field : IField
+public class Field
 {
     public event PropertyChangedEventHandler? PropertyChanged;
+    private static readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(nameof(Value));
     private readonly NullabilityInfoContext _nullability = new();
-    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(nameof(Value));
     private IFieldOwner? _owner;
     private object? _target;
     private string? _propertyName;
@@ -64,6 +63,7 @@ public class Field : IField
             }
         }
     }
+    public Type? Declarator => _target?.GetType();
     public EntityProperty? EntityProperty => _entityProperty;
     public Type Type
     {
@@ -78,7 +78,8 @@ public class Field : IField
     }
     public bool IsNullable => _isNullable;
     public bool IsCollection => _isCollection;
-    public bool IsReadonly  => _entityProperty?.IsReadonly ?? false;
+    public int Count => IsReady && IsCollection ? (Value as IList)?.Count ?? 0 : 0;
+    public bool IsReadonly  => _entityProperty?.IsReadonly ?? !(_propertyInfo?.CanWrite ?? false);
     public object? Value
     {
         get => _propertyInfo?.GetValue(Target);
@@ -105,9 +106,7 @@ public class Field : IField
             return true;
         }
     }
-
     public bool IsReady => _type is { };
-
     public void Clear()
     {
         if (Type is { })

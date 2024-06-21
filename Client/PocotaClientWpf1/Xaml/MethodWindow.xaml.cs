@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Net.Leksi.Pocota.Client.UserControls;
 using System.ComponentModel;
 using System.Globalization;
 using System.Text.Json;
@@ -35,13 +36,14 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated, IE
 
     public string ObjectTitle => $"{ConvertName(ServiceKey)}:{ConvertName(_connectorMethod.Method.Name, _connectorMethod.Connector)}()";
 #pragma warning disable CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Возможно, стоит объявить поле как допускающее значения NULL.
-    private MethodWindow()
+    private MethodWindow(Window owner)
 #pragma warning restore CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Возможно, стоит объявить поле как допускающее значения NULL.
     {
         _namesConverter = (Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!.GetRequiredService<INamesConverter>();
         Core = new WindowCore(this);
+        Core.Launcher = (owner as IWindowWithCore)?.Core;
     }
-    public MethodWindow(Delegate @delegate) : this()
+    public MethodWindow(Delegate @delegate, Window owner) : this(owner)
     {
         _connectorMethod = GetConnectorMethod(@delegate);
         Init();
@@ -52,8 +54,9 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated, IE
         return (Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!.GetRequiredService<ConnectorsMethodsList>()[@delegate.Method]!;
     }
 
-    public MethodWindow(ConnectorMethod connectorMethod): this()
+    public MethodWindow(ConnectorMethod connectorMethod, Window owner) : this(owner)
     {
+        
         _connectorMethod = connectorMethod;
         Init();
     }
@@ -88,6 +91,13 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated, IE
             foreach (var item in mi.Items)
             {
             }
+        }
+    }
+    private void ObjectEditor_CurrentInputChanged(object sender, EventArgs e)
+    {
+        if (sender is ObjectEditor oe)
+        {
+            InsertInputMode.Text = (string?)oe.Convert(oe.CurrentInput?.IsInsertMode, typeof(string), "InsertInputMode", CultureInfo.CurrentCulture);
         }
     }
 }

@@ -27,6 +27,7 @@
                 Style="{StaticResource ClearButtonStyle}"
                 Command="{Binding ElementName=of}"
                 CommandParameter="Clear"
+                Visibility="{Binding Field.IsReadonly, ElementName=of, Converter={StaticResource Converter}, ConverterParameter=EditVisibility}"
                 />
             <Button 
                 DockPanel.Dock="Right" 
@@ -57,6 +58,7 @@
                 Style="{StaticResource CreateButtonStyle}"
                 Command="{Binding ElementName=of}"
                 CommandParameter="Create"
+                Visibility="{Binding Field.IsReadonly, ElementName=of, Converter={StaticResource Converter}, ConverterParameter=EditVisibility}"
                 />
             <Button 
                 DockPanel.Dock="Right" 
@@ -70,7 +72,7 @@
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
                         <Style.Triggers>
-                            <l:DataSwitch Binding="{Binding Value, Converter={StaticResource Converter}, ConverterParameter=ObjectState}">
+                            <l:DataSwitch Binding="{Binding ObjectState, ElementName=of}">
                                 <DataTrigger Value="{x:Static uc:ObjectState.IsNull}">
                                     <Setter Property="Text" Value="∅"/>
                                     <Setter Property="Foreground" Value="Red"/>
