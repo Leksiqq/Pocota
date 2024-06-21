@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Data;
 using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
-public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, INotifyPropertyChanged, IEditWindow, IValueConverter
+public partial class ObjectWindow : Window, IServiceRelated, INotifyPropertyChanged, IEditWindow, IValueConverter
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
@@ -14,7 +14,6 @@ public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, IN
     private object? _target;
     private string? _propertyName;
     private IInputElement? _currentInput = null;
-    public WindowCore Core { get; private set; }
     public string ServiceKey { get; private init; }
     public object? Target
     {
@@ -40,23 +39,14 @@ public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, IN
             }
         }
     }
-    public string ObjectTitle => $"{(Core.Launcher?.Owner is IEditWindow ew ? $"{ew.ObjectTitle}/" : string.Empty)}{ConvertName(PropertyName, Target?.GetType())}";
+    public string ObjectTitle => GetType().FullName!;//$"{(Core.Launcher?.Owner is IEditWindow ew ? $"{ew.ObjectTitle}/" : string.Empty)}{ConvertName(PropertyName, Target?.GetType())}";
     public ObjectWindow(string serviceKey, Window owner)
     {
         _namesConverter = (Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!.GetRequiredService<INamesConverter>();
         ServiceKey = serviceKey;
-        Core = new WindowCore(this);
-        //Core.Launcher = (owner as IWindowWithCore)?.Core;
         _mw = owner as MethodsWindow;
-        Closed += ObjectWindow_Closed;
         InitializeComponent();
     }
-
-    private void ObjectWindow_Closed(object? sender, EventArgs e)
-    {
-        Core = null;
-    }
-
     MethodsWindow? _mw;
     ~ObjectWindow()
     {

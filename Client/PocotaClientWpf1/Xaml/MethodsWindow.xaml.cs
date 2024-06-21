@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
-public partial class MethodsWindow : Window, IWindowWithCore, ICommand
+public partial class MethodsWindow : Window, ICommand
 {
     public event EventHandler? CanExecuteChanged
     {
@@ -17,17 +17,15 @@ public partial class MethodsWindow : Window, IWindowWithCore, ICommand
             CommandManager.RequerySuggested -= value;
         }
     }
-    public WindowCore Core { get; private init; }
     public DataGridManager ConnectorsDataGridManager { get; private init; } = new();
     public MethodsWindow()
     {
-        Core = new WindowCore(this);
         ConnectorsDataGridManager.ViewSource.Source = ((IServiceProvider)Application.Current.Resources[ServiceProviderResourceKey]).GetRequiredService<ConnectorsMethodsList>();
-        InitializeComponent();
         Activated += MethodsWindow_Activated;
+        InitializeComponent();
     }
 
-    Timer t;
+    Timer? t;
     internal ulong count = 0;
     private void MethodsWindow_Activated(object? sender, EventArgs e)
     {

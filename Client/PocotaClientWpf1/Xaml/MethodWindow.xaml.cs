@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
-public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated, IEditWindow, INotifyPropertyChanged
+public partial class MethodWindow : Window, IServiceRelated, IEditWindow, INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     private const string s_target = "target";
@@ -28,7 +28,6 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated, IE
             }
         }
     }
-    public WindowCore Core { get; private init; }
     public string MethodName => _connectorMethod.Method.Name;
     public string ServiceKey => _connectorMethod.ServiceKey;
     public Type ReturnType => _connectorMethod.Method.GetParameters()
@@ -40,8 +39,6 @@ public partial class MethodWindow : Window, IWindowWithCore, IServiceRelated, IE
 #pragma warning restore CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Возможно, стоит объявить поле как допускающее значения NULL.
     {
         _namesConverter = (Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!.GetRequiredService<INamesConverter>();
-        Core = new WindowCore(this);
-        Core.Launcher = (owner as IWindowWithCore)?.Core;
     }
     public MethodWindow(Delegate @delegate, Window owner) : this(owner)
     {

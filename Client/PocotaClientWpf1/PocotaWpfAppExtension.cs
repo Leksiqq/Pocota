@@ -56,8 +56,7 @@ public static class PocotaWpfAppExtension
                 return app;
             }
         );
-        services.AddSingleton<ApplicationCore>();
-        services.AddSingleton<Localizer>();
+       services.AddSingleton<Localizer>();
 
         ConnectorsMethodsList methods = new();
         foreach(ServiceDescriptor sd in services)
@@ -89,6 +88,10 @@ public static class PocotaWpfAppExtension
         where TWindow: Window, new()
     {
         return AddPocotaWpfApp(services, s => new TApplication(), typeof(TWindow));
+    }
+    public static IServiceProvider GetServiceProvider(this Application app)
+    {
+        return app.Resources[ServiceProviderResourceKey] as IServiceProvider ?? throw new NullReferenceException();
     }
     public static IServiceCollection RemoveService(this IServiceCollection services, Type serviceType)
     {
