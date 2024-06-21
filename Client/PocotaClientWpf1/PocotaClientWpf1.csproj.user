@@ -11,6 +11,9 @@
     <Compile Update="UserControls\TextField.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Window1.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Xaml\MethodsWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -35,6 +38,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\TextField.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Window1.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Xaml\Dictionaries\DataGrid.xaml">

@@ -14,7 +14,7 @@ public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, IN
     private object? _target;
     private string? _propertyName;
     private IInputElement? _currentInput = null;
-    public WindowCore Core { get; private init; }
+    public WindowCore Core { get; private set; }
     public string ServiceKey { get; private init; }
     public object? Target
     {
@@ -44,10 +44,27 @@ public partial class ObjectWindow : Window, IWindowWithCore, IServiceRelated, IN
     public ObjectWindow(string serviceKey, Window owner)
     {
         _namesConverter = (Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!.GetRequiredService<INamesConverter>();
-        Core = new WindowCore(this);
         ServiceKey = serviceKey;
-        Core.Launcher = (owner as IWindowWithCore)?.Core;
+        Core = new WindowCore(this);
+        //Core.Launcher = (owner as IWindowWithCore)?.Core;
+        _mw = owner as MethodsWindow;
+        Closed += ObjectWindow_Closed;
         InitializeComponent();
+    }
+
+    private void ObjectWindow_Closed(object? sender, EventArgs e)
+    {
+        Core = null;
+    }
+
+    MethodsWindow? _mw;
+    ~ObjectWindow()
+    {
+        if(_mw is { })
+        {
+            Interlocked.Decrement(ref _mw.count);
+            Console.WriteLine();
+        }
     }
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

@@ -266,11 +266,11 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
         {
             if (dop is Window window)
             {
-                Window = window;
-                if (window is IServiceRelated sr)
-                {
-                    _serviceKey = sr.ServiceKey;
-                }
+                //Window = window;
+                //if (window is IServiceRelated sr)
+                //{
+                //    _serviceKey = sr.ServiceKey;
+                //}
                 break;
             }
         }

@@ -10,8 +10,8 @@ public class WindowCore : IValueConverter
     private readonly Localizer _localizer;
     private readonly List<WeakReference<WindowCore>> _launched = [];
     private WindowCore? _launcher = null;
-    public ApplicationCore ApplicationCore => Services.GetRequiredService<ApplicationCore>();
-    public IServiceProvider Services => (IServiceProvider)Application.Current.Resources[ServiceProviderResourceKey];
+    public ApplicationCore ApplicationCore => null;// Services.GetRequiredService<ApplicationCore>();
+    public IServiceProvider Services => null;// (IServiceProvider)Application.Current.Resources[ServiceProviderResourceKey];
     public WindowCore? Launcher
     {
         get => _launcher;
@@ -25,7 +25,8 @@ public class WindowCore : IValueConverter
             }
         }
     }
-    public IEnumerable<WindowCore> Launched => _launched.Select(wr => wr.TryGetTarget(out WindowCore? wc) ?  wc : null).Where(wc => wc is { })!;
+    public IEnumerable<WindowCore> Launched => _launched.Select(wr => wr.TryGetTarget(out WindowCore? wc) ?  wc : null)
+        .Where(wc => wc is { } && wc._owner.IsLoaded)!;
     public Window Owner => _owner;
     internal WindowCore(Window owner)
     {
@@ -34,16 +35,14 @@ public class WindowCore : IValueConverter
         _owner.Closed += Owner_Closed;
         _owner.Activated += Owner_Activated;
         _owner.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-        _localizer = Services.GetRequiredService<Localizer>();
-        Services.GetRequiredService<ApplicationCore>().Touch();
+        _localizer = ((IServiceProvider)Application.Current.Resources[ServiceProviderResourceKey]).GetRequiredService<Localizer>();
+        ((IServiceProvider)Application.Current.Resources[ServiceProviderResourceKey]).GetRequiredService<ApplicationCore>().Touch();
     }
-
     private void Owner_Activated(object? sender, EventArgs e)
     {
-        ApplicationCore.ActiveWindow = _owner;
+        ((IServiceProvider)Application.Current.Resources[ServiceProviderResourceKey]).GetRequiredService<ApplicationCore>().ActiveWindow = _owner;
         _owner.Owner = null;
     }
-
     private void Owner_Closed(object? sender, EventArgs e)
     {
         foreach(WeakReference<WindowCore> wr in _launched)
@@ -53,9 +52,8 @@ public class WindowCore : IValueConverter
                 core.Owner.Close();
             }
         }
-        Services.GetRequiredService<ApplicationCore>().Touch();
+        ((IServiceProvider)Application.Current.Resources[ServiceProviderResourceKey]).GetRequiredService<ApplicationCore>().Touch();
     }
-
     public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if ("ThisWindow".Equals(parameter))
@@ -92,7 +90,6 @@ public class WindowCore : IValueConverter
         }
         return null;
     }
-
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
         throw new NotImplementedException();

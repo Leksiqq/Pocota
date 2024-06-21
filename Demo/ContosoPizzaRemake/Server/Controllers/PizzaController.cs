@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaController                            //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-20T18:20:03.                                 //
+// at 2024-06-21T16:41:59.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -86,16 +86,17 @@ public class PizzaController: ControllerBase
         }
 
     }
-    [HttpGet("GetAllSauces")]
-    public async Task GetAllSauces()
+    [HttpGet("GetAllSauces/{limit}")]
+    public async Task GetAllSauces(string limit)
     {
         PizzaServiceBase _storageService = HttpContext.RequestServices.GetRequiredService<PizzaServiceBase>();
         IAccessCalculator accessCalculator = HttpContext.RequestServices.GetRequiredKeyedService<IAccessCalculator>(typeof(Sauce));
         JsonSerializerOptions _serializerOptions = GetJsonSerializerOptions(HttpContext.RequestServices);
         HttpContext.Response.ContentType = "application/json";
+        Int32 _limitFilter = JsonSerializer.Deserialize<Int32>(limit, _serializerOptions)!;
         await JsonSerializer.SerializeAsync(
             HttpContext.Response.Body, 
-            PocotaContext.ProcessEntitiesAsync<Sauce>(accessCalculator, _storageService.GetAllSaucesAsync()), 
+            PocotaContext.ProcessEntitiesAsync<Sauce>(accessCalculator, _storageService.GetAllSaucesAsync(_limitFilter)), 
             _serializerOptions
         );
 

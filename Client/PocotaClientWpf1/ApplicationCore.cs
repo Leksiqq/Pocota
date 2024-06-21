@@ -61,14 +61,15 @@ public class ApplicationCore(IServiceProvider services): ICommand, INotifyProper
         }
         else if(s_allWindows.Equals(parameter))
         {
-            WindowsWindow windowsWindow = new();
-            windowsWindow.Owner = ActiveWindow;
-            windowsWindow.Clear();
-            _uniqWindows.Clear();
+            WindowsWindow windowsWindow = new()
+            {
+                Owner = ActiveWindow
+            };
             foreach (Window window in Application.Current.Windows)
             {
                 Walk(window, 0, windowsWindow);
             }
+            _uniqWindows.Clear();
             windowsWindow.ActiveWindow = ActiveWindow;
             if(windowsWindow.ShowDialog() is bool b && b)
             {

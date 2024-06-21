@@ -81,13 +81,6 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         {
             if(
                 mi.GetParameters().Count() > 0
-                && (
-                    mi.GetParameters().Count() > 1
-                    || (
-                        !entities.Contains(mi.GetParameters().First().ParameterType)
-                        && !envelopes.Contains(mi.GetParameters().First().ParameterType)
-                    )
-                )
             )
             {
                 string name1 = $"{mi.Name}Options";
@@ -289,16 +282,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 mm.ReturnTypeName = mm.ReturnTypeName.Replace(">", "?>");
                 model.AddUsing(typeof(ValueTask));
             }
-            if (
-                mi.GetParameters().Count() > 0
-                && (
-                    mi.GetParameters().Count() > 1
-                    || (
-                        !options.Entities.Contains(mi.GetParameters().First().ParameterType)
-                        && !options.Envelopes.Contains(mi.GetParameters().First().ParameterType)
-                    )
-                )
-            )
+            if (mi.GetParameters().Count() > 1)
             {
                 ParameterModel pm = new()
                 {

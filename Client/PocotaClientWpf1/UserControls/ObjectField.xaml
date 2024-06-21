@@ -17,6 +17,15 @@
                 <ResourceDictionary Source="../Xaml/Dictionaries/Dictionary1.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <l:ConverterProxy Converter="{Binding  ElementName=of}" x:Key="Converter"/>
+            <l:BoolExpressionConverter x:Key="BoolExpressionConverter"/>
+            <l:BindingProxy x:Key="IsReadonly">
+                <l:BindingProxy.Value>
+                    <MultiBinding Converter="{StaticResource BoolExpressionConverter}" ConverterParameter="@0 | @1">
+                        <Binding Path="Field.IsReadonly" ElementName="of"/>
+                        <Binding Path="Field.IsCollection" ElementName="of"/>
+                    </MultiBinding>
+                </l:BindingProxy.Value>
+            </l:BindingProxy>
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
@@ -27,7 +36,7 @@
                 Style="{StaticResource ClearButtonStyle}"
                 Command="{Binding ElementName=of}"
                 CommandParameter="Clear"
-                Visibility="{Binding Field.IsReadonly, ElementName=of, Converter={StaticResource Converter}, ConverterParameter=EditVisibility}"
+                Visibility="{Binding Value, Source={StaticResource IsReadonly}, Converter={StaticResource Converter}, ConverterParameter=EditVisibility}"
                 />
             <Button 
                 DockPanel.Dock="Right" 
@@ -58,7 +67,7 @@
                 Style="{StaticResource CreateButtonStyle}"
                 Command="{Binding ElementName=of}"
                 CommandParameter="Create"
-                Visibility="{Binding Field.IsReadonly, ElementName=of, Converter={StaticResource Converter}, ConverterParameter=EditVisibility}"
+                Visibility="{Binding Value, Source={StaticResource IsReadonly}, Converter={StaticResource Converter}, ConverterParameter=EditVisibility}"
                 />
             <Button 
                 DockPanel.Dock="Right" 

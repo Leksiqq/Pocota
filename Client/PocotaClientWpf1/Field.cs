@@ -79,7 +79,7 @@ public class Field
     public bool IsNullable => _isNullable;
     public bool IsCollection => _isCollection;
     public int Count => IsReady && IsCollection ? (Value as IList)?.Count ?? 0 : 0;
-    public bool IsReadonly  => _entityProperty?.IsReadonly ?? !(_propertyInfo?.CanWrite ?? false);
+    public bool IsReadonly  => _entityProperty?.IsReadonly ?? !((_propertyInfo?.CanWrite ?? false) && !_isCollection);
     public object? Value
     {
         get => _propertyInfo?.GetValue(Target);
@@ -107,6 +107,10 @@ public class Field
         }
     }
     public bool IsReady => _type is { };
+    ~Field()
+    {
+        Console.WriteLine("here");
+    }
     public void Clear()
     {
         if (Type is { })

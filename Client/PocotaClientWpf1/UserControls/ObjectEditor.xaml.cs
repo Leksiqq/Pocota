@@ -148,7 +148,7 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
         }
         else
         {
-            Task.Delay(1).ContinueWith(t => Task.Run(CheckColumnWidth));
+            //Task.Delay(1).ContinueWith(t => Task.Run(CheckColumnWidth));
         }
     }
     private void ObjectEditor_Loaded(object sender, RoutedEventArgs e)
@@ -157,8 +157,8 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
         {
             if (dop is Window window)
             {
-                Window = window;
-                SetTemplateSelector();
+                //Window = window;
+                //SetTemplateSelector();
                 break;
             }
         }

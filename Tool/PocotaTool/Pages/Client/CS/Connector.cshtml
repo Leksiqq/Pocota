@@ -18,7 +18,7 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string.Join("
 @foreach (MethodModel mm in @Model.Methods)
 {
     ParameterModel? pm = mm.Parameters.SkipWhile(p => p.Name == "target").FirstOrDefault();
-    <text>        _methodsOptionsTypes.Add(((Delegate)@mm.Name).Method, @if(pm is {}){<text>typeof(@Html.Raw(pm.TypeName))</text>} else {<text>null</text>});
+    <text>        _methodsOptionsTypes.Add(((Delegate)@mm.Name).Method, @if(pm is {}){<text>typeof(@Html.Raw($"{mm.Name.Replace("Async", string.Empty)}Options"))</text>} else {<text>null</text>});
 </text>
 }
     }

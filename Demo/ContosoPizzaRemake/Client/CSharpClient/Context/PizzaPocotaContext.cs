@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaPocotaContext                  //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-20T18:20:03.                                 //
+// at 2024-06-21T16:41:59.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 

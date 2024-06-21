@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaConnector          //
 // was generated automatically from            //
-// at 2024-06-20T18:20:03.                     //
+// at 2024-06-21T16:41:59.                     //
 // Modifying this file will break the program! //
 /////////////////////////////////////////////////
 
@@ -29,11 +29,11 @@ public class PizzaConnector: Connector
         );
         _methodsOptionsTypes.Add(((Delegate)GetAllPizzasAsync).Method, null);
         _methodsOptionsTypes.Add(((Delegate)FindPizzasAsync).Method, typeof(FindPizzasOptions));
-        _methodsOptionsTypes.Add(((Delegate)GetPizzaAsync).Method, typeof(Pizza));
-        _methodsOptionsTypes.Add(((Delegate)GetAllSaucesAsync).Method, null);
-        _methodsOptionsTypes.Add(((Delegate)GetSauceAsync).Method, typeof(Sauce));
+        _methodsOptionsTypes.Add(((Delegate)GetPizzaAsync).Method, typeof(GetPizzaOptions));
+        _methodsOptionsTypes.Add(((Delegate)GetAllSaucesAsync).Method, typeof(GetAllSaucesOptions));
+        _methodsOptionsTypes.Add(((Delegate)GetSauceAsync).Method, typeof(GetSauceOptions));
         _methodsOptionsTypes.Add(((Delegate)GetAllToppingsAsync).Method, null);
-        _methodsOptionsTypes.Add(((Delegate)GetToppingAsync).Method, typeof(Topping));
+        _methodsOptionsTypes.Add(((Delegate)GetToppingAsync).Method, typeof(GetToppingOptions));
     }
     public override async Task GetPocotaConfigAsync(CancellationToken cancellationToken)
     {
@@ -97,16 +97,17 @@ public class PizzaConnector: Connector
             _asyncLock.Release();
         }
     }
-    public async Task GetAllSaucesAsync(ICollection<Sauce> target, CancellationToken cancellationToken) 
+    public async Task GetAllSaucesAsync(ICollection<Sauce> target, Int32 limit, CancellationToken cancellationToken) 
     {
         await _asyncLock.WaitAsync(cancellationToken);
         try 
         {
             ResetContext();
+            string _limit = HttpUtility.UrlEncode(JsonSerializer.Serialize(limit, _serializerOptions));
 
             HttpRequestMessage _request = new(
                 HttpMethod.Get, 
-                $"/Pizza/GetAllSauces"
+                $"/Pizza/GetAllSauces/{_limit}"
             );
             await GetResponseAsyncEnumerable(target, _request, _serializerOptions, cancellationToken);
         }
