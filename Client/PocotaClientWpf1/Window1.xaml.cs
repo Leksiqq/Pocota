@@ -27,6 +27,7 @@ namespace Net.Leksi.Pocota.Client
         }
         ~Window1()
         {
+            Console.WriteLine();
             Interlocked.Decrement(ref _mw.count);
         }
     }

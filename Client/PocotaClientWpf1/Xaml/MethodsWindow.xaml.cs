@@ -27,6 +27,7 @@ public partial class MethodsWindow : Window, ICommand
 
     Timer? t;
     internal ulong count = 0;
+    internal ulong step = 0;
     private void MethodsWindow_Activated(object? sender, EventArgs e)
     {
         SemaphoreSlim ss = new(1);
@@ -38,11 +39,13 @@ public partial class MethodsWindow : Window, ICommand
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        ObjectWindow ow = new ObjectWindow("Pizza", this);
-                        //Window1 ow = new Window1(this);
-                        if(Interlocked.Increment(ref count) > 100)
+                        //ObjectWindow ow = new ObjectWindow("Pizza", this);
+                        Window1 ow = new(this);
+                        Interlocked.Increment(ref count);
+                        if (Interlocked.Increment(ref step) % 100 == 0)
                         {
-                            GC.Collect();
+                            GC.Collect(GC.MaxGeneration, GCCollectionMode.Default, true, true);
+                            GC.WaitForPendingFinalizers();
                         }
                         Console.Write($"\r              \r{count}");
                         ow.Show();

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Net.Leksi.Pocota.Client;
+using System.Diagnostics;
 
 namespace WpfApp1;
 
@@ -20,6 +21,11 @@ static class Program
         builder.Services.RemoveService(typeof(INamesConverter));
         builder.Services.AddSingleton<INamesConverter, NamesConverter>();
         using IHost host = builder.Build();
+        Process currentProcess = Process.GetCurrentProcess();
+
+        // Set the maximum working set size (in bytes)
+        long maxWorkingSetBytes = 1024 * 1024 * 50; // 100 MB
+        currentProcess.MaxWorkingSet = new IntPtr(maxWorkingSetBytes);
         host.RunPocotaWpfApp(app =>
         {
             app.ShutdownMode = System.Windows.ShutdownMode.OnMainWindowClose;
