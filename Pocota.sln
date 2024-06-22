@@ -47,7 +47,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibrary1", "..\Localiz
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PocotaClientWpf1", "Client\PocotaClientWpf1\PocotaClientWpf1.csproj", "{594E057A-DC85-43D8-8D87-9BAD3F354D6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{F9EF61FD-ED07-4DB3-94F6-0E93813C99F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{F9EF61FD-ED07-4DB3-94F6-0E93813C99F4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LifetimeObserver", "W:\c#\LifetimeObserver\Library\LifetimeObserver.csproj", "{BAA5F3C1-2F9D-4B60-AE11-F54E840DDBFC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,6 +121,10 @@ Global
 		{F9EF61FD-ED07-4DB3-94F6-0E93813C99F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9EF61FD-ED07-4DB3-94F6-0E93813C99F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9EF61FD-ED07-4DB3-94F6-0E93813C99F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAA5F3C1-2F9D-4B60-AE11-F54E840DDBFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAA5F3C1-2F9D-4B60-AE11-F54E840DDBFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAA5F3C1-2F9D-4B60-AE11-F54E840DDBFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAA5F3C1-2F9D-4B60-AE11-F54E840DDBFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
