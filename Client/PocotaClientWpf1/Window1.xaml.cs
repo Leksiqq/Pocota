@@ -1,16 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿using System.Windows;
 
 namespace Net.Leksi.Pocota.Client
 {
@@ -19,16 +7,16 @@ namespace Net.Leksi.Pocota.Client
     /// </summary>
     public partial class Window1 : Window
     {
-        private readonly MethodsWindow _mw;
-        public Window1(MethodsWindow mw)
+        private static int _hashGen = 0;
+        private readonly int _hash;
+        public Window1()
         {
-            _mw = mw;
+            _hash = Interlocked.Increment(ref _hashGen);
             InitializeComponent();
         }
-        ~Window1()
+        public override string ToString()
         {
-            Console.WriteLine();
-            Interlocked.Decrement(ref _mw.count);
+            return $"{GetType().Name}@{_hash}";
         }
     }
 }

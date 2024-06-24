@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Net.Leksi.Pocota.Client;
+using Net.Leksi.Util;
 using System.Diagnostics;
 
 namespace WpfApp1;
@@ -20,6 +21,11 @@ static class Program
         builder.Services.AddSingleton<Localizer>(s => s.GetRequiredService<MyLocalizer>());
         builder.Services.RemoveService(typeof(INamesConverter));
         builder.Services.AddSingleton<INamesConverter, NamesConverter>();
+        builder.Services.AddTransient<Window1>();
+        builder.Services.AddLIfetimeObserver(lto =>
+        {
+            lto.Trace<Window1>();
+        });
         using IHost host = builder.Build();
         Process currentProcess = Process.GetCurrentProcess();
 

@@ -44,17 +44,7 @@ public partial class ObjectWindow : Window, IServiceRelated, INotifyPropertyChan
     {
         _namesConverter = (Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!.GetRequiredService<INamesConverter>();
         ServiceKey = serviceKey;
-        _mw = owner as MethodsWindow;
         InitializeComponent();
-    }
-    MethodsWindow? _mw;
-    ~ObjectWindow()
-    {
-        Console.WriteLine();
-        if(_mw is { })
-        {
-            Interlocked.Decrement(ref _mw.count);
-        }
     }
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

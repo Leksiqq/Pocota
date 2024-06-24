@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Net.Leksi.Util;
 using Net.Leksi.WpfMarkup;
 using System.Windows;
 using System.Windows.Input;
@@ -25,14 +26,34 @@ public partial class MethodsWindow : Window, ICommand
         InitializeComponent();
     }
 
-    Timer? t;
-    internal ulong count = 0;
-    internal ulong step = 0;
+    Timer? t = null;
+    long count = 0;
+    long step = 0;
+    int dir = 0;
     private void MethodsWindow_Activated(object? sender, EventArgs e)
     {
         SemaphoreSlim ss = new(1);
         if (t is null)
         {
+            LifetimeObserver lifetimeObserver = Application.Current.GetServiceProvider().GetRequiredService<LifetimeObserver>();
+            lifetimeObserver.LifetimeEventOccured += (s, e) =>
+            {
+                switch (e.Kind)
+                {
+                    case LifetimeEventKind.Created:
+                        Interlocked.Increment(ref count);
+                        if (dir == -1)
+                        {
+                            Console.WriteLine();
+                        }
+                        dir = 1;
+                        break;
+                    case LifetimeEventKind.Finalized:
+                        Interlocked.Decrement(ref count);
+                        dir = -1;
+                        break;
+                };
+            };
             t = new Timer(s =>
             {
                 if (ss.Wait(1))
@@ -40,11 +61,10 @@ public partial class MethodsWindow : Window, ICommand
                     Dispatcher.Invoke(() =>
                     {
                         //ObjectWindow ow = new ObjectWindow("Pizza", this);
-                        Window1 ow = new(this);
-                        Interlocked.Increment(ref count);
+                        Window1 ow = Application.Current.GetServiceProvider().GetRequiredService<Window1>();
                         if (Interlocked.Increment(ref step) % 100 == 0)
                         {
-                            GC.Collect(GC.MaxGeneration, GCCollectionMode.Default, true, true);
+                            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, false);
                             GC.WaitForPendingFinalizers();
                         }
                         Console.Write($"\r              \r{count}");
