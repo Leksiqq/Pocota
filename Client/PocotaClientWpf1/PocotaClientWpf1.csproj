@@ -29,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\LifetimeObserver\Library\LifetimeObserver.csproj" />
     <ProjectReference Include="..\..\..\Localization\Localization\Localization.csproj" />
     <ProjectReference Include="..\..\..\WPF\WpfMarkupExtension\WpfMarkupExtension\WpfMarkupExtension.csproj" />
     <ProjectReference Include="..\PocotaClient\PocotaClient.csproj" />
