@@ -5,5 +5,6 @@ public static class Constants
     public static string LocalizerResourceKey => "Localizer";
     public static string NamesConverterResourceKey => "NamesConverter";
     public static string CommonJsonSerializerOptionsResourceKey => "CommonJsonSerializerOptions";
+    public static string ApplicationCoreResourceKey => "ApplicationCore";
 }
 

@@ -30,14 +30,22 @@ public static class PocotaWpfAppExtension
         {
             services.AddKeyedTransient(
                 s_mainWindowServiceKey, 
-                (s, o) => (Window)Activator.CreateInstance(mainWindowType)!
+                (s, o) => {
+                    Window w = (Window)Activator.CreateInstance(mainWindowType)!;
+                    (Application.Current.Resources[ApplicationCoreResourceKey] as ApplicationCore)!.AttachWindow(w);
+                    return w;
+                }
             );
         }
         else
         {
-            services.AddKeyedTransient<Window>(
+            services.AddKeyedTransient(
                 s_mainWindowServiceKey,
-                (s, o) => new MethodsWindow()
+                (s, o) => {
+                    Window w = new MethodsWindow();
+                    (Application.Current.Resources[ApplicationCoreResourceKey] as ApplicationCore)!.AttachWindow(w);
+                    return w;
+                }
             );
         }
         services.AddScoped(
@@ -53,6 +61,7 @@ public static class PocotaWpfAppExtension
                 };
                 commonJSO.Converters.Add(new CommonJsonConverterFactory());
                 app.Resources[CommonJsonSerializerOptionsResourceKey] = commonJSO;
+                app.Resources[ApplicationCoreResourceKey] = new ApplicationCore();
                 return app;
             }
         );

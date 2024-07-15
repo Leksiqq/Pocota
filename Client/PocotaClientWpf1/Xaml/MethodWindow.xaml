@@ -23,13 +23,12 @@
                 <ResourceDictionary Source="Dictionaries/PropertyTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
-            <l:ConverterProxy Converter="{Binding Core}" x:Key="Converter"/>
             <l:XamlServiceProviderCatcher x:Key="WindowSP"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
-            <MenuItem Style="{l:ParameterizedResource WindowsMenuItemStyle, Replaces=$window:Window|$converter:Converter}"/>
+            <MenuItem Style="{DynamicResource WindowsMenuItemStyle}"/>
         </Menu>
         <TextBlock DockPanel.Dock="Top" FontSize="20" HorizontalAlignment="Center" Margin="10,0">
             <TextBlock.Text>

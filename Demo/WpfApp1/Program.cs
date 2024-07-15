@@ -22,7 +22,7 @@ static class Program
         builder.Services.RemoveService(typeof(INamesConverter));
         builder.Services.AddSingleton<INamesConverter, NamesConverter>();
         builder.Services.AddTransient<Window1>();
-        builder.Services.AddLIfetimeObserver(lto =>
+        builder.Services.AddLifetimeObserver(lto =>
         {
             lto.Trace<Window1>();
         });

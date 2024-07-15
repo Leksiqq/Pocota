@@ -22,7 +22,7 @@ public partial class MethodsWindow : Window, ICommand
     public MethodsWindow()
     {
         ConnectorsDataGridManager.ViewSource.Source = ((IServiceProvider)Application.Current.Resources[ServiceProviderResourceKey]).GetRequiredService<ConnectorsMethodsList>();
-        Activated += MethodsWindow_Activated;
+        //Activated += MethodsWindow_Activated;
         InitializeComponent();
     }
 
@@ -62,6 +62,7 @@ public partial class MethodsWindow : Window, ICommand
                     {
                         //ObjectWindow ow = new ObjectWindow("Pizza", this);
                         Window1 ow = Application.Current.GetServiceProvider().GetRequiredService<Window1>();
+                        (Application.Current.Resources[ApplicationCoreResourceKey] as ApplicationCore)!.AttachWindow(ow);
                         if (Interlocked.Increment(ref step) % 100 == 0)
                         {
                             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, false);
@@ -85,7 +86,8 @@ public partial class MethodsWindow : Window, ICommand
     {
         if (parameter is ConnectorMethod cm)
         {
-            MethodWindow methodWindow = new(cm, this);
+            MethodWindow methodWindow = new(cm);
+            (Application.Current.Resources[ApplicationCoreResourceKey] as ApplicationCore)!.AttachWindow(methodWindow);
             methodWindow.Show();
         }
     }

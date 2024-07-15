@@ -6,27 +6,30 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     >
-    <Style TargetType="MenuItem" x:Key="WindowsMenuItemStyle" x:Shared="True">
+    <Style TargetType="MenuItem" x:Key="WindowsMenuItemStyle">
+        <Style.Resources>
+            <l:ConverterProxy Converter="{Binding Source={StaticResource ApplicationCore}}" x:Key="Converter"/>
+        </Style.Resources>
         <Setter Property="Header" Value="{Binding Window, Source={StaticResource Localizer}}"/>
-        <Setter Property="ItemsSource" Value="{Binding Value.Core.ApplicationCore.WindowMenuItems, Source={l:ParameterizedResource $window}}"/>
+        <Setter Property="ItemsSource" Value="{Binding WindowMenuItems, Source={StaticResource ApplicationCore}}"/>
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
                 <Style TargetType="{x:Type MenuItem}">
-                    <Setter Property="Command" Value="{Binding Value.Core.ApplicationCore, Source={l:ParameterizedResource $window}}" />
+                    <Setter Property="Command" Value="{Binding Source={StaticResource ApplicationCore}}" />
                     <Setter Property="CommandParameter" Value="{Binding}"/>
-                    <Setter Property="IsChecked" Value="{Binding Converter={l:ParameterizedResource $converter}, ConverterParameter=ThisWindow, Mode=OneWay}"/>
+                    <Setter Property="IsChecked" Value="{Binding Converter={StaticResource Converter}, ConverterParameter=ThisWindow, Mode=OneWay}"/>
                 </Style>
             </Setter.Value>
         </Setter>
         <Setter Property="ItemTemplate">
             <Setter.Value>
                 <HierarchicalDataTemplate DataType="Window">
-                    <TextBlock d:Text="{Binding Title}">
+                    <TextBlock>
                         <TextBlock.Text>
                             <MultiBinding StringFormat="{}{0}{1}{2}">
-                                <Binding Converter="{l:ParameterizedResource $converter}" ConverterParameter="PriorInfo"/>
-                                <Binding Converter="{l:ParameterizedResource $converter}" ConverterParameter="Title"/>
-                                <Binding Converter="{l:ParameterizedResource $converter}" ConverterParameter="AdditionalInfo"/>
+                                <Binding Converter="{StaticResource Converter}" ConverterParameter="PriorInfo"/>
+                                <Binding Converter="{StaticResource Converter}" ConverterParameter="Title"/>
+                                <Binding Converter="{StaticResource Converter}" ConverterParameter="AdditionalInfo"/>
                             </MultiBinding>
                         </TextBlock.Text>
                     </TextBlock>

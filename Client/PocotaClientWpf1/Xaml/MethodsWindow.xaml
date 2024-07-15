@@ -18,12 +18,11 @@
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy x:Key="ConnectorsDataGridManager" Value="{Binding ConnectorsDataGridManager}"/>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
-            <l:ConverterProxy Converter="{Binding Core}" x:Key="Converter"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True" Grid.Row="0">
         <Menu DockPanel.Dock="Top">
-            <MenuItem Style="{l:ParameterizedResource WindowsMenuItemStyle,  Replaces=$window:Window|$converter:Converter}"/>
+            <MenuItem Style="{DynamicResource WindowsMenuItemStyle}"/>
         </Menu>
         <StatusBar DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
             <StatusBarItem>
