@@ -11,6 +11,9 @@ namespace Net.Leksi.Pocota.Client;
 public static class PocotaWpfAppExtension
 {
     internal const string s_mainWindowServiceKey = "Net.Leksi.Pocota.Client.MainWindow";
+    private const string PriorInfoResourceKey = "PriorInfo";
+    private const string TitleResourceKey = "Title";
+    private const string AdditionalInfoResourceKey = "AdditionalInfo";
 
     public static IServiceCollection AddPocotaWpfApp(
         this IServiceCollection services, 
@@ -62,6 +65,9 @@ public static class PocotaWpfAppExtension
                 commonJSO.Converters.Add(new CommonJsonConverterFactory());
                 app.Resources[CommonJsonSerializerOptionsResourceKey] = commonJSO;
                 app.Resources[ApplicationCoreResourceKey] = new ApplicationCore();
+                app.Resources[PriorInfoResourceKey] = PriorInfoResourceKey;
+                app.Resources[TitleResourceKey] = TitleResourceKey;
+                app.Resources[AdditionalInfoResourceKey] = AdditionalInfoResourceKey;
                 return app;
             }
         );
@@ -98,10 +104,19 @@ public static class PocotaWpfAppExtension
     {
         return AddPocotaWpfApp(services, s => new TApplication(), typeof(TWindow));
     }
-    public static IServiceProvider GetServiceProvider(this Application app)
-    {
-        return app.Resources[ServiceProviderResourceKey] as IServiceProvider ?? throw new NullReferenceException();
-    }
+    public static IServiceProvider GetServiceProvider(this Application app) => 
+        (app.Resources[ServiceProviderResourceKey] as IServiceProvider)!;
+    public static Localizer GetLocalizer(this Application app) => 
+        app.GetServiceProvider().GetRequiredService<Localizer>();
+    public static INamesConverter GetNamesConverter(this Application app) =>
+        app.GetServiceProvider().GetRequiredService<INamesConverter>();
+    public static ApplicationCore GetApplicationCore(this Application app) =>
+        (app.Resources[ApplicationCoreResourceKey] as ApplicationCore)!;
+    public static JsonSerializerOptions GetCommonJsonSerializerOptions(this Application app) =>
+        (app.Resources[CommonJsonSerializerOptionsResourceKey] as JsonSerializerOptions)!;
+    public static void AttachWindow(this Application app, Window window, Window? launcher = null) => 
+        GetApplicationCore(app).AttachWindow(window, launcher);
+    public static T GetRequiredService<T>(this Application app) where T: notnull => GetServiceProvider(app).GetRequiredService<T>();
     public static IServiceCollection RemoveService(this IServiceCollection services, Type serviceType)
     {
         if (services.Where(sd => sd.ServiceType == serviceType).FirstOrDefault() is ServiceDescriptor sd)

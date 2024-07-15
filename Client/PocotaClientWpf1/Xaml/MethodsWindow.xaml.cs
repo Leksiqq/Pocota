@@ -1,9 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Net.Leksi.Util;
+﻿using Net.Leksi.Util;
 using Net.Leksi.WpfMarkup;
 using System.Windows;
 using System.Windows.Input;
-using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
 public partial class MethodsWindow : Window, ICommand
 {
@@ -21,7 +19,7 @@ public partial class MethodsWindow : Window, ICommand
     public DataGridManager ConnectorsDataGridManager { get; private init; } = new();
     public MethodsWindow()
     {
-        ConnectorsDataGridManager.ViewSource.Source = ((IServiceProvider)Application.Current.Resources[ServiceProviderResourceKey]).GetRequiredService<ConnectorsMethodsList>();
+        ConnectorsDataGridManager.ViewSource.Source = Application.Current.GetRequiredService<ConnectorsMethodsList>();
         //Activated += MethodsWindow_Activated;
         InitializeComponent();
     }
@@ -35,7 +33,7 @@ public partial class MethodsWindow : Window, ICommand
         SemaphoreSlim ss = new(1);
         if (t is null)
         {
-            LifetimeObserver lifetimeObserver = Application.Current.GetServiceProvider().GetRequiredService<LifetimeObserver>();
+            LifetimeObserver lifetimeObserver = Application.Current.GetRequiredService<LifetimeObserver>();
             lifetimeObserver.LifetimeEventOccured += (s, e) =>
             {
                 switch (e.Kind)
@@ -61,8 +59,8 @@ public partial class MethodsWindow : Window, ICommand
                     Dispatcher.Invoke(() =>
                     {
                         //ObjectWindow ow = new ObjectWindow("Pizza", this);
-                        Window1 ow = Application.Current.GetServiceProvider().GetRequiredService<Window1>();
-                        (Application.Current.Resources[ApplicationCoreResourceKey] as ApplicationCore)!.AttachWindow(ow);
+                        Window1 ow = Application.Current.GetRequiredService<Window1>();
+                        Application.Current.AttachWindow(ow);
                         if (Interlocked.Increment(ref step) % 100 == 0)
                         {
                             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, false);
@@ -87,7 +85,7 @@ public partial class MethodsWindow : Window, ICommand
         if (parameter is ConnectorMethod cm)
         {
             MethodWindow methodWindow = new(cm);
-            (Application.Current.Resources[ApplicationCoreResourceKey] as ApplicationCore)!.AttachWindow(methodWindow);
+            Application.Current.AttachWindow(methodWindow);
             methodWindow.Show();
         }
     }

@@ -22,7 +22,7 @@
     </Window.Resources>
     <DockPanel LastChildFill="True" Grid.Row="0">
         <Menu DockPanel.Dock="Top">
-            <MenuItem Style="{DynamicResource WindowsMenuItemStyle}"/>
+            <MenuItem Style="{StaticResource WindowsMenuItemStyle}"/>
         </Menu>
         <StatusBar DockPanel.Dock="Bottom" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
             <StatusBarItem>

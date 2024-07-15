@@ -28,7 +28,7 @@
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
-            <MenuItem Style="{DynamicResource WindowsMenuItemStyle}"/>
+            <MenuItem Style="{StaticResource WindowsMenuItemStyle}"/>
         </Menu>
         <TextBlock DockPanel.Dock="Top" FontSize="20" HorizontalAlignment="Center" Margin="10,0">
             <TextBlock.Text>

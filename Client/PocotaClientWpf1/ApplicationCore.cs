@@ -25,10 +25,9 @@ public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     private const string s_allWindows = "AllWindows";
     private readonly HashSet<Window> _uniqWindows = [];
-    private readonly Localizer _localizer = Services.GetRequiredService<Localizer>();
+    private readonly Localizer _localizer = Application.Current.GetServiceProvider().GetRequiredService<Localizer>();
     private readonly PropertyChangedEventArgs _windowMenuItemsPropertyChangedEventsArg = new(nameof(WindowMenuItems));
     private Window? _activeWindow = null;
-    private static IServiceProvider Services => (Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!;
     public bool CanExecute(object? parameter)
     {
         return true;

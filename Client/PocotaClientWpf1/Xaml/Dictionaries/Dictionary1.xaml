@@ -27,9 +27,9 @@
                     <TextBlock>
                         <TextBlock.Text>
                             <MultiBinding StringFormat="{}{0}{1}{2}">
-                                <Binding Converter="{StaticResource Converter}" ConverterParameter="PriorInfo"/>
-                                <Binding Converter="{StaticResource Converter}" ConverterParameter="Title"/>
-                                <Binding Converter="{StaticResource Converter}" ConverterParameter="AdditionalInfo"/>
+                                <Binding Converter="{StaticResource Converter}" ConverterParameter="{StaticResource PriorInfo}"/>
+                                <Binding Converter="{StaticResource Converter}" ConverterParameter="{StaticResource Title}"/>
+                                <Binding Converter="{StaticResource Converter}" ConverterParameter="{StaticResource AdditionalInfo}"/>
                             </MultiBinding>
                         </TextBlock.Text>
                     </TextBlock>
