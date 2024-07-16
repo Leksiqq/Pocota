@@ -29,7 +29,7 @@ public static class PocotaWpfAppExtension
                 s_mainWindowServiceKey, 
                 (s, o) => {
                     Window w = (Window)Activator.CreateInstance(mainWindowType)!;
-                    (Application.Current.Resources[Constants.ApplicationCore] as ApplicationCore)!.AttachWindow(w);
+                    Application.Current.GetApplicationCore().AttachWindow(w);
                     return w;
                 }
             );
@@ -40,7 +40,7 @@ public static class PocotaWpfAppExtension
                 s_mainWindowServiceKey,
                 (s, o) => {
                     Window w = new MethodsWindow();
-                    (Application.Current.Resources[Constants.ApplicationCore] as ApplicationCore)!.AttachWindow(w);
+                    Application.Current.GetApplicationCore().AttachWindow(w);
                     return w;
                 }
             );
@@ -66,7 +66,10 @@ public static class PocotaWpfAppExtension
                 return app;
             }
         );
-       services.AddSingleton<Localizer>();
+        services.AddSingleton<Localizer>();
+        services.AddTransient<MethodWindow>();
+        services.AddTransient<ObjectWindow>();
+        services.AddTransient<WindowsWindow>();
 
         ConnectorsMethodsList methods = new();
         foreach(ServiceDescriptor sd in services)

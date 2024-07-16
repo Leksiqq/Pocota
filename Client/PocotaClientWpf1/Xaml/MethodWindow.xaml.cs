@@ -5,70 +5,46 @@ using System.Globalization;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
-using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
 public partial class MethodWindow : Window, IServiceRelated, IEditWindow, INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     private const string s_target = "target";
-    private readonly ConnectorMethod _connectorMethod;
-    private readonly INamesConverter _namesConverter;
+    private readonly INamesConverter _namesConverter = null!;
+    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
+    private ConnectorMethod _connectorMethod = null!;
     private object? _target;
-    private PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
+    public object? Target => _target;
+    public string? MethodName => _connectorMethod?.Method.Name;
+    public string? ServiceKey => _connectorMethod?.ServiceKey;
+    public Type? ReturnType => _connectorMethod != null ? 
+        _connectorMethod.Method.GetParameters()
+            .Where(p => p.Name == s_target).FirstOrDefault()?.ParameterType 
+                ?? _connectorMethod.Method.ReturnType.GetGenericArguments()[0]
+        : null;
 
-    public object? Target
+    public string ObjectTitle => _connectorMethod != null ?
+        $"{ConvertName(ServiceKey!)}:{ConvertName(_connectorMethod.Method.Name, _connectorMethod.Connector)}()" : string.Empty;
+    public MethodWindow()
     {
-        get => _target;
-        internal set
-        {
-            if (_target != value)
-            {
-                _target = value;
-                PropertyChanged?.Invoke(this, _propertyChangedEventArgs);
-            }
-        }
+        _namesConverter = Application.Current.GetNamesConverter();
     }
-    public string MethodName => _connectorMethod.Method.Name;
-    public string ServiceKey => _connectorMethod.ServiceKey;
-    public Type ReturnType => _connectorMethod.Method.GetParameters()
-        .Where(p => p.Name == s_target).FirstOrDefault()?.ParameterType ?? _connectorMethod.Method.ReturnType.GetGenericArguments()[0];
-
-    public string ObjectTitle => $"{ConvertName(ServiceKey)}:{ConvertName(_connectorMethod.Method.Name, _connectorMethod.Connector)}()";
-#pragma warning disable CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Возможно, стоит объявить поле как допускающее значения NULL.
-    private MethodWindow()
-#pragma warning restore CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Возможно, стоит объявить поле как допускающее значения NULL.
+    public void Init(ConnectorMethod connectorMethod) 
     {
-        _namesConverter = Application.Current.GetServiceProvider().GetRequiredService<INamesConverter>();
-    }
-    public MethodWindow(Delegate @delegate, Window owner) : this()
-    {
-        _connectorMethod = GetConnectorMethod(@delegate);
-        Init();
-    }
-    public MethodWindow(ConnectorMethod connectorMethod) : this()
-    {
-        
-        _connectorMethod = connectorMethod;
-        Init();
-    }
-    private static ConnectorMethod GetConnectorMethod(Delegate @delegate)
-    {
-        return Application.Current.GetServiceProvider().GetRequiredService<ConnectorsMethodsList>()[@delegate.Method]!;
+        //_connectorMethod = connectorMethod;
+        //Type targetType = Application.Current.GetServiceProvider()
+        //        .GetRequiredKeyedService<Connector>(ServiceKey)
+        //        .GetMethodOptionsType(_connectorMethod.Method)!;
+        //if (targetType != null)
+        //{
+        //    _target = Activator.CreateInstance(targetType);
+        //}
+        InitializeComponent();
     }
     private string? ConvertName(object value, object? parameter = null)
     {
         return (string?)_namesConverter.Convert(value, typeof(string), parameter, CultureInfo.CurrentCulture);
     }
-    private void Init()
-    {
-        if(Application.Current.GetServiceProvider()
-            .GetRequiredKeyedService<Connector>(ServiceKey).GetMethodOptionsType(_connectorMethod.Method) is Type methodOptionsType)
-        {
-            Target = Activator.CreateInstance(methodOptionsType);
-        }
-        InitializeComponent();
-    }
-
     protected override void OnActivated(EventArgs e)
     {
         ObjectEditor.CalcColumnsWidth();
@@ -77,16 +53,6 @@ public partial class MethodWindow : Window, IServiceRelated, IEditWindow, INotif
     private void Button_Click(object sender, RoutedEventArgs e)
     {
         Console.WriteLine(JsonSerializer.Serialize(Target));
-    }
-
-    private void MenuItem_SubmenuOpened(object sender, RoutedEventArgs e)
-    {
-        if (sender is MenuItem mi)
-        {
-            foreach (var item in mi.Items)
-            {
-            }
-        }
     }
     private void ObjectEditor_CurrentInputChanged(object sender, EventArgs e)
     {

@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     >
-    <Style TargetType="MenuItem" x:Key="WindowsMenuItemStyle">
+    <Style TargetType="MenuItem" x:Key="WindowsMenuItemStyle" x:Shared="False">
         <Style.Resources>
             <l:ConverterProxy Converter="{Binding Source={StaticResource ApplicationCore}}" x:Key="Converter"/>
         </Style.Resources>

@@ -20,7 +20,7 @@ public partial class MethodsWindow : Window, ICommand
     public MethodsWindow()
     {
         ConnectorsDataGridManager.ViewSource.Source = Application.Current.GetRequiredService<ConnectorsMethodsList>();
-        //Activated += MethodsWindow_Activated;
+        Activated += MethodsWindow_Activated;
         InitializeComponent();
     }
 
@@ -58,17 +58,19 @@ public partial class MethodsWindow : Window, ICommand
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        //ObjectWindow ow = new ObjectWindow("Pizza", this);
-                        Window1 ow = Application.Current.GetRequiredService<Window1>();
-                        Application.Current.AttachWindow(ow);
+                        MethodWindow methodWindow = Application.Current.GetRequiredService<MethodWindow>();
+                        methodWindow.Init(Application.Current.GetRequiredService<ConnectorsMethodsList>().First());
+
+                        //Window1 methodWindow = Application.Current.GetRequiredService<Window1>();
+                        //Application.Current.AttachWindow(methodWindow);
                         if (Interlocked.Increment(ref step) % 100 == 0)
                         {
                             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, false);
                             GC.WaitForPendingFinalizers();
                         }
                         Console.Write($"\r              \r{count}");
-                        ow.Show();
-                        ow.Close();
+                        methodWindow.Show();
+                        methodWindow.Close();
                     });
                     ss.Release();
                 }
@@ -84,8 +86,9 @@ public partial class MethodsWindow : Window, ICommand
     {
         if (parameter is ConnectorMethod cm)
         {
-            MethodWindow methodWindow = new(cm);
+            MethodWindow methodWindow = Application.Current.GetRequiredService<MethodWindow>();
             Application.Current.AttachWindow(methodWindow);
+            methodWindow.Init(cm);
             methodWindow.Show();
         }
     }

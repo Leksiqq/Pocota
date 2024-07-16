@@ -2,5 +2,5 @@
 
 public interface IServiceRelated
 {
-    string ServiceKey { get; }
+    string? ServiceKey { get; }
 }

@@ -21,17 +21,18 @@ static class Program
         builder.Services.AddSingleton<Localizer>(s => s.GetRequiredService<MyLocalizer>());
         builder.Services.RemoveService(typeof(INamesConverter));
         builder.Services.AddSingleton<INamesConverter, NamesConverter>();
-        builder.Services.AddTransient<Window1>();
+        //builder.Services.AddTransient<Window1>();
         builder.Services.AddLifetimeObserver(lto =>
         {
-            lto.Trace<Window1>();
+            lto.Trace<MethodWindow>();
+            //lto.Trace<Window1>();
         });
         using IHost host = builder.Build();
         Process currentProcess = Process.GetCurrentProcess();
 
         // Set the maximum working set size (in bytes)
-        long maxWorkingSetBytes = 1024 * 1024 * 50; // 100 MB
-        currentProcess.MaxWorkingSet = new IntPtr(maxWorkingSetBytes);
+        //long maxWorkingSetBytes = 1024 * 1024 * 50;
+        //currentProcess.MaxWorkingSet = new IntPtr(maxWorkingSetBytes);
         host.RunPocotaWpfApp(app =>
         {
             app.ShutdownMode = System.Windows.ShutdownMode.OnMainWindowClose;

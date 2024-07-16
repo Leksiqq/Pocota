@@ -114,8 +114,10 @@ public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
                 _windowsByLauncher.Add(launcher, [window]);
             }
         }
-        WeakEventManager<Window, EventArgs>.AddHandler(window, "Activated", WindowActivated);
-        WeakEventManager<Window, EventArgs>.AddHandler(window, "Closed", WindowClosed);
+        //WeakEventManager<Window, EventArgs>.AddHandler(window, "Activated", WindowActivated);
+        //WeakEventManager<Window, EventArgs>.AddHandler(window, "Closed", WindowClosed);
+        window.Activated += WindowActivated;
+        window.Closed += WindowClosed;
         NotifyMenuItemsPropertyChanged();
     }
 
@@ -123,6 +125,8 @@ public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
     {
         if (sender is Window window)
         {
+            window.Activated -= WindowActivated;
+            window.Closed -= WindowClosed;
             if (_activeWindow == window)
             {
                 _activeWindow = null;
