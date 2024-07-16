@@ -42,7 +42,7 @@ public partial class ObjectWindow : Window, IServiceRelated, INotifyPropertyChan
     public string ObjectTitle => GetType().FullName!;//$"{(Core.Launcher?.Owner is IEditWindow ew ? $"{ew.ObjectTitle}/" : string.Empty)}{ConvertName(PropertyName, Target?.GetType())}";
     public ObjectWindow(string serviceKey, Window owner)
     {
-        _namesConverter = (Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!.GetRequiredService<INamesConverter>();
+        _namesConverter = Application.Current.GetServiceProvider().GetRequiredService<INamesConverter>();
         ServiceKey = serviceKey;
         InitializeComponent();
     }

@@ -51,7 +51,7 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     }
     public ObjectEditor()
     {
-        _localizer = (Application.Current.Resources[LocalizerResourceKey] as Localizer)!;
+        _localizer = Application.Current.GetLocalizer();
         InitializeComponent();
         Loaded += ObjectEditor_Loaded;
     }

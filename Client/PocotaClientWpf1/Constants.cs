@@ -1,10 +1,16 @@
-﻿namespace Net.Leksi.Pocota.Client;
-public static class Constants
+﻿using System;
+
+namespace Net.Leksi.Pocota.Client;
+internal static class Constants
 {
-    public static string ServiceProviderResourceKey => "ServiceProvider";
-    public static string LocalizerResourceKey => "Localizer";
-    public static string NamesConverterResourceKey => "NamesConverter";
-    public static string CommonJsonSerializerOptionsResourceKey => "CommonJsonSerializerOptions";
-    public static string ApplicationCoreResourceKey => "ApplicationCore";
+    internal const string ServiceProvider = nameof(ServiceProvider);
+    internal const string Localizer = nameof(Localizer);
+    internal const string NamesConverter = nameof(NamesConverter);
+    internal const string CommonJsonSerializerOptions = nameof(CommonJsonSerializerOptions);
+    internal const string ApplicationCore = nameof(ApplicationCore);
+    internal const string PriorInfo = nameof(PriorInfo);
+    internal const string Title = nameof(Title);
+    internal const string AdditionalInfo = nameof(AdditionalInfo);
+    internal const string ThisWindow = nameof(ThisWindow);
 }
 

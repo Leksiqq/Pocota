@@ -17,7 +17,7 @@
                 <Style TargetType="{x:Type MenuItem}">
                     <Setter Property="Command" Value="{Binding Source={StaticResource ApplicationCore}}" />
                     <Setter Property="CommandParameter" Value="{Binding}"/>
-                    <Setter Property="IsChecked" Value="{Binding Converter={StaticResource Converter}, ConverterParameter=ThisWindow, Mode=OneWay}"/>
+                    <Setter Property="IsChecked" Value="{Binding Converter={StaticResource Converter}, ConverterParameter={StaticResource ThisWindow}, Mode=OneWay}"/>
                 </Style>
             </Setter.Value>
         </Setter>

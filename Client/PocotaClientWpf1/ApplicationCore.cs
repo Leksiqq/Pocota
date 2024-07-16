@@ -5,10 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using static Net.Leksi.Pocota.Client.Constants;
-
 namespace Net.Leksi.Pocota.Client;
-
 public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
 {
     public event EventHandler? CanExecuteChanged
@@ -24,9 +21,11 @@ public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
     }
     public event PropertyChangedEventHandler? PropertyChanged;
     private const string s_allWindows = "AllWindows";
-    private readonly HashSet<Window> _uniqWindows = [];
-    private readonly Localizer _localizer = Application.Current.GetServiceProvider().GetRequiredService<Localizer>();
+    private const int s_maxWindowsInMenu = 10;
+    private readonly Localizer _localizer = Application.Current.GetLocalizer();
     private readonly PropertyChangedEventArgs _windowMenuItemsPropertyChangedEventsArg = new(nameof(WindowMenuItems));
+    private readonly Dictionary<Window, Window> _launcherByWindow = [];
+    private readonly Dictionary<Window, HashSet<Window>> _windowsByLauncher = [];
     private Window? _activeWindow = null;
     public bool CanExecute(object? parameter)
     {
@@ -88,7 +87,7 @@ public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
             foreach (Window window in Application.Current.Windows)
             {
                 yield return new Tuple<int, Window>(++i, window);
-                if (i == 10)
+                if (i == s_maxWindowsInMenu)
                 {
                     break;
                 }
@@ -103,14 +102,64 @@ public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
     }
     public void AttachWindow(Window window, Window? launcher = null)
     {
+        if(launcher != null)
+        {
+            _launcherByWindow.Add(window, launcher);
+            if (_windowsByLauncher.TryGetValue(launcher, out var windows))
+            {
+                windows.Add(window);
+            }
+            else
+            {
+                _windowsByLauncher.Add(launcher, [window]);
+            }
+        }
         WeakEventManager<Window, EventArgs>.AddHandler(window, "Activated", WindowActivated);
+        WeakEventManager<Window, EventArgs>.AddHandler(window, "Closed", WindowClosed);
+        NotifyMenuItemsPropertyChanged();
+    }
+
+    private void WindowClosed(object? sender, EventArgs e)
+    {
+        if (sender is Window window)
+        {
+            if (_activeWindow == window)
+            {
+                _activeWindow = null;
+            }
+            if(_windowsByLauncher.TryGetValue(window, out HashSet<Window>? toClose))
+            {
+                foreach(var item in toClose)
+                {
+                    _launcherByWindow.Remove(item);
+                }
+            }
+            if(_launcherByWindow.TryGetValue(window, out var launcher))
+            {
+                _windowsByLauncher[launcher].Remove(window);
+            }
+            NotifyMenuItemsPropertyChanged();
+            if(toClose != null)
+            {
+                foreach (var item in toClose)
+                {
+                    item.Close();
+                }
+            }
+        }
+    }
+
+    private void NotifyMenuItemsPropertyChanged()
+    {
         PropertyChanged?.Invoke(this, _windowMenuItemsPropertyChangedEventsArg);
     }
+
     private void WindowActivated(object? sender, EventArgs e)
     {
         if (sender is Window window)
         {
             _activeWindow = window;
+            NotifyMenuItemsPropertyChanged();
         }
     }
 }

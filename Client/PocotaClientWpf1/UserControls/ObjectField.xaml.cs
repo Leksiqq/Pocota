@@ -148,7 +148,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             {
                 if ("Create".Equals(parameter))
                 {
-                    Field.Value = ((IServiceProvider)FindResource(ServiceProviderResourceKey))
+                    Field.Value = Application.Current.GetServiceProvider()
                         .GetRequiredKeyedService<PocotaContext>(ServiceKey).CreateInstance(Field.Type);
                 }
                 else if ("EditExternal".Equals(parameter))

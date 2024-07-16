@@ -38,7 +38,7 @@ public partial class MethodWindow : Window, IServiceRelated, IEditWindow, INotif
     private MethodWindow()
 #pragma warning restore CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Возможно, стоит объявить поле как допускающее значения NULL.
     {
-        _namesConverter = (Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!.GetRequiredService<INamesConverter>();
+        _namesConverter = Application.Current.GetServiceProvider().GetRequiredService<INamesConverter>();
     }
     public MethodWindow(Delegate @delegate, Window owner) : this()
     {
@@ -51,9 +51,9 @@ public partial class MethodWindow : Window, IServiceRelated, IEditWindow, INotif
         _connectorMethod = connectorMethod;
         Init();
     }
-    private ConnectorMethod GetConnectorMethod(Delegate @delegate)
+    private static ConnectorMethod GetConnectorMethod(Delegate @delegate)
     {
-        return (Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!.GetRequiredService<ConnectorsMethodsList>()[@delegate.Method]!;
+        return Application.Current.GetServiceProvider().GetRequiredService<ConnectorsMethodsList>()[@delegate.Method]!;
     }
     private string? ConvertName(object value, object? parameter = null)
     {
@@ -61,7 +61,7 @@ public partial class MethodWindow : Window, IServiceRelated, IEditWindow, INotif
     }
     private void Init()
     {
-        if((Application.Current.Resources[ServiceProviderResourceKey] as IServiceProvider)!
+        if(Application.Current.GetServiceProvider()
             .GetRequiredKeyedService<Connector>(ServiceKey).GetMethodOptionsType(_connectorMethod.Method) is Type methodOptionsType)
         {
             Target = Activator.CreateInstance(methodOptionsType);

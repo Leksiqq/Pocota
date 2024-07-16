@@ -5,17 +5,11 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Markup;
-using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
-
 public static class PocotaWpfAppExtension
 {
-    internal const string s_mainWindowServiceKey = "Net.Leksi.Pocota.Client.MainWindow";
-    private const string PriorInfoResourceKey = "PriorInfo";
-    private const string TitleResourceKey = "Title";
-    private const string AdditionalInfoResourceKey = "AdditionalInfo";
-
-    public static IServiceCollection AddPocotaWpfApp(
+    private const string s_mainWindowServiceKey = "Net.Leksi.Pocota.Client.MainWindow";
+        public static IServiceCollection AddPocotaWpfApp(
         this IServiceCollection services, 
         Func<IServiceProvider,Application> createApplication, 
         Type? mainWindowType = null
@@ -35,7 +29,7 @@ public static class PocotaWpfAppExtension
                 s_mainWindowServiceKey, 
                 (s, o) => {
                     Window w = (Window)Activator.CreateInstance(mainWindowType)!;
-                    (Application.Current.Resources[ApplicationCoreResourceKey] as ApplicationCore)!.AttachWindow(w);
+                    (Application.Current.Resources[Constants.ApplicationCore] as ApplicationCore)!.AttachWindow(w);
                     return w;
                 }
             );
@@ -46,7 +40,7 @@ public static class PocotaWpfAppExtension
                 s_mainWindowServiceKey,
                 (s, o) => {
                     Window w = new MethodsWindow();
-                    (Application.Current.Resources[ApplicationCoreResourceKey] as ApplicationCore)!.AttachWindow(w);
+                    (Application.Current.Resources[Constants.ApplicationCore] as ApplicationCore)!.AttachWindow(w);
                     return w;
                 }
             );
@@ -55,19 +49,20 @@ public static class PocotaWpfAppExtension
             s =>
             {
                 Application app = createApplication.Invoke(s);
-                app.Resources[ServiceProviderResourceKey] = s;
-                app.Resources[LocalizerResourceKey] = s.GetRequiredService<Localizer>();
-                app.Resources[NamesConverterResourceKey] = s.GetRequiredService<INamesConverter>();
+                app.Resources[Constants.ServiceProvider] = s;
+                app.Resources[Constants.Localizer] = s.GetRequiredService<Localizer>();
+                app.Resources[Constants.NamesConverter] = s.GetRequiredService<INamesConverter>();
                 JsonSerializerOptions commonJSO = new()
                 {
                     ReferenceHandler = ReferenceHandler.Preserve
                 };
                 commonJSO.Converters.Add(new CommonJsonConverterFactory());
-                app.Resources[CommonJsonSerializerOptionsResourceKey] = commonJSO;
-                app.Resources[ApplicationCoreResourceKey] = new ApplicationCore();
-                app.Resources[PriorInfoResourceKey] = PriorInfoResourceKey;
-                app.Resources[TitleResourceKey] = TitleResourceKey;
-                app.Resources[AdditionalInfoResourceKey] = AdditionalInfoResourceKey;
+                app.Resources[Constants.CommonJsonSerializerOptions] = commonJSO;
+                app.Resources[Constants.ApplicationCore] = new ApplicationCore();
+                app.Resources[Constants.PriorInfo] = Constants.PriorInfo;
+                app.Resources[Constants.Title] = Constants.Title;
+                app.Resources[Constants.AdditionalInfo] = Constants.AdditionalInfo;
+                app.Resources[Constants.ThisWindow] = Constants.ThisWindow;
                 return app;
             }
         );
@@ -105,15 +100,15 @@ public static class PocotaWpfAppExtension
         return AddPocotaWpfApp(services, s => new TApplication(), typeof(TWindow));
     }
     public static IServiceProvider GetServiceProvider(this Application app) => 
-        (app.Resources[ServiceProviderResourceKey] as IServiceProvider)!;
+        (app.Resources[Constants.ServiceProvider] as IServiceProvider)!;
     public static Localizer GetLocalizer(this Application app) => 
         app.GetServiceProvider().GetRequiredService<Localizer>();
     public static INamesConverter GetNamesConverter(this Application app) =>
         app.GetServiceProvider().GetRequiredService<INamesConverter>();
     public static ApplicationCore GetApplicationCore(this Application app) =>
-        (app.Resources[ApplicationCoreResourceKey] as ApplicationCore)!;
+        (app.Resources[Constants.ApplicationCore] as ApplicationCore)!;
     public static JsonSerializerOptions GetCommonJsonSerializerOptions(this Application app) =>
-        (app.Resources[CommonJsonSerializerOptionsResourceKey] as JsonSerializerOptions)!;
+        (app.Resources[Constants.CommonJsonSerializerOptions] as JsonSerializerOptions)!;
     public static void AttachWindow(this Application app, Window window, Window? launcher = null) => 
         GetApplicationCore(app).AttachWindow(window, launcher);
     public static T GetRequiredService<T>(this Application app) where T: notnull => GetServiceProvider(app).GetRequiredService<T>();
