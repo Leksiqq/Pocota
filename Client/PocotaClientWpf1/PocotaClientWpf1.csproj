@@ -26,13 +26,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Net.Leksi.LifetimeObserver" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Localization\Localization\Localization.csproj" />
     <ProjectReference Include="..\..\..\WPF\WpfMarkupExtension\WpfMarkupExtension\WpfMarkupExtension.csproj" />
     <ProjectReference Include="..\PocotaClient\PocotaClient.csproj" />
+    <ProjectReference Include="C:\Users\leksi\Documents\leksi\c#\LifetimeObserver\Library\LifetimeObserver.csproj" />
   </ItemGroup>
 
 </Project>

@@ -25,12 +25,11 @@ public partial class MethodsWindow : Window, ICommand
         InitializeComponent();
     }
 
-    Timer? t = null;
-    volatile int count = 0;
-    volatile int step = 0;
-    volatile int dir = 0;
-    volatile bool needNewLine = false;
-    Random rnd = new();
+    private Timer? t = null;
+    private volatile int count = 0;
+    private volatile int step = 0;
+    private volatile bool needNewLine = false;
+    private readonly Random rnd = new();
     private void MethodsWindow_Activated(object? sender, EventArgs e)
     {
         SemaphoreSlim ss = new(1);
@@ -43,11 +42,9 @@ public partial class MethodsWindow : Window, ICommand
                 {
                     case LifetimeEventKind.Created:
                         Interlocked.Increment(ref count);
-                        dir = 1;
                         break;
                     case LifetimeEventKind.Finalized:
                         Interlocked.Decrement(ref count);
-                        dir = -1;
                         needNewLine = true;
                         break;
                 };
