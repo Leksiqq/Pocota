@@ -23,7 +23,7 @@
                 <ResourceDictionary Source="Dictionaries/PropertyTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
-            <l:XamlServiceProviderCatcher x:Key="WindowSP"/>
+            <l:XamlServiceProviderCatcher x:Key="WindowSP" x:Shared="False"/>
         </ResourceDictionary>
     </Window.Resources>
     <DockPanel LastChildFill="True">
@@ -33,7 +33,7 @@
         <TextBlock DockPanel.Dock="Top" FontSize="20" HorizontalAlignment="Center" Margin="10,0">
             <TextBlock.Text>
                 <MultiBinding StringFormat="{}{0} {1}:{2}">
-                    <Binding Path="ReturnType" Converter="{local:TypeNameConverter}" ConverterParameter="Short"/>
+                    <Binding Path="ReturnType" Converter="{local:TypeNameConverter}" ConverterParameter="Short" Mode="OneTime"/>
                     <Binding Path="ServiceKey" Converter="{StaticResource NamesConverter}" Mode="OneTime"/>
                     <Binding Path="MethodName" Converter="{StaticResource NamesConverter}" Mode="OneTime"/>
                 </MultiBinding>
@@ -43,7 +43,7 @@
             x:Name="ObjectEditor"
             DockPanel.Dock="Top"
             Target="{Binding Target}" 
-            ServiceProviderCatcher="{StaticResource WindowSP}" 
+            ServiceProviderHolder="{StaticResource WindowSP}" 
             CurrentInputChanged="ObjectEditor_CurrentInputChanged"
             />
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center">

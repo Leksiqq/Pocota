@@ -1,5 +1,6 @@
 ﻿using Net.Leksi.Util;
 using Net.Leksi.WpfMarkup;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 namespace Net.Leksi.Pocota.Client;
@@ -25,9 +26,11 @@ public partial class MethodsWindow : Window, ICommand
     }
 
     Timer? t = null;
-    long count = 0;
-    long step = 0;
-    int dir = 0;
+    volatile int count = 0;
+    volatile int step = 0;
+    volatile int dir = 0;
+    volatile bool needNewLine = false;
+    Random rnd = new();
     private void MethodsWindow_Activated(object? sender, EventArgs e)
     {
         SemaphoreSlim ss = new(1);
@@ -40,15 +43,12 @@ public partial class MethodsWindow : Window, ICommand
                 {
                     case LifetimeEventKind.Created:
                         Interlocked.Increment(ref count);
-                        if (dir == -1)
-                        {
-                            Console.WriteLine();
-                        }
                         dir = 1;
                         break;
                     case LifetimeEventKind.Finalized:
                         Interlocked.Decrement(ref count);
                         dir = -1;
+                        needNewLine = true;
                         break;
                 };
             };
@@ -59,20 +59,33 @@ public partial class MethodsWindow : Window, ICommand
                     Dispatcher.Invoke(() =>
                     {
                         MethodWindow methodWindow = Application.Current.GetRequiredService<MethodWindow>();
-                        methodWindow.Init(Application.Current.GetRequiredService<ConnectorsMethodsList>().First());
+                        methodWindow.Init(
+                            Application.Current.GetRequiredService<ConnectorsMethodsList>()
+                                .Skip(rnd.Next(Application.Current.GetRequiredService<ConnectorsMethodsList>().Count() - 1))
+                                .First()
+                        );
 
                         //Window1 methodWindow = Application.Current.GetRequiredService<Window1>();
-                        //Application.Current.AttachWindow(methodWindow);
+                        
+                        Application.Current.AttachWindow(methodWindow);
                         if (Interlocked.Increment(ref step) % 100 == 0)
                         {
                             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, false);
                             GC.WaitForPendingFinalizers();
+                            Thread.Sleep(1000);
                         }
-                        Console.Write($"\r              \r{count}");
+                        if (needNewLine)
+                        {
+                            Console.WriteLine();
+                            needNewLine = false;
+                        }
+                        Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+                        Console.Write($"\r              \r{count}    {currentProcess.WorkingSet64}");
                         methodWindow.Show();
                         methodWindow.Close();
+                        methodWindow.DataContext = null;
+                        ss.Release();
                     });
-                    ss.Release();
                 }
             }, null, 0, 10);
         }
@@ -87,7 +100,7 @@ public partial class MethodsWindow : Window, ICommand
         if (parameter is ConnectorMethod cm)
         {
             MethodWindow methodWindow = Application.Current.GetRequiredService<MethodWindow>();
-            Application.Current.AttachWindow(methodWindow);
+            Application.Current.AttachWindow(methodWindow, this);
             methodWindow.Init(cm);
             methodWindow.Show();
         }

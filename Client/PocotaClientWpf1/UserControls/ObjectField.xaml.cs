@@ -6,7 +6,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client.UserControls;
 public partial class ObjectField : UserControl, ICommand, IValueConverter, IServiceRelated, IFieldOwner, INotifyPropertyChanged
 {
@@ -191,7 +190,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                             {
                                 if(dob is ObjectEditor oe)
                                 {
-                                    ObjectEditor.ServiceProviderCatcher = oe.ServiceProviderCatcher;
+                                    ObjectEditor.ServiceProviderHolder = oe.ServiceProviderHolder;
                                     break;
                                 }
                             }

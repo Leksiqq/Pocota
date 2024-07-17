@@ -66,7 +66,7 @@ public static class PocotaWpfAppExtension
                 return app;
             }
         );
-        services.AddSingleton<Localizer>();
+        services.AddTransient<Localizer>();
         services.AddTransient<MethodWindow>();
         services.AddTransient<ObjectWindow>();
         services.AddTransient<WindowsWindow>();

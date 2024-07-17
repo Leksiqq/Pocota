@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
-using static Net.Leksi.Pocota.Client.Constants;
 
 namespace Net.Leksi.Pocota.Client.UserControls;
 
@@ -19,8 +18,8 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private readonly Localizer _localizer;
     private IInputElement? _currentInput = null;
-    public static readonly DependencyProperty ServiceProviderCatcherProperty = DependencyProperty.Register(
-       nameof(ServiceProviderCatcher), typeof(XamlServiceProviderCatcher),
+    public static readonly DependencyProperty ServiceProviderHolderProperty = DependencyProperty.Register(
+       nameof(ServiceProviderHolder), typeof(XamlServiceProviderHolder),
        typeof(ObjectEditor)
     );
     public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(
@@ -28,10 +27,10 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
        typeof(ObjectEditor)
     );
     public CollectionViewSource PropertiesViewSource { get; private init; } = new();
-    public XamlServiceProviderCatcher ServiceProviderCatcher 
+    public XamlServiceProviderHolder ServiceProviderHolder 
     { 
-        get => (XamlServiceProviderCatcher)GetValue(ServiceProviderCatcherProperty); 
-        set => SetValue(ServiceProviderCatcherProperty, value);
+        get => (XamlServiceProviderHolder)GetValue(ServiceProviderHolderProperty); 
+        set => SetValue(ServiceProviderHolderProperty, value);
     }
     public object? Target
     {
@@ -111,7 +110,7 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     }
     private void SetTemplateSelector()
     {
-        if (ServiceProviderCatcher is { } && Target is { } && Window is { })
+        if (ServiceProviderHolder is { } && Target is { } && Window is { })
         {
             if(PropertyValueColumn.CellTemplateSelector is null)
             {
@@ -120,8 +119,8 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
                 {
                     Replaces = new string[] { $"$serviceProviderCatcher:{spName}" },
                 };
-                this.Window.Resources.Add(spName, ServiceProviderCatcher);
-                PropertyValueColumn.CellTemplateSelector = pre.ProvideValue(ServiceProviderCatcher.ServiceProvider!) as DataTemplateSelector;
+                this.Window.Resources.Add(spName, ServiceProviderHolder);
+                PropertyValueColumn.CellTemplateSelector = pre.ProvideValue(ServiceProviderHolder.ServiceProvider!) as DataTemplateSelector;
                 this.Window.Resources.Remove(spName);
             }
             PropertiesViewSource.Source = Target.GetType().GetProperties().Select(p => new Field { PropertyName = p.Name, Target = Target });
@@ -148,7 +147,7 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
         }
         else
         {
-            //Task.Delay(1).ContinueWith(t => Task.Run(CheckColumnWidth));
+            Task.Delay(1).ContinueWith(t => Task.Run(CheckColumnWidth));
         }
     }
     private void ObjectEditor_Loaded(object sender, RoutedEventArgs e)
@@ -157,8 +156,8 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
         {
             if (dop is Window window)
             {
-                //Window = window;
-                //SetTemplateSelector();
+                Window = window;
+                SetTemplateSelector();
                 break;
             }
         }

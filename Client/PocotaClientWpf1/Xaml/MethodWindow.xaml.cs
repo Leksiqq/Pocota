@@ -12,33 +12,31 @@ public partial class MethodWindow : Window, IServiceRelated, IEditWindow, INotif
     private const string s_target = "target";
     private readonly INamesConverter _namesConverter = null!;
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
-    private ConnectorMethod _connectorMethod = null!;
     private object? _target;
-    public object? Target => _target;
-    public string? MethodName => _connectorMethod?.Method.Name;
-    public string? ServiceKey => _connectorMethod?.ServiceKey;
-    public Type? ReturnType => _connectorMethod != null ? 
-        _connectorMethod.Method.GetParameters()
-            .Where(p => p.Name == s_target).FirstOrDefault()?.ParameterType 
-                ?? _connectorMethod.Method.ReturnType.GetGenericArguments()[0]
-        : null;
-
-    public string ObjectTitle => _connectorMethod != null ?
-        $"{ConvertName(ServiceKey!)}:{ConvertName(_connectorMethod.Method.Name, _connectorMethod.Connector)}()" : string.Empty;
+    public object? Target { get; private set; }
+    public Type ReturnType { get; private set; } = null!;
+    public string ObjectTitle { get; private set; } = null!;
+    public string ServiceKey { get; private set; } = null!;
+    public string MethodName { get; private set; } = null!;
     public MethodWindow()
     {
         _namesConverter = Application.Current.GetNamesConverter();
     }
     public void Init(ConnectorMethod connectorMethod) 
     {
-        //_connectorMethod = connectorMethod;
-        //Type targetType = Application.Current.GetServiceProvider()
-        //        .GetRequiredKeyedService<Connector>(ServiceKey)
-        //        .GetMethodOptionsType(_connectorMethod.Method)!;
-        //if (targetType != null)
-        //{
-        //    _target = Activator.CreateInstance(targetType);
-        //}
+        ServiceKey = connectorMethod.ServiceKey;
+        MethodName = connectorMethod.Method.Name;
+        ObjectTitle = $"{ConvertName(ServiceKey!)}:{ConvertName(connectorMethod.Method.Name, connectorMethod.Connector)}()";
+        ReturnType = connectorMethod.Method.GetParameters()
+            .Where(p => p.Name == s_target).FirstOrDefault()?.ParameterType
+                ?? connectorMethod.Method.ReturnType.GetGenericArguments()[0];
+        Type targetType = Application.Current.GetServiceProvider()
+                .GetRequiredKeyedService<Connector>(ServiceKey)
+                .GetMethodOptionsType(connectorMethod.Method)!;
+        if (targetType != null)
+        {
+            Target = Activator.CreateInstance(targetType)!;
+        }
         InitializeComponent();
     }
     private string? ConvertName(object value, object? parameter = null)

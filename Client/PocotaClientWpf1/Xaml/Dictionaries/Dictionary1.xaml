@@ -11,7 +11,7 @@
             <l:ConverterProxy Converter="{Binding Source={StaticResource ApplicationCore}}" x:Key="Converter"/>
         </Style.Resources>
         <Setter Property="Header" Value="{Binding Window, Source={StaticResource Localizer}}"/>
-        <Setter Property="ItemsSource" Value="{Binding WindowMenuItems, Source={StaticResource ApplicationCore}}"/>
+        <Setter Property="ItemsSource" Value="{Binding WindowMenuItems, Source={StaticResource ApplicationCore}, Mode=OneWay}"/>
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
                 <Style TargetType="{x:Type MenuItem}">

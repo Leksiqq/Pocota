@@ -9,7 +9,7 @@
     mc:Ignorable="d"
     >
     <DataTemplate x:Key="ClassDataTemplate">
-        <uc:ObjectField Field="{Binding}" d:Window="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"/>
+        <uc:ObjectField Field="{Binding}"/>
     </DataTemplate>
     <DataTemplate x:Key="EnumDataTemplate">
         <uc:EnumField Field="{Binding}"/>
@@ -19,7 +19,7 @@
     </DataTemplate>
     <local:PropertyTemplateSelector 
         x:Key="PropertyTemplateSelector"
-        ServiceProviderCatcher="{l:ParameterizedResource $serviceProviderCatcher}"
+        ServiceProviderHolder="{l:ParameterizedResource $serviceProviderCatcher}"
         ClassDataTemplateKey="ClassDataTemplate"
         EnumDataTemplateKey="EnumDataTemplate"
         TextDataTemplateKey="TextDataTemplate"

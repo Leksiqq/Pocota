@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
@@ -6,8 +6,11 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 namespace Net.Leksi.Pocota.Client;
-public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
+public class ApplicationCore: DependencyObject, IValueConverter, ICommand, INotifyPropertyChanged
 {
+    public static readonly DependencyProperty WindowMenuItemsProperty = DependencyProperty.Register(
+       nameof(WindowMenuItems), typeof(ObservableCollection<object>), typeof(ApplicationCore)
+    );
     public event EventHandler? CanExecuteChanged
     {
         add
@@ -22,11 +25,29 @@ public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     private const string s_allWindows = "AllWindows";
     private const int s_maxWindowsInMenu = 10;
+    private static readonly Separator s_separator = new();
+    private readonly MenuItem _windowsItem;
     private readonly Localizer _localizer = Application.Current.GetLocalizer();
     private readonly PropertyChangedEventArgs _windowMenuItemsPropertyChangedEventsArg = new(nameof(WindowMenuItems));
     private readonly Dictionary<Window, Window> _launcherByWindow = [];
     private readonly Dictionary<Window, HashSet<Window>> _windowsByLauncher = [];
+    private readonly ObservableCollection<object> _windowMenuItems = [];
     private Window? _activeWindow = null;
+    private int _entersCount = 0;
+    public ApplicationCore()
+    {
+        _windowsItem = new()
+        {
+            Header = $"{_localizer.Windows}...",
+            Command = this,
+            CommandParameter = s_allWindows
+        };
+        SetValue(WindowMenuItemsProperty, _windowMenuItems);
+    }
+    public IEnumerable<object> WindowMenuItems
+    {
+        get => (IEnumerable<object>)GetValue(WindowMenuItemsProperty);
+    }
     public bool CanExecute(object? parameter)
     {
         return true;
@@ -66,10 +87,17 @@ public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
         }
         if ("AdditionalInfo".Equals(parameter))
         {
-            if (value is Tuple<int, Window> tup)
+            if (_activeWindow != null && value is Tuple<int, Window> tup)
             {
-                //return (tup.Item2 as IWindowWithCore)?.Core == _launcher ? $" - {_localizer.Owner}" : ((tup.Item2 as IWindowWithCore)?.Core._launcher == this ? $" - {_localizer.Owned}" : string.Empty);
-
+                if (_launcherByWindow.TryGetValue(_activeWindow, out Window? win) && win == tup.Item2)
+                {
+                    return $" - {_localizer.Owner}";
+                }
+                if (_windowsByLauncher.TryGetValue(_activeWindow, out var wins) && wins.Contains(tup.Item2))
+                {
+                    return $" - {_localizer.Owned}";
+                }
+                return string.Empty;
             }
         }
         return null;
@@ -77,28 +105,6 @@ public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
         return value;
-    }
-    public IEnumerable<object> WindowMenuItems
-    {
-        get
-        {
-            yield return new Separator();
-            int i = 0;
-            foreach (Window window in Application.Current.Windows)
-            {
-                yield return new Tuple<int, Window>(++i, window);
-                if (i == s_maxWindowsInMenu)
-                {
-                    break;
-                }
-            }
-            yield return new MenuItem()
-            {
-                Header = $"{_localizer.Windows}...",
-                Command = this,
-                CommandParameter = s_allWindows
-            };
-        }
     }
     public void AttachWindow(Window window, Window? launcher = null)
     {
@@ -114,17 +120,16 @@ public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
                 _windowsByLauncher.Add(launcher, [window]);
             }
         }
-        //WeakEventManager<Window, EventArgs>.AddHandler(window, "Activated", WindowActivated);
-        //WeakEventManager<Window, EventArgs>.AddHandler(window, "Closed", WindowClosed);
+        window.Resources[Constants.Localizer] = Application.Current.GetLocalizer();
         window.Activated += WindowActivated;
         window.Closed += WindowClosed;
-        NotifyMenuItemsPropertyChanged();
+        //NotifyWindowMenuItemsPropertyChanged();
     }
-
     private void WindowClosed(object? sender, EventArgs e)
     {
         if (sender is Window window)
         {
+            ++_entersCount;
             window.Activated -= WindowActivated;
             window.Closed -= WindowClosed;
             if (_activeWindow == window)
@@ -142,7 +147,6 @@ public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
             {
                 _windowsByLauncher[launcher].Remove(window);
             }
-            NotifyMenuItemsPropertyChanged();
             if(toClose != null)
             {
                 foreach (var item in toClose)
@@ -150,20 +154,35 @@ public class ApplicationCore: IValueConverter, ICommand, INotifyPropertyChanged
                     item.Close();
                 }
             }
+            if(--_entersCount == 0)
+            {
+                NotifyWindowMenuItemsPropertyChanged();
+            }
         }
     }
-
-    private void NotifyMenuItemsPropertyChanged()
-    {
-        PropertyChanged?.Invoke(this, _windowMenuItemsPropertyChangedEventsArg);
-    }
-
     private void WindowActivated(object? sender, EventArgs e)
     {
         if (sender is Window window)
         {
             _activeWindow = window;
-            NotifyMenuItemsPropertyChanged();
+            NotifyWindowMenuItemsPropertyChanged();
         }
+    }
+    private void NotifyWindowMenuItemsPropertyChanged()
+    {
+        _windowMenuItems.Clear();
+        _windowMenuItems.Add(s_separator);
+        int i = 0;
+        foreach (Window window in Application.Current.Windows)
+        {
+            _windowMenuItems.Add(new Tuple<int, Window>(++i, window));
+            if (i == s_maxWindowsInMenu)
+            {
+                break;
+            }
+        }
+        _windowMenuItems.Add(_windowsItem);
+
+        //PropertyChanged?.Invoke(this, _windowMenuItemsPropertyChangedEventsArg);
     }
 }

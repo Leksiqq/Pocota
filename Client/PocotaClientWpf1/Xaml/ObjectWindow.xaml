@@ -53,7 +53,7 @@
         <uc:ObjectEditor 
             DockPanel.Dock="Top"
             Target="{Binding Target}" 
-            ServiceProviderCatcher="{StaticResource WindowSP}" 
+            ServiceProviderHolder="{StaticResource WindowSP}" 
             CurrentInputChanged="ObjectEditor_CurrentInputChanged"
             />
     </DockPanel>

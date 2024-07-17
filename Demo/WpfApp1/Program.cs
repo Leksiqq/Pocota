@@ -28,11 +28,10 @@ static class Program
             //lto.Trace<Window1>();
         });
         using IHost host = builder.Build();
-        Process currentProcess = Process.GetCurrentProcess();
 
-        // Set the maximum working set size (in bytes)
-        //long maxWorkingSetBytes = 1024 * 1024 * 50;
-        //currentProcess.MaxWorkingSet = new IntPtr(maxWorkingSetBytes);
+        Process currentProcess = Process.GetCurrentProcess();
+        long maxWorkingSetBytes = 1024 * 1024 * 50;
+        currentProcess.MaxWorkingSet = new IntPtr(maxWorkingSetBytes);
         host.RunPocotaWpfApp(app =>
         {
             app.ShutdownMode = System.Windows.ShutdownMode.OnMainWindowClose;

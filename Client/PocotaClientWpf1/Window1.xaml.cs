@@ -9,6 +9,7 @@ namespace Net.Leksi.Pocota.Client
     {
         private static int _hashGen = 0;
         private readonly int _hash;
+        public string TestTitle => "TestTitle";
         public Window1()
         {
             _hash = Interlocked.Increment(ref _hashGen);

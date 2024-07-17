@@ -1,15 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Net.Leksi.WpfMarkup;
+﻿using Net.Leksi.WpfMarkup;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Xaml;
 
 namespace Net.Leksi.Pocota.Client;
 
 public class PropertyTemplateSelector: DataTemplateSelector
 {
-    public XamlServiceProviderCatcher? ServiceProviderCatcher { get; set; }
+    public XamlServiceProviderHolder? ServiceProviderHolder { get; set; }
     public string ClassDataTemplateKey { get; set; } = null!;
     public string EnumDataTemplateKey { get; set; } = null!;
     public string TextDataTemplateKey { get; set; } = null!;
@@ -45,7 +42,7 @@ public class PropertyTemplateSelector: DataTemplateSelector
             {
                 result = ProvideValue(TextDataTemplateKey);
             }
-            if (result is { })
+            if (result != null)
             {
                 return result;
             }
@@ -55,11 +52,12 @@ public class PropertyTemplateSelector: DataTemplateSelector
     private DataTemplate? ProvideValue(string templateKey)
     {
         DataTemplate? result = null;
-        if (ServiceProviderCatcher is { })
+        if (ServiceProviderHolder != null)
         {
-            IServiceProvider sp = ServiceProviderCatcher.ServiceProvider!;
+            IServiceProvider sp = ServiceProviderHolder.ServiceProvider!;
             ParameterizedResourceExtension pre = new(templateKey);
             result = pre.ProvideValue(sp) as DataTemplate;
+            ServiceProviderHolder = null;
         }
         return result;
     }
