@@ -35,11 +35,11 @@ static class Program
         builder.Services.AddTransient<Window1>();
         builder.Services.AddLifetimeObserver(lto =>
         {
-            //lto.Trace<ObjectEditor>(true);
+            lto.Trace<ObjectEditor>(true);
             lto.Trace<PropertyTemplateSelector>(true);
-            //lto.Trace<ParameterizedResourceExtension>(true);
-            //lto.Trace<MethodWindow>();
-            //lto.Trace<Window1>();
+            lto.Trace<ParameterizedResourceExtension>(true);
+            lto.Trace<MethodWindow>();
+            lto.Trace<Window1>();
         });
         using IHost host = builder.Build();
 
