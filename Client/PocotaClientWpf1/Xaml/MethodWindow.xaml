@@ -33,9 +33,9 @@
         <TextBlock DockPanel.Dock="Top" FontSize="20" HorizontalAlignment="Center" Margin="10,0">
             <TextBlock.Text>
                 <MultiBinding StringFormat="{}{0} {1}:{2}">
-                    <Binding Path="ReturnType" Converter="{local:TypeNameConverter}" ConverterParameter="Short" Mode="OneTime"/>
-                    <Binding Path="ServiceKey" Converter="{StaticResource NamesConverter}" Mode="OneTime"/>
-                    <Binding Path="MethodName" Converter="{StaticResource NamesConverter}" Mode="OneTime"/>
+                    <Binding Path="ReturnType" Converter="{local:TypeNameConverter}" ConverterParameter="Short"/>
+                    <Binding Path="ServiceKey" Converter="{StaticResource NamesConverter}"/>
+                    <Binding Path="MethodName" Converter="{StaticResource NamesConverter}"/>
                 </MultiBinding>
             </TextBlock.Text>
         </TextBlock>
@@ -43,9 +43,9 @@
             x:Name="ObjectEditor"
             DockPanel.Dock="Top"
             Target="{Binding Target}" 
-            ServiceProviderHolder="{StaticResource WindowSP}" 
+            ServiceProvider="{StaticResource WindowSP}" 
             CurrentInputChanged="ObjectEditor_CurrentInputChanged"
-            />
+        />
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="{Binding Call, Source={StaticResource Localizer}}" Margin="0,10,0,10" Click="Button_Click"/>
             <Button Content="{Binding Interrupt, Source={StaticResource Localizer}}" Margin="10,10,0,10"/>

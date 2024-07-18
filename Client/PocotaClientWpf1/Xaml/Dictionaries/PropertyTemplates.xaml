@@ -19,7 +19,7 @@
     </DataTemplate>
     <local:PropertyTemplateSelector 
         x:Key="PropertyTemplateSelector"
-        ServiceProviderHolder="{l:ParameterizedResource $serviceProviderCatcher}"
+        ServiceProvider="{l:ParameterizedResource $serviceProviderCatcher}"
         ClassDataTemplateKey="ClassDataTemplate"
         EnumDataTemplateKey="EnumDataTemplate"
         TextDataTemplateKey="TextDataTemplate"

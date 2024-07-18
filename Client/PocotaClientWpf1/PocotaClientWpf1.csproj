@@ -32,7 +32,7 @@
     <ProjectReference Include="..\..\..\Localization\Localization\Localization.csproj" />
     <ProjectReference Include="..\..\..\WPF\WpfMarkupExtension\WpfMarkupExtension\WpfMarkupExtension.csproj" />
     <ProjectReference Include="..\PocotaClient\PocotaClient.csproj" />
-    <ProjectReference Include="C:\Users\leksi\Documents\leksi\c#\LifetimeObserver\Library\LifetimeObserver.csproj" />
+    <ProjectReference Include="..\..\..\LifetimeObserver\Library\LifetimeObserver.csproj" />
   </ItemGroup>
 
 </Project>

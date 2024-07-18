@@ -24,70 +24,22 @@ public partial class MethodsWindow : Window, ICommand
         Activated += MethodsWindow_Activated;
         InitializeComponent();
     }
-
-    private Timer? t = null;
-    private volatile int count = 0;
-    private volatile int step = 0;
-    private volatile bool needNewLine = false;
-    private readonly Random rnd = new();
+    private Random rnd = new();
     private void MethodsWindow_Activated(object? sender, EventArgs e)
     {
-        SemaphoreSlim ss = new(1);
-        if (t is null)
+        WindowsShower.Dispatcher = Dispatcher;
+        WindowsShower.Start(() =>
         {
-            LifetimeObserver lifetimeObserver = Application.Current.GetRequiredService<LifetimeObserver>();
-            lifetimeObserver.LifetimeEventOccured += (s, e) =>
-            {
-                switch (e.Kind)
-                {
-                    case LifetimeEventKind.Created:
-                        Interlocked.Increment(ref count);
-                        break;
-                    case LifetimeEventKind.Finalized:
-                        Interlocked.Decrement(ref count);
-                        needNewLine = true;
-                        break;
-                };
-            };
-            t = new Timer(s =>
-            {
-                if (ss.Wait(1))
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        MethodWindow methodWindow = Application.Current.GetRequiredService<MethodWindow>();
-                        methodWindow.Init(
-                            Application.Current.GetRequiredService<ConnectorsMethodsList>()
-                                .Skip(rnd.Next(Application.Current.GetRequiredService<ConnectorsMethodsList>().Count() - 1))
-                                .First()
-                        );
-
-                        //Window1 methodWindow = Application.Current.GetRequiredService<Window1>();
-                        
-                        Application.Current.AttachWindow(methodWindow);
-                        if (Interlocked.Increment(ref step) % 100 == 0)
-                        {
-                            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, false);
-                            GC.WaitForPendingFinalizers();
-                            Thread.Sleep(1000);
-                        }
-                        if (needNewLine)
-                        {
-                            Console.WriteLine();
-                            needNewLine = false;
-                        }
-                        Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
-                        Console.Write($"\r              \r{count}    {currentProcess.WorkingSet64}");
-                        methodWindow.Show();
-                        methodWindow.Close();
-                        methodWindow.DataContext = null;
-                        ss.Release();
-                    });
-                }
-            }, null, 0, 10);
-        }
+            MethodWindow window = Application.Current.GetRequiredService<MethodWindow>();
+            window.Init(
+                Application.Current.GetRequiredService<ConnectorsMethodsList>()
+                .Skip(rnd.Next(Application.Current.GetRequiredService<ConnectorsMethodsList>().Count() - 1))
+                .First()
+            );
+            return window;
+        });
+        LifetimeVisualizer.Start();
     }
-
     public bool CanExecute(object? parameter)
     {
         return parameter is ConnectorMethod;

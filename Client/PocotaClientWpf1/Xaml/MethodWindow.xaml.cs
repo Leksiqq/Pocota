@@ -4,40 +4,66 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Text.Json;
 using System.Windows;
-using System.Windows.Controls;
 namespace Net.Leksi.Pocota.Client;
-public partial class MethodWindow : Window, IServiceRelated, IEditWindow, INotifyPropertyChanged
+public partial class MethodWindow : Window, IServiceRelated, IEditWindow
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
     private const string s_target = "target";
+    public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(nameof(Target), typeof(object), typeof(MethodWindow));
+    public static readonly DependencyProperty ServiceKeyProperty = DependencyProperty.Register(nameof(ServiceKey), typeof(string), typeof(MethodWindow));
+    public static readonly DependencyProperty ReturnTypeProperty = DependencyProperty.Register(nameof(ReturnType), typeof(Type), typeof(MethodWindow));
+    public static readonly DependencyProperty MethodNameProperty = DependencyProperty.Register(nameof(MethodName), typeof(string), typeof(MethodWindow));
+    public static readonly DependencyProperty ObjectTitleProperty = DependencyProperty.Register(nameof(ObjectTitle), typeof(string), typeof(MethodWindow));
     private readonly INamesConverter _namesConverter = null!;
-    private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private object? _target;
-    public object? Target { get; private set; }
-    public Type ReturnType { get; private set; } = null!;
-    public string ObjectTitle { get; private set; } = null!;
-    public string ServiceKey { get; private set; } = null!;
-    public string MethodName { get; private set; } = null!;
+    public object? Target
+    {
+        get => GetValue(TargetProperty);
+        set => SetValue(TargetProperty, value);
+    }
+    public Type ReturnType
+    {
+        get => (Type)GetValue(ReturnTypeProperty);
+        set => SetValue(ReturnTypeProperty, value);
+    }
+    public string ObjectTitle
+    {
+        get => (string)GetValue(ObjectTitleProperty);
+        set => SetValue(ObjectTitleProperty, value);
+    }
+    public string ServiceKey
+    {
+        get => (string)GetValue(ServiceKeyProperty);
+        set => SetValue(ServiceKeyProperty, value);
+    }
+    public string MethodName
+    {
+        get => (string)GetValue(MethodNameProperty);
+        set => SetValue(MethodNameProperty, value);
+    }
+
     public MethodWindow()
     {
         _namesConverter = Application.Current.GetNamesConverter();
+        InitializeComponent();
     }
     public void Init(ConnectorMethod connectorMethod) 
     {
-        ServiceKey = connectorMethod.ServiceKey;
-        MethodName = connectorMethod.Method.Name;
-        ObjectTitle = $"{ConvertName(ServiceKey!)}:{ConvertName(connectorMethod.Method.Name, connectorMethod.Connector)}()";
-        ReturnType = connectorMethod.Method.GetParameters()
-            .Where(p => p.Name == s_target).FirstOrDefault()?.ParameterType
-                ?? connectorMethod.Method.ReturnType.GetGenericArguments()[0];
-        Type targetType = Application.Current.GetServiceProvider()
-                .GetRequiredKeyedService<Connector>(ServiceKey)
-                .GetMethodOptionsType(connectorMethod.Method)!;
-        if (targetType != null)
+        if(connectorMethod != null)
         {
-            Target = Activator.CreateInstance(targetType)!;
+            ServiceKey = connectorMethod.ServiceKey;
+            MethodName = connectorMethod.Method.Name;
+            ObjectTitle = $"{ConvertName(ServiceKey!)}:{ConvertName(connectorMethod.Method.Name, connectorMethod.Connector)}()";
+            ReturnType = connectorMethod.Method.GetParameters()
+                .Where(p => p.Name == s_target).FirstOrDefault()?.ParameterType
+                    ?? connectorMethod.Method.ReturnType.GetGenericArguments()[0];
+            Type targetType = Application.Current.GetServiceProvider()
+                    .GetRequiredKeyedService<Connector>(ServiceKey)
+                    .GetMethodOptionsType(connectorMethod.Method)!;
+            if (targetType != null)
+            {
+                Target = Activator.CreateInstance(targetType)!;
+            }
         }
-        InitializeComponent();
     }
     private string? ConvertName(object value, object? parameter = null)
     {
@@ -45,7 +71,7 @@ public partial class MethodWindow : Window, IServiceRelated, IEditWindow, INotif
     }
     protected override void OnActivated(EventArgs e)
     {
-        ObjectEditor.CalcColumnsWidth();
+        ObjectEditor?.CalcColumnsWidth();
         base.OnActivated(e);
     }
     private void Button_Click(object sender, RoutedEventArgs e)

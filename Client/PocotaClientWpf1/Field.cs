@@ -107,10 +107,6 @@ public class Field
         }
     }
     public bool IsReady => _type is { };
-    ~Field()
-    {
-        Console.WriteLine("here");
-    }
     public void Clear()
     {
         if (Type is { })

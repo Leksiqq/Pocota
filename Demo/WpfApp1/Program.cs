@@ -2,7 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Net.Leksi.Pocota.Client;
+using Net.Leksi.Pocota.Client.UserControls;
 using Net.Leksi.Util;
+using Net.Leksi.WpfMarkup;
 using System.Diagnostics;
 
 namespace WpfApp1;
@@ -30,17 +32,17 @@ static class Program
         builder.Services.AddSingleton<Localizer>(s => s.GetRequiredService<MyLocalizer>());
         builder.Services.RemoveService(typeof(INamesConverter));
         builder.Services.AddSingleton<INamesConverter, NamesConverter>();
-        //builder.Services.AddTransient<Window1>();
+        builder.Services.AddTransient<Window1>();
         builder.Services.AddLifetimeObserver(lto =>
         {
+            //lto.Trace<ObjectEditor>(true);
+            lto.Trace<PropertyTemplateSelector>(true);
+            //lto.Trace<ParameterizedResourceExtension>(true);
             //lto.Trace<MethodWindow>();
             //lto.Trace<Window1>();
         });
         using IHost host = builder.Build();
 
-        Process currentProcess = Process.GetCurrentProcess();
-        long maxWorkingSetBytes = 1024 * 1024 * 50;
-        currentProcess.MaxWorkingSet = new IntPtr(maxWorkingSetBytes);
         host.RunPocotaWpfApp(app =>
         {
             app.ShutdownMode = System.Windows.ShutdownMode.OnMainWindowClose;

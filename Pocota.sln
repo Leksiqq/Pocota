@@ -49,7 +49,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PocotaClientWpf1", "Client\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{F9EF61FD-ED07-4DB3-94F6-0E93813C99F4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LifetimeObserver", "C:\Users\leksi\Documents\leksi\c#\LifetimeObserver\Library\LifetimeObserver.csproj", "{3ACC4397-7FCC-4C3C-9D16-E77E5DAF8BDE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LifetimeObserver", "..\LifetimeObserver\Library\LifetimeObserver.csproj", "{3ACC4397-7FCC-4C3C-9D16-E77E5DAF8BDE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

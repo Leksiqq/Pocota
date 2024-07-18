@@ -1,4 +1,5 @@
-﻿using Net.Leksi.WpfMarkup;
+﻿using Net.Leksi.Util;
+using Net.Leksi.WpfMarkup;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -6,10 +7,17 @@ namespace Net.Leksi.Pocota.Client;
 
 public class PropertyTemplateSelector: DataTemplateSelector
 {
-    public XamlServiceProviderHolder? ServiceProviderHolder { get; set; }
+    public IServiceProvider? ServiceProvider { get; set; }
     public string ClassDataTemplateKey { get; set; } = null!;
     public string EnumDataTemplateKey { get; set; } = null!;
     public string TextDataTemplateKey { get; set; } = null!;
+    public PropertyTemplateSelector() 
+    {
+        if (Application.Current.TryFindResource("LifetimeObserver") is LifetimeObserver lto)
+        {
+            lto.TraceObject(this);
+        }
+    }
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
         DataTemplate? result = null;
@@ -52,12 +60,11 @@ public class PropertyTemplateSelector: DataTemplateSelector
     private DataTemplate? ProvideValue(string templateKey)
     {
         DataTemplate? result = null;
-        if (ServiceProviderHolder != null)
+        if (ServiceProvider != null)
         {
-            IServiceProvider sp = ServiceProviderHolder.ServiceProvider!;
             ParameterizedResourceExtension pre = new(templateKey);
-            result = pre.ProvideValue(sp) as DataTemplate;
-            ServiceProviderHolder = null;
+            result = pre.ProvideValue(ServiceProvider) as DataTemplate;
+            ServiceProvider = null;
         }
         return result;
     }

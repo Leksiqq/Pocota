@@ -16,7 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Client\PocotaClientWpf1\PocotaClientWpf1.csproj" />
     <ProjectReference Include="..\ContosoPizzaRemake\Client\CSharpClient\CSharpClient.csproj" />
-    <ProjectReference Include="C:\Users\leksi\Documents\leksi\c#\LifetimeObserver\Library\LifetimeObserver.csproj" />
+    <ProjectReference Include="..\..\..\LifetimeObserver\Library\LifetimeObserver.csproj" />
   </ItemGroup>
 
   <ItemGroup>

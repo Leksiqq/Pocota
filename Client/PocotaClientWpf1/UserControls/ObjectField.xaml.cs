@@ -190,7 +190,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                             {
                                 if(dob is ObjectEditor oe)
                                 {
-                                    ObjectEditor.ServiceProviderHolder = oe.ServiceProviderHolder;
+                                    ObjectEditor.ServiceProvider = oe.ServiceProvider;
                                     break;
                                 }
                             }

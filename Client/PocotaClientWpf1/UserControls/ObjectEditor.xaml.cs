@@ -1,4 +1,5 @@
-﻿using Net.Leksi.WpfMarkup;
+﻿using Net.Leksi.Util;
+using Net.Leksi.WpfMarkup;
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
@@ -18,19 +19,29 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
     private readonly Localizer _localizer;
     private IInputElement? _currentInput = null;
-    public static readonly DependencyProperty ServiceProviderHolderProperty = DependencyProperty.Register(
-       nameof(ServiceProviderHolder), typeof(XamlServiceProviderHolder),
+    private bool _columnsWidthCalculated = false;
+    private bool _isFirstLoad = true;
+    public static readonly DependencyProperty ServiceProviderProperty = DependencyProperty.Register(
+       nameof(ServiceProvider), typeof(IServiceProvider),
        typeof(ObjectEditor)
     );
     public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(
        nameof(Target), typeof(object),
        typeof(ObjectEditor)
     );
-    public CollectionViewSource PropertiesViewSource { get; private init; } = new();
-    public XamlServiceProviderHolder ServiceProviderHolder 
+    public static readonly DependencyProperty PropertiesViewSourceProperty = DependencyProperty.Register(
+       nameof(PropertiesViewSource), typeof(CollectionViewSource),
+       typeof(ObjectEditor)
+    );
+    public CollectionViewSource PropertiesViewSource
+    {
+        get => (CollectionViewSource)GetValue(PropertiesViewSourceProperty);
+        set => SetValue(PropertiesViewSourceProperty, value);
+    }
+    public IServiceProvider ServiceProvider 
     { 
-        get => (XamlServiceProviderHolder)GetValue(ServiceProviderHolderProperty); 
-        set => SetValue(ServiceProviderHolderProperty, value);
+        get => (IServiceProvider)GetValue(ServiceProviderProperty); 
+        set => SetValue(ServiceProviderProperty, value);
     }
     public object? Target
     {
@@ -50,9 +61,14 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     }
     public ObjectEditor()
     {
+        PropertiesViewSource = new CollectionViewSource();
         _localizer = Application.Current.GetLocalizer();
         InitializeComponent();
         Loaded += ObjectEditor_Loaded;
+        if (Application.Current.TryFindResource("LifetimeObserver") is LifetimeObserver lto)
+        {
+            lto.TraceObject(this);
+        }
     }
     public object? Convert(object? value, Type targetType, object parameter, CultureInfo culture)
     {
@@ -83,6 +99,7 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
                 PropertyValueColumn.Width = scrollViewer.ActualWidth - PropertyNameColumn.ActualWidth - s_ValueWidthParameter;
             }
             scrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            _columnsWidthCalculated = true;
         }
     }
     private void PropertiesView_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -110,17 +127,17 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     }
     private void SetTemplateSelector()
     {
-        if (ServiceProviderHolder is { } && Target is { } && Window is { })
+        if (ServiceProvider != null && Target != null && Window != null)
         {
-            if(PropertyValueColumn.CellTemplateSelector is null)
+            if(PropertyValueColumn.CellTemplateSelector == null)
             {
                 string spName = $"sp{Guid.NewGuid()}";
                 ParameterizedResourceExtension pre = new("PropertyTemplateSelector")
                 {
                     Replaces = new string[] { $"$serviceProviderCatcher:{spName}" },
                 };
-                this.Window.Resources.Add(spName, ServiceProviderHolder);
-                PropertyValueColumn.CellTemplateSelector = pre.ProvideValue(ServiceProviderHolder.ServiceProvider!) as DataTemplateSelector;
+                this.Window.Resources.Add(spName, ServiceProvider);
+                PropertyValueColumn.CellTemplateSelector = pre.ProvideValue(ServiceProvider) as DataTemplateSelector;
                 this.Window.Resources.Remove(spName);
             }
             PropertiesViewSource.Source = Target.GetType().GetProperties().Select(p => new Field { PropertyName = p.Name, Target = Target });
@@ -141,26 +158,41 @@ public partial class ObjectEditor : UserControl, INotifyPropertyChanged, IValueC
     }
     private void CheckColumnWidth()
     {
-        if (PropertyNameColumn.ActualWidth > s_HeaderWidthTreshold)
+        bool windowIsLoaded = false;
+        double propertyNameColumnActualWidth = 0;
+        Dispatcher.Invoke(() => 
+        {
+            windowIsLoaded = Window?.IsLoaded ?? false;
+            propertyNameColumnActualWidth = PropertyNameColumn.ActualWidth;
+        });
+        if (propertyNameColumnActualWidth > s_HeaderWidthTreshold)
         {
             Dispatcher.Invoke(CalcColumnsWidth);
         }
-        else
+        else if(windowIsLoaded && !_columnsWidthCalculated)
         {
             Task.Delay(1).ContinueWith(t => Task.Run(CheckColumnWidth));
         }
     }
     private void ObjectEditor_Loaded(object sender, RoutedEventArgs e)
     {
-        for (DependencyObject dop = this; dop is { }; dop = VisualTreeHelper.GetParent(dop))
+        if (_isFirstLoad)
         {
-            if (dop is Window window)
+            _isFirstLoad = false;
+            for (DependencyObject dop = this; dop != null; dop = VisualTreeHelper.GetParent(dop))
             {
-                Window = window;
-                SetTemplateSelector();
-                break;
+                if (dop is Window window)
+                {
+                    Window = window;
+                    var oe = GetVisualDescendants(window).OfType<ObjectEditor>().FirstOrDefault();
+                    if(oe == this)
+                    {
+                        SetTemplateSelector();
+                        CheckColumnWidth();
+                    }
+                    break;
+                }
             }
         }
-        CheckColumnWidth();
     }
 }

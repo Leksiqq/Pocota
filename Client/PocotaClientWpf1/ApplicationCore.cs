@@ -1,16 +1,12 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 namespace Net.Leksi.Pocota.Client;
-public class ApplicationCore: DependencyObject, IValueConverter, ICommand, INotifyPropertyChanged
+public class ApplicationCore: DependencyObject, IValueConverter, ICommand
 {
-    public static readonly DependencyProperty WindowMenuItemsProperty = DependencyProperty.Register(
-       nameof(WindowMenuItems), typeof(ObservableCollection<object>), typeof(ApplicationCore)
-    );
     public event EventHandler? CanExecuteChanged
     {
         add
@@ -22,18 +18,16 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand, INoti
             CommandManager.RequerySuggested -= value;
         }
     }
-    public event PropertyChangedEventHandler? PropertyChanged;
     private const string s_allWindows = "AllWindows";
     private const int s_maxWindowsInMenu = 10;
     private static readonly Separator s_separator = new();
     private readonly MenuItem _windowsItem;
     private readonly Localizer _localizer = Application.Current.GetLocalizer();
-    private readonly PropertyChangedEventArgs _windowMenuItemsPropertyChangedEventsArg = new(nameof(WindowMenuItems));
     private readonly Dictionary<Window, Window> _launcherByWindow = [];
     private readonly Dictionary<Window, HashSet<Window>> _windowsByLauncher = [];
-    private readonly ObservableCollection<object> _windowMenuItems = [];
     private Window? _activeWindow = null;
     private int _entersCount = 0;
+    public ObservableCollection<object> WindowMenuItems { get; private init; } = [];
     public ApplicationCore()
     {
         _windowsItem = new()
@@ -42,11 +36,6 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand, INoti
             Command = this,
             CommandParameter = s_allWindows
         };
-        SetValue(WindowMenuItemsProperty, _windowMenuItems);
-    }
-    public IEnumerable<object> WindowMenuItems
-    {
-        get => (IEnumerable<object>)GetValue(WindowMenuItemsProperty);
     }
     public bool CanExecute(object? parameter)
     {
@@ -123,7 +112,6 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand, INoti
         window.Resources[Constants.Localizer] = Application.Current.GetLocalizer();
         window.Activated += WindowActivated;
         window.Closed += WindowClosed;
-        //NotifyWindowMenuItemsPropertyChanged();
     }
     private void WindowClosed(object? sender, EventArgs e)
     {
@@ -156,7 +144,7 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand, INoti
             }
             if(--_entersCount == 0)
             {
-                NotifyWindowMenuItemsPropertyChanged();
+                RefreshWindowMenuItems();
             }
         }
     }
@@ -165,24 +153,22 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand, INoti
         if (sender is Window window)
         {
             _activeWindow = window;
-            NotifyWindowMenuItemsPropertyChanged();
+            RefreshWindowMenuItems();
         }
     }
-    private void NotifyWindowMenuItemsPropertyChanged()
+    private void RefreshWindowMenuItems()
     {
-        _windowMenuItems.Clear();
-        _windowMenuItems.Add(s_separator);
+        WindowMenuItems.Clear();
+        WindowMenuItems.Add(s_separator);
         int i = 0;
         foreach (Window window in Application.Current.Windows)
         {
-            _windowMenuItems.Add(new Tuple<int, Window>(++i, window));
+            WindowMenuItems.Add(new Tuple<int, Window>(++i, window));
             if (i == s_maxWindowsInMenu)
             {
                 break;
             }
         }
-        _windowMenuItems.Add(_windowsItem);
-
-        //PropertyChanged?.Invoke(this, _windowMenuItemsPropertyChangedEventsArg);
+        WindowMenuItems.Add(_windowsItem);
     }
 }
