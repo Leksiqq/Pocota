@@ -1,7 +1,6 @@
 ﻿using Net.Leksi.Util;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
@@ -98,11 +97,12 @@ public static class LifetimeVisualizer
 
     private static void Write()
     {
-        string message = string.Join('\n', s_counts.Select(item =>
+        string data = string.Join('\n', s_counts.Select(item =>
         {
             string line = string.Format($"{{0,-{s_maxNameLen}}}\t+{{1}}\t-{{2}}\t{{3}}", item.Key, item.Value._incCount, item.Value._decCount, item.Value._incCount - item.Value._decCount);
             return $"{line}";
         })) + "\n";
+        string message = $"{data}\0";
         try
         {
             s_socket.Send(Encoding.UTF8.GetBytes(message));

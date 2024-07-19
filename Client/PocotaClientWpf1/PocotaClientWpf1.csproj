@@ -35,28 +35,16 @@
     <ProjectReference Include="..\..\..\LifetimeObserver\Library\LifetimeObserver.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="Libs\Microsoft.Extensions.Configuration.Abstractions.dll">
+    <None Update="..\EchoConsole1\bin\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Configuration.Abstractions.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Libs\Microsoft.Extensions.Configuration.CommandLine.dll">
+    <None Update="..\EchoConsole1\bin\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Configuration.CommandLine.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Libs\Microsoft.Extensions.Configuration.dll">
+    <None Update="..\EchoConsole1\bin\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Configuration.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Libs\Microsoft.Extensions.Primitives.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Microsoft.Extensions.Configuration.Abstractions.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Microsoft.Extensions.Configuration.CommandLine.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Microsoft.Extensions.Configuration.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Microsoft.Extensions.Primitives.dll">
+    <None Update="..\EchoConsole1\bin\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Primitives.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
