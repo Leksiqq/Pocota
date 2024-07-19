@@ -1,61 +1,118 @@
 ﻿using Net.Leksi.Util;
-using System.Collections.Concurrent;
-using System.Windows;
+using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Text;
 
 namespace Net.Leksi.Pocota.Client;
 public static class LifetimeVisualizer
 {
     private static Dictionary<Type, CountHolder> s_counts = [];
-    private static int step = 0;
-    private static bool _running = false;
-    public static void Start()
+    private static int s_step = 0;
+    private static bool s_running = false;
+    private static int s_maxNameLen = 0;
+    private static LifetimeObserver? s_lifetimeObserver = null;
+    private static Socket s_socket = null!;
+    private static string s_socketPath = null!;
+    public static int CollectGarbageEveryNewObjectsCount { get; set; } = 100;
+    public static void Start(LifetimeObserver lifetimeObserver)
     {
-        if (!_running)
+        if (lifetimeObserver != null)
         {
-            _running = true;
-            LifetimeObserver lifetimeObserver = Application.Current.GetRequiredService<LifetimeObserver>();
-            lock (s_counts)
+            s_lifetimeObserver = lifetimeObserver;
+            if (!s_running)
             {
-                foreach (Type type in lifetimeObserver.GetTracedTypes())
-                {
-                    s_counts.Add(type, new CountHolder());
-                }
-            }
-            lifetimeObserver.LifetimeEventOccured += (s, e) =>
-            {
-                lock (e.Type)
-                {
-                    CountHolder ch = s_counts[e.Type];
-                    switch (e.Kind)
-                    {
-                        case LifetimeEventKind.Created:
-                            Interlocked.Increment(ref ch._incCount);
-                            break;
-                        case LifetimeEventKind.Finalized:
-                            Interlocked.Increment(ref ch._decCount);
-                            break;
-                    };
-                }
+                s_running = true;
+                s_socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
+                s_socketPath = Path.GetTempFileName();
+                File.Delete(s_socketPath);
+
                 lock (s_counts)
                 {
-                    Console.SetCursorPosition(0, 0);
-                    foreach (var item in s_counts)
+                    foreach (Type type in s_lifetimeObserver!.GetTracedTypes())
                     {
-                        string line = $"{item.Key}:\t+{item.Value._incCount}, -{item.Value._decCount}, {item.Value._incCount - item.Value._decCount}";
-                        string blank = string.Format($"{{0,{line.Length + 5}}}\r", string.Empty);
-                        Console.WriteLine($"{blank}{line}");
+                        s_counts.Add(type, new CountHolder());
+                        if(s_maxNameLen < type.FullName!.Length)
+                        {
+                            s_maxNameLen = type.FullName.Length;
+                        }
                     }
                 }
-                if (Interlocked.Increment(ref step) % 100 == 0)
+                Process echo = new();
+                AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
+                echo.StartInfo.FileName = "EchoConsole1";
+                echo.StartInfo.Arguments = $"--title \"LifetimeVisualizer: {Assembly.GetExecutingAssembly().GetName()}\" --socket-path {s_socketPath}";
+                echo.StartInfo.UseShellExecute = true;
+                echo.Exited += Echo_Exited;
+                echo.Start();
+                while(!File.Exists(s_socketPath))
                 {
-                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive);
-                    GC.WaitForPendingFinalizers();
+                    Thread.Sleep(10);
                 }
+                s_socket.Connect(new UnixDomainSocketEndPoint(s_socketPath));
+                Write();
+                s_lifetimeObserver.LifetimeEventOccured += LifetimeObserver_LifetimeEventOccured; 
+            }
+        }
+    }
+    public static void Stop()
+    {
+        if (s_lifetimeObserver != null)
+        {
+            s_lifetimeObserver!.LifetimeEventOccured -= LifetimeObserver_LifetimeEventOccured;
+        }
+        s_running = false;
+    }
+    private static void CurrentDomain_ProcessExit(object? sender, EventArgs e)
+    {
+        s_socket.Close();
+    }
+    private static void Echo_Exited(object? sender, EventArgs e)
+    {
+        Stop();
+    }
+    private static void LifetimeObserver_LifetimeEventOccured(object? sender, LifetimeEventArgs e)
+    {
+        lock (e.Type)
+        {
+            CountHolder ch = s_counts[e.Type];
+            switch (e.Kind)
+            {
+                case LifetimeEventKind.Created:
+                    Interlocked.Increment(ref ch._incCount);
+                    break;
+                case LifetimeEventKind.Finalized:
+                    Interlocked.Increment(ref ch._decCount);
+                    break;
             };
+        }
+        Write();
+        if (CollectGarbageEveryNewObjectsCount > 0 && Interlocked.Increment(ref s_step) % CollectGarbageEveryNewObjectsCount == 0)
+        {
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive);
+            GC.WaitForPendingFinalizers();
+        }
+    }
+
+    private static void Write()
+    {
+        string message = string.Join('\n', s_counts.Select(item =>
+        {
+            string line = string.Format($"{{0,-{s_maxNameLen}}}\t+{{1}}\t-{{2}}\t{{3}}", item.Key, item.Value._incCount, item.Value._decCount, item.Value._incCount - item.Value._decCount);
+            return $"{line}";
+        })) + "\n";
+        try
+        {
+            s_socket.Send(Encoding.UTF8.GetBytes(message));
+        }
+        catch (Exception)
+        {
+            Stop();
         }
     }
 }
-
 internal class CountHolder
 {
     internal int _incCount = 0;

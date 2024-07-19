@@ -51,6 +51,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "ConsoleApp1\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LifetimeObserver", "..\LifetimeObserver\Library\LifetimeObserver.csproj", "{3ACC4397-7FCC-4C3C-9D16-E77E5DAF8BDE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoConsole1", "Client\EchoConsole1\EchoConsole1.csproj", "{9F03220D-0769-4E6E-958B-F1383402ECE5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +127,10 @@ Global
 		{3ACC4397-7FCC-4C3C-9D16-E77E5DAF8BDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3ACC4397-7FCC-4C3C-9D16-E77E5DAF8BDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3ACC4397-7FCC-4C3C-9D16-E77E5DAF8BDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F03220D-0769-4E6E-958B-F1383402ECE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F03220D-0769-4E6E-958B-F1383402ECE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F03220D-0769-4E6E-958B-F1383402ECE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F03220D-0769-4E6E-958B-F1383402ECE5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -145,6 +151,7 @@ Global
 		{7BF57B9B-1FF3-413B-BC9D-E4DFB2ED8B32} = {6F7B5E12-9F91-40C8-B0C2-492F878EEC96}
 		{594E057A-DC85-43D8-8D87-9BAD3F354D6C} = {E196270F-9B8E-4231-8EDB-74E68391AECD}
 		{F9EF61FD-ED07-4DB3-94F6-0E93813C99F4} = {6F7B5E12-9F91-40C8-B0C2-492F878EEC96}
+		{9F03220D-0769-4E6E-958B-F1383402ECE5} = {E196270F-9B8E-4231-8EDB-74E68391AECD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {03A22767-6ACB-43F5-ACE0-24BDB396D7E9}

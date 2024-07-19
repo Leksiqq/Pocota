@@ -1,6 +1,5 @@
-﻿using System.Globalization;
-using System.Windows;
-using System.Windows.Markup;
+﻿using System.Windows;
+using System.Windows.Threading;
 
 namespace WpfApp1
 {
@@ -9,6 +8,16 @@ namespace WpfApp1
     /// </summary>
     public partial class App : Application
     {
+        public App()
+        {
+            DispatcherUnhandledException += App_DispatcherUnhandledException;
+        }
+
+        private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            Console.WriteLine(e);
+        }
     }
+
 
 }

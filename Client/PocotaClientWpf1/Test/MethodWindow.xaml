@@ -19,8 +19,8 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Dictionaries/Dictionary1.xaml" />
-                <ResourceDictionary Source="Dictionaries/PropertyTemplates.xaml" />
+                <ResourceDictionary Source="../Xaml/Dictionaries/Dictionary1.xaml" />
+                <ResourceDictionary Source="../Xaml/Dictionaries/PropertyTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <l:BindingProxy Value="{Binding}" x:Key="Window"/>
             <l:XamlServiceProviderCatcher x:Key="WindowSP" x:Shared="False"/>
@@ -40,12 +40,13 @@
             </TextBlock.Text>
         </TextBlock>
         <uc:ObjectEditor 
+            DockPanel.Dock="Top" 
             x:Name="ObjectEditor"
-            DockPanel.Dock="Top"
             Target="{Binding Target}" 
             ServiceProvider="{StaticResource WindowSP}" 
             CurrentInputChanged="ObjectEditor_CurrentInputChanged"
-        />
+            Window="{Binding Value, Source={StaticResource Window}}"
+            />
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="{Binding Call, Source={StaticResource Localizer}}" Margin="0,10,0,10" Click="Button_Click"/>
             <Button Content="{Binding Interrupt, Source={StaticResource Localizer}}" Margin="10,10,0,10"/>

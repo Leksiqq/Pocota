@@ -7,6 +7,8 @@ public static class WindowsShower
     private static Timer? _timer = null;
     private static readonly HashSet<Timer> _timers = [];
     public static Dispatcher? Dispatcher { get; set; }
+    public static int TimeOfWindowExpositionMs { get; set; } = 3000;
+    public static int PeriodOfShowMs { get; set; } = 1000;
     public static void Start(Func<Window> supplier)
     {
         if(supplier == null)
@@ -37,14 +39,14 @@ public static class WindowsShower
                             });
                             _timers.Remove((state as Timer)!);
                         });
-                        t1.Change(3000, 0);
+                        t1.Change(TimeOfWindowExpositionMs, 0);
                         _timers.Add(t1);
                     };
                     window.Show();
                 });
                 if (_running)
                 {
-                    (s as Timer)!.Change(1000, 0);
+                    (s as Timer)!.Change(PeriodOfShowMs, 0);
                 }
             });
             _timer.Change(0, 0);

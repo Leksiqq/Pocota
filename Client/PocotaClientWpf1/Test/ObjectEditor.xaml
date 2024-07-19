@@ -4,9 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-    xmlns:l="clr-namespace:Net.Leksi.WpfMarkup;assembly=Net.Leksi.WpfMarkupExtension"
-    xmlns:local="clr-namespace:Net.Leksi.Pocota.Client"
-    xmlns:uc="clr-namespace:Net.Leksi.Pocota.Client.UserControls"
+    xmlns:local="clr-namespace:Net.Leksi.Pocota.Client.UserControls"
     mc:Ignorable="d" 
     x:Name="oe"
     >

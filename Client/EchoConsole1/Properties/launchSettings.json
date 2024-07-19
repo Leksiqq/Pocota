@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "EchoConsole1": {
+      "commandName": "Project",
+      "commandLineArgs": "--socket-path qq.txt"
+    }
+  }
+}

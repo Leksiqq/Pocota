@@ -1,6 +1,4 @@
-﻿using Net.Leksi.Util;
-using Net.Leksi.WpfMarkup;
-using System.Diagnostics;
+﻿using Net.Leksi.WpfMarkup;
 using System.Windows;
 using System.Windows.Input;
 namespace Net.Leksi.Pocota.Client;
@@ -38,7 +36,16 @@ public partial class MethodsWindow : Window, ICommand
             );
             return window;
         });
-        LifetimeVisualizer.Start();
+        //WindowsShower.Start(() =>
+        //{
+        //    MethodWindow window = Application.Current.GetRequiredService<MethodWindow>();
+        //    window.Init(
+        //        Application.Current.GetRequiredService<ConnectorsMethodsList>()
+        //        .Skip(rnd.Next(Application.Current.GetRequiredService<ConnectorsMethodsList>().Count() - 1))
+        //        .First()
+        //    );
+        //    return window;
+        //});
     }
     public bool CanExecute(object? parameter)
     {

@@ -5,7 +5,6 @@ using Net.Leksi.Pocota.Client;
 using Net.Leksi.Pocota.Client.UserControls;
 using Net.Leksi.Util;
 using Net.Leksi.WpfMarkup;
-using System.Diagnostics;
 
 namespace WpfApp1;
 
@@ -32,20 +31,42 @@ static class Program
         builder.Services.AddSingleton<Localizer>(s => s.GetRequiredService<MyLocalizer>());
         builder.Services.RemoveService(typeof(INamesConverter));
         builder.Services.AddSingleton<INamesConverter, NamesConverter>();
-        builder.Services.AddTransient<Window1>();
+        builder.Services.AddTransient<MethodWindow>();
         builder.Services.AddLifetimeObserver(lto =>
         {
+            //PocotaClientWpf1
             lto.Trace<ObjectEditor>(true);
             lto.Trace<PropertyTemplateSelector>(true);
-            lto.Trace<ParameterizedResourceExtension>(true);
             lto.Trace<MethodWindow>();
-            lto.Trace<Window1>();
+
+            //WpfMarkupExtension
+            lto.Trace<BindingProxy>(true);
+            lto.Trace<BindingProxyMarkup>(true);
+            lto.Trace<BoolExpressionConverter>(true);
+            lto.Trace<ConverterProxy>(true);
+            lto.Trace<DataGridManager>(true);
+            lto.Trace<DataSwitch>(true);
+            lto.Trace<ParameterizedResourceExtension>(true);
+            lto.Trace<SortByColumn>(true);
+            lto.Trace<SortByColumnArgs>(true);
+            lto.Trace<SortByColumnConverter>(true);
+            lto.Trace<StyleCombiner>(true);
+            lto.Trace<Unsort>(true);
+            lto.Trace<XamlServiceProviderCatcher>(true);
         });
         using IHost host = builder.Build();
 
         host.RunPocotaWpfApp(app =>
         {
             app.ShutdownMode = System.Windows.ShutdownMode.OnMainWindowClose;
+            if (app.TryGetLifetimeObserver(out LifetimeObserver? lto))
+            {
+                LifetimeVisualizer.CollectGarbageEveryNewObjectsCount = 0;
+                LifetimeVisualizer.Start(lto!);
+                Net.Leksi.WpfMarkup.NotifyInstanceCreated.InstanceCreated += (s, e) => {
+                    lto!.TraceObject(s!);
+                };
+            }
         });
     }
 }

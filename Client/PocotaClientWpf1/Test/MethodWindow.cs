@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Net.Leksi.Pocota.Client.UserControls;
-using System.ComponentModel;
 using System.Globalization;
 using System.Text.Json;
 using System.Windows;
 namespace Net.Leksi.Pocota.Client;
-public partial class MethodWindow : Window, IServiceRelated, IEditWindow
+public partial class MethodWindow : Window
 {
     private const string s_target = "target";
     public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(nameof(Target), typeof(object), typeof(MethodWindow));
@@ -44,11 +43,12 @@ public partial class MethodWindow : Window, IServiceRelated, IEditWindow
     public MethodWindow()
     {
         _namesConverter = Application.Current.GetNamesConverter();
+        Closed += Window1_Closed;
         InitializeComponent();
     }
-    public void Init(ConnectorMethod connectorMethod) 
+    public void Init(ConnectorMethod connectorMethod)
     {
-        if(connectorMethod != null)
+        if (connectorMethod != null)
         {
             ServiceKey = connectorMethod.ServiceKey;
             MethodName = connectorMethod.Method.Name;
@@ -69,11 +69,6 @@ public partial class MethodWindow : Window, IServiceRelated, IEditWindow
     {
         return (string?)_namesConverter.Convert(value, typeof(string), parameter, CultureInfo.CurrentCulture);
     }
-    protected override void OnActivated(EventArgs e)
-    {
-        ObjectEditor?.CalcColumnsWidth();
-        base.OnActivated(e);
-    }
     private void Button_Click(object sender, RoutedEventArgs e)
     {
         Console.WriteLine(JsonSerializer.Serialize(Target));
@@ -84,5 +79,9 @@ public partial class MethodWindow : Window, IServiceRelated, IEditWindow
         {
             InsertInputMode.Text = (string?)oe.Convert(oe.CurrentInput?.IsInsertMode, typeof(string), "InsertInputMode", CultureInfo.CurrentCulture);
         }
+    }
+    private void Window1_Closed(object? sender, EventArgs e)
+    {
+        ObjectEditor.Clear();
     }
 }
