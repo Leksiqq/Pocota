@@ -28,25 +28,12 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\EchoConsole\EchoConsole.csproj" />
+    <ProjectReference Include="..\..\..\LifetimeVisualizer\LifetimeVisualizer.csproj" />
     <ProjectReference Include="..\..\..\Localization\Localization\Localization.csproj" />
     <ProjectReference Include="..\..\..\WPF\WpfMarkupExtension\WpfMarkupExtension\WpfMarkupExtension.csproj" />
-    <ProjectReference Include="..\EchoConsole1\EchoConsole1.csproj" />
     <ProjectReference Include="..\PocotaClient\PocotaClient.csproj" />
     <ProjectReference Include="..\..\..\LifetimeObserver\Library\LifetimeObserver.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="..\EchoConsole1\bin\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Configuration.Abstractions.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="..\EchoConsole1\bin\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Configuration.CommandLine.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="..\EchoConsole1\bin\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Configuration.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="..\EchoConsole1\bin\$(Configuration)\$(TargetFramework)\Microsoft.Extensions.Primitives.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
