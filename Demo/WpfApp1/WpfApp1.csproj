@@ -14,10 +14,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\LifetimeVisualizer\LifetimeVisualizer.csproj" />
     <ProjectReference Include="..\..\Client\PocotaClientWpf1\PocotaClientWpf1.csproj" />
     <ProjectReference Include="..\ContosoPizzaRemake\Client\CSharpClient\CSharpClient.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='Debug'">
+    <ProjectReference Include="..\..\..\LifetimeVisualizer\LifetimeVisualizer.csproj" />
     <ProjectReference Include="..\..\..\LifetimeObserver\Library\LifetimeObserver.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='Release'">
+    <PackageReference Include="Net.Leksi.LifetimeObserver" Version="1.1.0" />
+    <PackageReference Include="Net.Leksi.LifetimeVisualizer" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
