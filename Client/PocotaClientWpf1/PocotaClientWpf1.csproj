@@ -28,7 +28,6 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\EchoConsole\EchoConsole.csproj" />
     <ProjectReference Include="..\PocotaClient\PocotaClient.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)'=='Debug'">
@@ -38,7 +37,6 @@
     <ProjectReference Include="..\..\..\LifetimeObserver\Library\LifetimeObserver.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)'=='Release'">
-    <PackageReference Include="Net.Leksi.LifetimeVisualizer" Version="1.0.*" />
     <PackageReference Include="Net.Leksi.LifetimeObserver" Version="1.1.*" />
     <PackageReference Include="Net.Leksi.WpfMarkupExtension" Version="3.0.*" />
     <PackageReference Include="Net.Leksi.Localization" Version="1.0.*" />

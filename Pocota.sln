@@ -47,7 +47,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PocotaClientWpf1", "Client\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LifetimeObserver", "..\LifetimeObserver\Library\LifetimeObserver.csproj", "{3ACC4397-7FCC-4C3C-9D16-E77E5DAF8BDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LifetimeVisualizer", "..\LifetimeVisualizer\LifetimeVisualizer.csproj", "{4AF4C1CC-8084-4340-8E37-BCD0BD442908}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LifetimeVisualizer", "..\LifetimeVisualizer\LifetimeVisualizer.csproj", "{4AF4C1CC-8084-4340-8E37-BCD0BD442908}"
+	ProjectSection(ProjectDependencies) = postProject
+		{32C9AC0F-294B-487B-BFE0-DDB5B3EC9C14} = {32C9AC0F-294B-487B-BFE0-DDB5B3EC9C14}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EchoConsole", "..\EchoConsole\EchoConsole.csproj", "{32C9AC0F-294B-487B-BFE0-DDB5B3EC9C14}"
 EndProject
