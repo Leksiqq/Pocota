@@ -99,7 +99,7 @@ internal static class Util
             }
         }
         object defaultObject = Activator.CreateInstance(attribute.GetType())!;
-        if (usedConstructor is { })
+        if (usedConstructor != null)
         {
             List<object?> parameters = [];
             foreach (ParameterInfo par in usedConstructor.GetParameters())

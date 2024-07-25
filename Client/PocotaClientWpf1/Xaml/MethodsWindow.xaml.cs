@@ -19,12 +19,12 @@ public partial class MethodsWindow : Window, ICommand
     public MethodsWindow()
     {
         ConnectorsDataGridManager.ViewSource.Source = Application.Current.GetRequiredService<ConnectorsMethodsList>();
-        Activated += MethodsWindow_Activated;
+        //Activated += MethodsWindow_Activated;
         InitializeComponent();
     }
-    private Random rnd = new();
     private void MethodsWindow_Activated(object? sender, EventArgs e)
     {
+        Random rnd = new();
         WindowsShower.Dispatcher = Dispatcher;
         WindowsShower.Start(() =>
         {
@@ -36,16 +36,6 @@ public partial class MethodsWindow : Window, ICommand
             );
             return window;
         });
-        //WindowsShower.Start(() =>
-        //{
-        //    MethodWindow window = Application.Current.GetRequiredService<MethodWindow>();
-        //    window.Init(
-        //        Application.Current.GetRequiredService<ConnectorsMethodsList>()
-        //        .Skip(rnd.Next(Application.Current.GetRequiredService<ConnectorsMethodsList>().Count() - 1))
-        //        .First()
-        //    );
-        //    return window;
-        //});
     }
     public bool CanExecute(object? parameter)
     {

@@ -36,7 +36,7 @@ public class PocotaContext
             {
                 if (prop.Metadata.IsPrimaryKey())
                 {
-                    config.Keys[type.FullName!].Add(prop.Metadata.Name, prop.Metadata.ValueGenerated is not ValueGenerated.Never);
+                    config.Keys[type.FullName!].Add(prop.Metadata.Name, prop.Metadata.ValueGenerated != ValueGenerated.Never);
                 }
             }
         }

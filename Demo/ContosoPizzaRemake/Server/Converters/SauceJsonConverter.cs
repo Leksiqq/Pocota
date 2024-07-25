@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.SauceJsonConverter                  //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-21T16:41:59.                                 //
+// at 2024-07-25T16:23:23.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -56,7 +56,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
         pocotaEntity.IsSerialized = true;
         if(!pocotaEntity.Id.IsSent)
         {
-            if(pocotaEntity.Id.Access is not AccessKind.NotSet)
+            if(pocotaEntity.Id.Access != AccessKind.NotSet)
             {
                 pocotaEntity.Id.IsSent = true;
                 writer.WritePropertyName(s_Id);
@@ -66,7 +66,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
                     writer.WriteNumberValue((int)pocotaEntity.Id.Access);
                 }
                 if(
-                    pocotaEntity.Id.Access is AccessKind.Forbidden
+                    pocotaEntity.Id.Access == AccessKind.Forbidden
                 )
                 {
                     writer.WriteNullValue();
@@ -83,7 +83,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
         }
         if(!pocotaEntity.Id1.IsSent)
         {
-            if(pocotaEntity.Id1.Access is not AccessKind.NotSet)
+            if(pocotaEntity.Id1.Access != AccessKind.NotSet)
             {
                 pocotaEntity.Id1.IsSent = true;
                 writer.WritePropertyName(s_Id1);
@@ -93,7 +93,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
                     writer.WriteNumberValue((int)pocotaEntity.Id1.Access);
                 }
                 if(
-                    pocotaEntity.Id1.Access is AccessKind.Forbidden
+                    pocotaEntity.Id1.Access == AccessKind.Forbidden
                 )
                 {
                     writer.WriteNullValue();
@@ -110,7 +110,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
         }
         if(!pocotaEntity.Name.IsSent)
         {
-            if(pocotaEntity.Name.Access is not AccessKind.NotSet)
+            if(pocotaEntity.Name.Access != AccessKind.NotSet)
             {
                 pocotaEntity.Name.IsSent = true;
                 writer.WritePropertyName(s_Name);
@@ -120,7 +120,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
                     writer.WriteNumberValue((int)pocotaEntity.Name.Access);
                 }
                 if(
-                    pocotaEntity.Name.Access is AccessKind.Forbidden
+                    pocotaEntity.Name.Access == AccessKind.Forbidden
                 )
                 {
                     writer.WriteNullValue();
@@ -137,7 +137,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
         }
         if(!pocotaEntity.IsVegan.IsSent)
         {
-            if(pocotaEntity.IsVegan.Access is not AccessKind.NotSet)
+            if(pocotaEntity.IsVegan.Access != AccessKind.NotSet)
             {
                 pocotaEntity.IsVegan.IsSent = true;
                 writer.WritePropertyName(s_IsVegan);
@@ -147,7 +147,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
                     writer.WriteNumberValue((int)pocotaEntity.IsVegan.Access);
                 }
                 if(
-                    pocotaEntity.IsVegan.Access is AccessKind.Forbidden
+                    pocotaEntity.IsVegan.Access == AccessKind.Forbidden
                 )
                 {
                     writer.WriteNullValue();

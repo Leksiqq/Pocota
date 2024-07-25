@@ -5,7 +5,7 @@
     <Compile Update="Test\ObjectEditor.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Test\MethodWindow.cs">
+    <Compile Update="Test\MethodWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\EnumField.xaml.cs">

@@ -8,7 +8,7 @@ public class TypeNameConverter : MarkupExtension, IValueConverter
 {
     public object? Convert(object? value, Type targetType, object parameter, CultureInfo culture)
     {
-        if(value is { })
+        if(value != null)
         {
             Type type = value as Type ?? value.GetType();
             if ("Short".Equals(parameter))

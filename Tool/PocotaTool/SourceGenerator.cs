@@ -47,7 +47,7 @@ public class SourceGenerator : Runner, ICommand
         {
             foreach (string folder in _serverFolders)
             {
-                if (_configuration[folder] is null)
+                if (_configuration[folder] == null)
                 {
                     _configuration[folder] = Path.Combine(sb, Util.PascalCase(folder.StartsWith("server-") ? folder["server-".Length..] : folder));
                 }
@@ -72,7 +72,7 @@ public class SourceGenerator : Runner, ICommand
             }
             foreach (string folder in _clientFolders)
             {
-                if (_configuration[folder] is null)
+                if (_configuration[folder] == null)
                 {
                     _configuration[folder] = Path.Combine(cb, Util.PascalCase(folder.StartsWith("client-") ? folder["client-".Length..] : folder));
                 }
@@ -197,7 +197,7 @@ public class SourceGenerator : Runner, ICommand
                     type = type.GetGenericArguments()[0];
                     isNullable = true;
                 }
-                else if (new NullabilityInfoContext().Create(pi).ReadState is NullabilityState.Nullable)
+                else if (new NullabilityInfoContext().Create(pi).ReadState == NullabilityState.Nullable)
                 {
                     isNullable = true;
                 }
@@ -250,7 +250,7 @@ public class SourceGenerator : Runner, ICommand
                     type = type.GetGenericArguments()[0];
                     isNullable = true;
                 }
-                else if(new NullabilityInfoContext().Create(pi).ReadState is NullabilityState.Nullable)
+                else if(new NullabilityInfoContext().Create(pi).ReadState == NullabilityState.Nullable)
                 {
                     isNullable = true;
                 }
@@ -302,7 +302,7 @@ public class SourceGenerator : Runner, ICommand
         model.AddInheritance(typeof(JsonConverter<>).MakeGenericType([options.EntityType!]));
         foreach (PropertyInfo pi in options.EntityType!.GetProperties())
         {
-            if(pi.GetCustomAttribute<JsonIgnoreAttribute>() is null)
+            if(pi.GetCustomAttribute<JsonIgnoreAttribute>() == null)
             {
                 model.AddUsing(pi.PropertyType);
                 PropertyModel pm = new()
@@ -379,7 +379,7 @@ public class SourceGenerator : Runner, ICommand
         model.AddUsing(typeof(EntityEntry));
         foreach (PropertyInfo pi in options.EntityType!.GetProperties())
         {
-            if (pi.GetCustomAttribute<JsonIgnoreAttribute>() is null)
+            if (pi.GetCustomAttribute<JsonIgnoreAttribute>() == null)
             {
                 model.AddUsing(pi.PropertyType);
                 PropertyModel pm = new()

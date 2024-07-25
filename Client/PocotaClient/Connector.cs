@@ -27,7 +27,7 @@ public abstract class Connector
             {
                 _baseAddress = value;
                 ReplaceHttpClient();
-                if(_baseAddress is { })
+                if(_baseAddress != null)
                 {
                     GetPocotaConfigAsync(CancellationToken.None).Wait();
                 }
@@ -50,7 +50,7 @@ public abstract class Connector
     {
         _services = services;
         _httpClient = new HttpClient();
-        if(baseUri is { })
+        if(baseUri != null)
         {
             _httpClient.BaseAddress = baseUri;
         }
@@ -94,7 +94,7 @@ public abstract class Connector
                 jsonSerializerOptions,
                 cancellationToken
             ).GetAsyncEnumerator(cancellationToken);
-            if (target is { })
+            if (target != null)
             {
                 while (await en.MoveNextAsync())
                 {
@@ -108,7 +108,7 @@ public abstract class Connector
         }
         catch
         {
-            if (stream is { })
+            if (stream != null)
             {
                 new StreamReader(stream).ReadToEnd();
                 if (stream.FindException())
@@ -138,7 +138,7 @@ public abstract class Connector
         }
         catch
         {
-            if (stream is { })
+            if (stream != null)
             {
                 new StreamReader(stream).ReadToEnd();
                 if (stream.FindException())

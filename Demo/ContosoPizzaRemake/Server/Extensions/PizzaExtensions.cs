@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.PizzaExtensions                            //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-21T16:41:59.                                 //
+// at 2024-07-25T16:23:23.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -46,7 +46,7 @@ public static class PizzaExtensions
         else
         {
             ServiceDescriptor sd = services.Where(s => AccessCalculatorServicesEqualityComparer.Instance.Equals(probe, s)).First();
-            if (sd.Lifetime is not ServiceLifetime.Scoped)
+            if (sd.Lifetime != ServiceLifetime.Scoped)
             {
                 throw new InvalidOperationException($"{nameof(IAccessCalculator)} service expected to be scoped, got: {sd}.");
             }
@@ -59,7 +59,7 @@ public static class PizzaExtensions
         else
         {
             ServiceDescriptor sd = services.Where(s => AccessCalculatorServicesEqualityComparer.Instance.Equals(probe, s)).First();
-            if (sd.Lifetime is not ServiceLifetime.Scoped)
+            if (sd.Lifetime != ServiceLifetime.Scoped)
             {
                 throw new InvalidOperationException($"{nameof(IAccessCalculator)} service expected to be scoped, got: {sd}.");
             }
@@ -72,7 +72,7 @@ public static class PizzaExtensions
         else
         {
             ServiceDescriptor sd = services.Where(s => AccessCalculatorServicesEqualityComparer.Instance.Equals(probe, s)).First();
-            if (sd.Lifetime is not ServiceLifetime.Scoped)
+            if (sd.Lifetime != ServiceLifetime.Scoped)
             {
                 throw new InvalidOperationException($"{nameof(IAccessCalculator)} service expected to be scoped, got: {sd}.");
             }

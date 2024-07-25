@@ -23,7 +23,7 @@ public class Field
         get => _target;
         set 
         {
-            if(_target is null && value is { })
+            if(_target == null && value != null)
             {
                 _target = value;
                 if(_target is INotifyPropertyChanged npc)
@@ -51,7 +51,7 @@ public class Field
         get => _owner;
         set
         {
-            if (_owner is null && value is { })
+            if (_owner == null && value != null)
             {
                 _owner = value;
                 _owner.Field = this;
@@ -69,7 +69,7 @@ public class Field
     {
         get
         {
-            if(_type is null)
+            if(_type == null)
             {
                 throw new InvalidOperationException("Field is not ready!");
             }
@@ -85,7 +85,7 @@ public class Field
         get => _propertyInfo?.GetValue(Target);
         set
         {
-            if(_propertyInfo is { })
+            if(_propertyInfo != null)
             {
                 _propertyInfo?.SetValue(Target, value);
             }
@@ -95,21 +95,21 @@ public class Field
     {
         get
         {
-            if (Type is { })
+            if (Type != null)
             {
                 if (IsNullable || Type.IsClass)
                 {
-                    return Value is null;
+                    return Value == null;
                 }
                 return Value?.Equals(Activator.CreateInstance(Type)) ?? true;
             }
             return true;
         }
     }
-    public bool IsReady => _type is { };
+    public bool IsReady => _type != null;
     public void Clear()
     {
-        if (Type is { })
+        if (Type != null)
         {
             if (IsNullable || Type.IsClass)
             {
@@ -130,27 +130,27 @@ public class Field
     }
     private void ProcessPropertyChanged()
     {
-        if(Target is { } && PropertyName is { })
+        if(Target != null && PropertyName != null)
         {
             _propertyInfo = Target.GetType().GetProperty(PropertyName);
-            if (_propertyInfo is null)
+            if (_propertyInfo == null)
             {
                 throw new ArgumentException($"{Target.GetType()} has not {nameof(PropertyName)} property!");
             }
             _entityProperty = Target is IEntityOwner eo ? eo.Entity.GetEntityProperty(PropertyName) : null;
-            _type = _entityProperty is { } ? _entityProperty.Type : _propertyInfo.PropertyType;
+            _type = _entityProperty != null ? _entityProperty.Type : _propertyInfo.PropertyType;
             _isNullable = false;
             if(_type.IsGenericType && typeof(Nullable<>).IsAssignableFrom(_type.GetGenericTypeDefinition()))
             {
                 _isNullable = true;
                 _type = _type.GetGenericArguments()[0];
             }
-            else if(_nullability.Create(_propertyInfo!).ReadState is NullabilityState.Nullable)
+            else if(_nullability.Create(_propertyInfo!).ReadState == NullabilityState.Nullable)
             {
                 _isNullable = true;
             }
             _isCollection = _type.IsGenericType && typeof(ObservableCollection<>).IsAssignableFrom(_type.GetGenericTypeDefinition());
-            if (_owner is { } && !_assignedFieldCalled)
+            if (_owner != null && !_assignedFieldCalled)
             {
                 _assignedFieldCalled = true;
                 _owner.OnFieldAssigned();

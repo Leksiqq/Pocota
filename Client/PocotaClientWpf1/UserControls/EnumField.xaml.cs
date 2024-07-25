@@ -52,7 +52,7 @@ public partial class EnumField : UserControl, ICommand, IFieldOwner
     }
     public bool CanExecute(object? parameter)
     {
-        bool res = Field is { } && Field.IsReady
+        bool res = Field != null && Field.IsReady
         && (
             "Undo".Equals(parameter)
             || ("Clear".Equals(parameter) && !Field!.IsClean)
@@ -62,7 +62,7 @@ public partial class EnumField : UserControl, ICommand, IFieldOwner
     public void Execute(object? parameter)
     {
         if (
-            Field is { } && Field.IsReady
+            Field != null && Field.IsReady
             && (
                 "Undo".Equals(parameter)
                 || ("Clear".Equals(parameter) && !Field!.IsClean)
@@ -81,10 +81,10 @@ public partial class EnumField : UserControl, ICommand, IFieldOwner
     }
     public void OnFieldAssigned()
     {
-        if(Field is { })
+        if(Field != null)
         {
             ComboBox.DataContext = Field;
-            UndoButton.Visibility = Field.EntityProperty?.Entity.State is EntityState.Unchanged || Field.EntityProperty?.Entity.State is EntityState.Modified
+            UndoButton.Visibility = Field.EntityProperty?.Entity.State == EntityState.Unchanged || Field.EntityProperty?.Entity.State == EntityState.Modified
                 ? Visibility.Visible : Visibility.Collapsed;
             if (Field.IsNullable)
             {

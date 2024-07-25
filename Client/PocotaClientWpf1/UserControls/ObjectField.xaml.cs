@@ -56,20 +56,20 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     }
     public Window Window { get; private set; } = null!;
     public string ServiceKey => _serviceKey;
-    public bool EditorOpen => ObjectEditor?.Visibility is Visibility.Visible;
+    public bool EditorOpen => ObjectEditor?.Visibility == Visibility.Visible;
     public ObjectState ObjectState
     {
         get
         {
-            if (Field?.EntityProperty?.Entity.Access is Contract.AccessKind.NotSet)
+            if (Field?.EntityProperty?.Entity.Access == Contract.AccessKind.NotSet)
             {
                 return ObjectState.NotSet;
             }
-            if (Field?.EntityProperty?.Entity.Access is Contract.AccessKind.Forbidden)
+            if (Field?.EntityProperty?.Entity.Access == Contract.AccessKind.Forbidden)
             {
                 return ObjectState.Forbidden;
             }
-            if (Field?.Value is { })
+            if (Field?.Value != null)
             {
                 return ObjectState.IsNotNull;
             }
@@ -85,10 +85,10 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     public bool CanExecute(object? parameter)
     {
         return
-            Field is { } && Field.IsReady
+            Field != null && Field.IsReady
             && (
                 (
-                    Field!.Value is { } 
+                    Field!.Value != null
                     && (
                         "Edit".Equals(parameter)
                         || "EditExternal".Equals(parameter)
@@ -97,7 +97,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                 )
                 || (
                     !Field.IsReadonly 
-                    && Field.Value is null
+                    && Field.Value == null
                     && (
                         (
                             "Find".Equals(parameter) 
@@ -108,8 +108,8 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                 )
                 || (
                     !Field.IsReadonly 
-                    && Field.Value is { } 
-                    && _editWindow is null
+                    && Field.Value != null 
+                    && _editWindow == null
                     && !ObjectEditor.IsVisible
                     && "Clear".Equals(parameter)
                 )
@@ -118,14 +118,14 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     }
     public void Execute(object? parameter)
     {
-        if(Field is { } && Field.IsReady)
+        if(Field != null && Field.IsReady)
         {
             
-            if(!Field!.IsReadonly && Field.Value is { } && "Clear".Equals(parameter))
+            if(!Field!.IsReadonly && Field.Value != null && "Clear".Equals(parameter))
             {
                 Field.Value = null;
             }
-            else if (Field.Value is { } && "CloseEdit".Equals(parameter))
+            else if (Field.Value != null && "CloseEdit".Equals(parameter))
             {
                 ObjectEditor.Visibility = Visibility.Collapsed;
                 ObjectEditor.Target = null!;
@@ -137,7 +137,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                     && "Create".Equals(parameter)
                 )
                 || (
-                    Field.Value is { } 
+                    Field.Value != null
                     && (
                         "Edit".Equals(parameter)
                         || "EditExternal".Equals(parameter)
@@ -158,7 +158,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                     }
                     else
                     {
-                        if (_editWindow is null || !_editWindow.IsLoaded)
+                        if (_editWindow == null || !_editWindow.IsLoaded)
                         {
 
                             _editWindow = new ObjectWindow(_serviceKey, Window);
@@ -186,7 +186,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                         }
                         else if (Field.Value is object value)
                         {
-                            for(DependencyObject dob = this; dob is not null; dob = VisualTreeHelper.GetParent(dob))
+                            for(DependencyObject dob = this; dob != null; dob = VisualTreeHelper.GetParent(dob))
                             {
                                 if(dob is ObjectEditor oe)
                                 {
@@ -216,7 +216,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     }
     public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (Field is { } && Field.IsReady)
+        if (Field != null && Field.IsReady)
         {
             if ("CountVisibility".Equals(parameter))
             {
@@ -239,7 +239,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     }
     public void OnFieldAssigned()
     {
-        if(Field is { })
+        if(Field != null)
         {
             TextBlock.DataContext = Field;
             CountText.DataContext = Field;
@@ -261,7 +261,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     }
     private void ObjectField_Loaded(object sender, RoutedEventArgs e)
     {
-        for (DependencyObject dop = this; dop is { }; dop = VisualTreeHelper.GetParent(dop))
+        for (DependencyObject dop = this; dop != null; dop = VisualTreeHelper.GetParent(dop))
         {
             if (dop is Window window)
             {

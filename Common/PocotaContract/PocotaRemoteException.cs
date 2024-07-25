@@ -37,7 +37,7 @@ public class PocotaRemoteException(string? message) : Exception(message)
         {
             string name = string.Format($"{{0,{level * _indention}}}{{1,-{alignment + _indention}}} ", "", key.ToString() + ':');
             object? value = data[key];
-            if(value is null)
+            if(value == null)
             {
                 sb.AppendLine($"{name}null");
             }

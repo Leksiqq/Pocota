@@ -76,7 +76,7 @@ public partial class ObjectEditor : UserControl, IValueConverter
     }
     public void CalcColumnsWidth()
     {
-        if ((Window?.IsActive ?? false) && Visibility is Visibility.Visible && PropertyNameColumn.ActualWidth > s_HeaderWidthTreshold)
+        if ((Window?.IsActive ?? false) && Visibility == Visibility.Visible && PropertyNameColumn.ActualWidth > s_HeaderWidthTreshold)
         {
             ScrollViewer scrollViewer = Utilities.GetVisualDescendants(PropertiesView).OfType<ScrollViewer>().First();
             if (scrollViewer.ActualWidth - PropertyNameColumn.ActualWidth - s_ValueWidthParameter > 0)
@@ -113,7 +113,7 @@ public partial class ObjectEditor : UserControl, IValueConverter
         {
             if (e.Property == TargetProperty)
             {
-                if (e.NewValue is null)
+                if (e.NewValue == null)
                 {
                     PropertiesViewSource.Source = null;
                 }

@@ -23,7 +23,7 @@ public class ConnectorsMethodsList: IEnumerable<ConnectorMethod>
     {
         get
         {
-            if(_methods is null)
+            if(_methods == null)
             {
                 _methods = new List<ConnectorMethod>();
                 foreach (Type type in _types)

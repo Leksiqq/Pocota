@@ -12,7 +12,7 @@ public class ExceptionJsonConverter : JsonConverter<Exception>
 
     public override Exception? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TokenType is not JsonTokenType.StartObject)
+        if (reader.TokenType != JsonTokenType.StartObject)
         {
             throw new JsonException();
         }
@@ -25,11 +25,11 @@ public class ExceptionJsonConverter : JsonConverter<Exception>
 
         while (reader.Read())
         {
-            if (reader.TokenType is JsonTokenType.EndObject)
+            if (reader.TokenType == JsonTokenType.EndObject)
             {
                 break;
             }
-            if (reader.TokenType is not JsonTokenType.PropertyName)
+            if (reader.TokenType != JsonTokenType.PropertyName)
             {
                 throw new JsonException();
             }
@@ -49,9 +49,9 @@ public class ExceptionJsonConverter : JsonConverter<Exception>
                 JsonElement jsonElement = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
                 PropertyInfo? propertyInfo = resultType.GetProperty(propertyName);
                 bool isConverted = false;
-                if(propertyInfo is { })
+                if(propertyInfo != null)
                 {
-                    if(propertyInfo.PropertyType.GetConstructor([]) is { })
+                    if(propertyInfo.PropertyType.GetConstructor([]) != null)
                     {
                         exception.Data.Add(propertyName, JsonSerializer.Deserialize(jsonElement, propertyInfo.PropertyType, options));
                         isConverted = true;
@@ -105,7 +105,7 @@ public class ExceptionJsonConverter : JsonConverter<Exception>
             )
             {
                 object? valueObj = pi.GetValue(value);
-                if (valueObj is { })
+                if (valueObj != null)
                 {
                     writer.WritePropertyName(pi.Name);
                     try

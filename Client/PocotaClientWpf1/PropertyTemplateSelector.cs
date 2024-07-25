@@ -23,12 +23,12 @@ public class PropertyTemplateSelector: DataTemplateSelector
         DataTemplate? result = null;
         if (item is Field field)
         {
-            if(field.EntityProperty?.Access is Contract.AccessKind.NotSet || field.EntityProperty?.Access is Contract.AccessKind.Forbidden)
+            if(field.EntityProperty?.Access == Contract.AccessKind.NotSet || field.EntityProperty?.Access == Contract.AccessKind.Forbidden)
             {
                 result = ProvideValue(ClassDataTemplateKey);
                 
             }
-            //else if (property is ListProperty)
+            //else if (property == ListProperty)
             //{
             //}
             else if (field.Type.IsClass && field.Type != typeof(string))
@@ -64,7 +64,6 @@ public class PropertyTemplateSelector: DataTemplateSelector
         {
             ParameterizedResourceExtension pre = new(templateKey);
             result = pre.ProvideValue(ServiceProvider) as DataTemplate;
-            ServiceProvider = null;
         }
         return result;
     }

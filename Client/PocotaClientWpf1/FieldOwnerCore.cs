@@ -29,7 +29,7 @@ public class FieldOwnerCore(IFieldOwner owner, DependencyProperty field, Depende
         {
             if (CanProcessProperty(WaitingFor.PropertyName))
             {
-                if (_expected is WaitingFor.None)
+                if (_expected == WaitingFor.None)
                 {
                     owner.Field = new Field { Target = owner.Target, PropertyName = owner.PropertyName, Owner = owner };
                 }
@@ -39,7 +39,7 @@ public class FieldOwnerCore(IFieldOwner owner, DependencyProperty field, Depende
         {
             if (CanProcessProperty(WaitingFor.Target))
             {
-                if (_expected is WaitingFor.None)
+                if (_expected == WaitingFor.None)
                 {
                     owner.Field = new Field { Target = owner.Target, PropertyName = owner.PropertyName, Owner = owner };
                 }
@@ -48,19 +48,19 @@ public class FieldOwnerCore(IFieldOwner owner, DependencyProperty field, Depende
     }
     private bool CanProcessProperty(WaitingFor got)
     {
-        if (_expected is not WaitingFor.Any && _expected != got)
+        if (_expected != WaitingFor.Any && _expected != got)
         {
             return false;
         }
-        if (got is WaitingFor.Field)
+        if (got == WaitingFor.Field)
         {
             _expected = WaitingFor.None;
         }
-        else if (got is WaitingFor.PropertyName)
+        else if (got == WaitingFor.PropertyName)
         {
             _expected = WaitingFor.Target;
         }
-        else if (got is WaitingFor.Target)
+        else if (got == WaitingFor.Target)
         {
             _expected = WaitingFor.PropertyName;
         }

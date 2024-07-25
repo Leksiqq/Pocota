@@ -17,9 +17,9 @@ public abstract class PocotaEntity
         {
             if (
                 (
-                    value is AccessKind.Forbidden
-                    || value is AccessKind.Readonly
-                    || value is AccessKind.Full
+                    value == AccessKind.Forbidden
+                    || value == AccessKind.Readonly
+                    || value == AccessKind.Full
                 )
                 && (
                     value <= _entityAccess 
@@ -69,7 +69,7 @@ public abstract class PocotaEntity
         get => _entity;
         set
         {
-            if (_entity is null && value is { })
+            if (_entity == null && value != null)
             {
                 _entity = value;
                 InitializingProperties = true;

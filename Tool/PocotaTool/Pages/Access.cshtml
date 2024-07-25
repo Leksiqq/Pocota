@@ -34,12 +34,12 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
 @foreach (PropertyModel prop in Model.Properties.Where(p => !p.IsCollection))
 {
     <text>                        case "@prop.Name":
-                            if(value@{}.@prop.Name is {})
+                            if(value@{}.@prop.Name != null)
                             {
                                 @nameof(IAccessCalculator) accessCalculator = _services.GetRequiredKeyedService@{
                                      }@Html.Raw($"<{nameof(IAccessCalculator)}>")@{}(typeof(@prop.TypeName));
                                 AccessKind access = accessCalculator.Calculate(value@{}.@prop.Name);
-                                if(pocotaEntity.Access is AccessKind.Forbidden && access is AccessKind.Anonym)
+                                if(pocotaEntity.Access == AccessKind.Forbidden && access == AccessKind.Anonym)
                                 {
                                     pocotaEntity.Access = AccessKind.Anonym;
                                 }
@@ -61,14 +61,14 @@ public class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {stri
 @foreach (PropertyModel prop in Model.Properties.Where(p => p.IsCollection))
 {
     <text>                        case "@prop.Name":
-                            if(value@{}.@prop.Name is {} && value@{}.@prop.Name@{}.Count > 0)
+                            if(value@{}.@prop.Name != null && value@{}.@prop.Name@{}.Count > 0)
                             {
                                 @nameof(IAccessCalculator) accessCalculator = _services.GetRequiredKeyedService@{
                                      }@Html.Raw($"<{nameof(IAccessCalculator)}>")@{}(typeof(@prop.ItemTypeName));
                                 foreach(@prop.ItemTypeName item in value@{}.@prop.Name)
                                 {
                                     AccessKind access = accessCalculator.Calculate(item);
-                                    if(pocotaEntity.Access is AccessKind.Forbidden && access is AccessKind.Anonym)
+                                    if(pocotaEntity.Access == AccessKind.Forbidden && access == AccessKind.Anonym)
                                     {
                                         pocotaEntity.Access = AccessKind.Anonym;
                                     }

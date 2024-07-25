@@ -68,7 +68,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     {
         get
         {
-            if (_objectEditor is null)
+            if (_objectEditor == null)
             {
                 if (GetAncestors(this).OfType<ObjectEditor>().FirstOrDefault() is ObjectEditor oe)
                 {
@@ -87,16 +87,16 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     }
     public object? Convert(object? value, Type targetType, object parameter, CultureInfo culture)
     {
-        if(Field is { } && Field.IsReady)
+        if(Field != null && Field.IsReady)
         {
             if ("Foreground".Equals(parameter))
             {
-                return _badFormat is { } ? Brushes.Red : Brushes.Black;
+                return _badFormat != null ? Brushes.Red : Brushes.Black;
             }
             if ("Text".Equals(parameter))
             {
                 _value = value;
-                if (_badFormat is { })
+                if (_badFormat != null)
                 {
                     return _badFormat;
                 }
@@ -107,7 +107,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     }
     public object? ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (Field is { } && Field.IsReady)
+        if (Field != null && Field.IsReady)
         {
             if ("Text".Equals(parameter))
             {
@@ -147,7 +147,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     }
     public bool CanExecute(object? parameter)
     {
-        bool res = Field is { } && Field.IsReady
+        bool res = Field != null && Field.IsReady
         && (
             "Undo".Equals(parameter)
             || "Increase".Equals(parameter)
@@ -159,7 +159,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     public void Execute(object? parameter)
     {
         if(
-            Field is { } && Field.IsReady
+            Field != null && Field.IsReady
             && (
                 "Undo".Equals(parameter)
                 || "Increase".Equals(parameter)
@@ -186,7 +186,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
                         _initialHeight = TextBox.ActualHeight;
                     }
                     TextBox.Height = TextBox.ActualHeight + TextBox.FontSize * ChangeHeight;
-                    if(TextBox.Height >= Buttons.ActualWidth && Buttons.Orientation is not Orientation.Vertical)
+                    if(TextBox.Height >= Buttons.ActualWidth && Buttons.Orientation != Orientation.Vertical)
                     {
                         Buttons.Orientation = Orientation.Vertical;
                     }
@@ -203,7 +203,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
                         {
                             TextBox.Height = _initialHeight;
                         }
-                        if (TextBox.Height < Buttons.ActualHeight && Buttons.Orientation is not Orientation.Horizontal)
+                        if (TextBox.Height < Buttons.ActualHeight && Buttons.Orientation != Orientation.Horizontal)
                         {
                             Buttons.Orientation = Orientation.Horizontal;
                         }
@@ -214,7 +214,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     }
     public void OnFieldAssigned()
     {
-        if(Field is { })
+        if(Field != null)
         {
             Field.PropertyChanged += Field_PropertyChanged;
             TextBox.DataContext = Field;
@@ -239,7 +239,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     }
     private static string? ToString(object? value, Type type)
     {
-        if (value is { })
+        if (value != null)
         {
             return value.ToString();
         }
@@ -302,10 +302,10 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     {
         if(sender is TextBox)
         {
-            if (e.Key is Key.Insert)
+            if (e.Key == Key.Insert)
             {
                 IsInsertMode = !IsInsertMode;
-                if (Editor is { })
+                if (Editor != null)
                 {
                     Editor.CurrentInput = this;
                 }
@@ -314,14 +314,14 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
     }
     private void TextBox_GotFocus(object sender, RoutedEventArgs e)
     {
-        if(sender is TextBox && Editor is { })
+        if(sender is TextBox && Editor != null)
         {
             Editor.CurrentInput = this;
         }
     }
     private void TextBox_LostFocus(object sender, RoutedEventArgs e)
     {
-        if (sender is TextBox && Editor is { })
+        if (sender is TextBox && Editor != null)
         {
             Editor.CurrentInput = null;
         }
@@ -329,7 +329,7 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
 
     private static IEnumerable<DependencyObject> GetAncestors(DependencyObject obj)
     {
-        for (var cur = obj; cur is not null; cur = VisualTreeHelper.GetParent(cur))
+        for (var cur = obj; cur != null; cur = VisualTreeHelper.GetParent(cur))
         {
             yield return cur;
         }

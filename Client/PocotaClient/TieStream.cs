@@ -34,7 +34,7 @@ public class TieStream : Stream
 
     public bool FindException()
     {
-        if(_exceptionBoundary is { })
+        if(_exceptionBoundary != null)
         {
             _savedStream.Position = 0;
             _exceptionContent = new StreamReader(_savedStream).ReadToEnd();

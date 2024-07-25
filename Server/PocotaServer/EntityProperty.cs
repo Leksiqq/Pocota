@@ -13,8 +13,8 @@ public class EntityProperty
         set
         {
             if(
-                value is not AccessKind.NotSet 
-                && (value is not AccessKind.Key || _entity.InitializingProperties)
+                value != AccessKind.NotSet 
+                && (value != AccessKind.Key || _entity.InitializingProperties)
                 && value <= _propertyAccess
             )
             {

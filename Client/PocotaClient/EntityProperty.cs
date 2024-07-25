@@ -34,7 +34,7 @@ public class EntityProperty(IPocotaEntity entity, string name, Type type): INoti
         {
             if (_access != value)
             {
-                if (value is not AccessKind.Anonym)
+                if (value != AccessKind.Anonym)
                 {
                     _access = value;
                 }
@@ -62,18 +62,18 @@ public class EntityProperty(IPocotaEntity entity, string name, Type type): INoti
     {
         get
         {
-            if (Entity.State is EntityState.Detached || Entity.State is EntityState.Created)
+            if (Entity.State == EntityState.Detached || Entity.State is EntityState.Created)
             {
                 return IsSetReadOnly;
             }
             if (
-                Entity.State is EntityState.Deleted
-                || Entity.Access is AccessKind.Readonly
-                || Entity.Access is AccessKind.Anonym
-                || Access is AccessKind.NotSet
-                || Access is AccessKind.Forbidden
-                || Access is AccessKind.Full
-                || Access is AccessKind.Readonly
+                Entity.State == EntityState.Deleted
+                || Entity.Access == AccessKind.Readonly
+                || Entity.Access == AccessKind.Anonym
+                || Access == AccessKind.NotSet
+                || Access == AccessKind.Forbidden
+                || Access == AccessKind.Full
+                || Access == AccessKind.Readonly
             )
             {
                 return true;

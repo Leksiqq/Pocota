@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.Client.SauceJsonConverter           //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-21T16:41:59.                                 //
+// at 2024-07-25T16:23:24.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -48,7 +48,7 @@ internal class SauceJsonConverter: JsonConverter<Sauce>
     private void WriteKeyOnly(Utf8JsonWriter writer, Sauce value, JsonSerializerOptions options)
     {
         ISaucePocotaEntity pocotaEntity = (ISaucePocotaEntity)((IEntityOwner)value).Entity;
-        if (pocotaEntity is null)
+        if (pocotaEntity == null)
         {
             throw new InvalidOperationException();
         }

@@ -18,7 +18,7 @@ public class PocotaContext
         get => _pocotaConfig;
         set
         {
-            if(_pocotaConfig != value && value is { })
+            if(_pocotaConfig != value && value != null)
             {
                 _pocotaConfig = value;
                 _keyProperties.Clear();

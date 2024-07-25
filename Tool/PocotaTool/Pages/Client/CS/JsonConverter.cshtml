@@ -39,7 +39,7 @@ internal class @Model.ClassName@(Model.Inheritances.Count > 0 ? Html.Raw($": {st
     private void WriteKeyOnly(Utf8JsonWriter writer, @Model.EntityTypeName value, JsonSerializerOptions options)
     {
         I@{}@Model.EntityTypeName@{}PocotaEntity pocotaEntity = (I@{}@Model.EntityTypeName@{}PocotaEntity)((IEntityOwner)value).Entity;
-        if (pocotaEntity is null)
+        if (pocotaEntity == null)
         {
             throw new InvalidOperationException();
         }

@@ -40,7 +40,7 @@ public static class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string
         else
         {
             ServiceDescriptor sd = services.Where(s => AccessCalculatorServicesEqualityComparer.Instance.Equals(probe, s)).First();
-            if (sd.Lifetime is not ServiceLifetime.Scoped)
+            if (sd.Lifetime != ServiceLifetime.Scoped)
             {
                 throw new InvalidOperationException($"{nameof(@nameof(IAccessCalculator))} service expected to be scoped, got: {sd}.");
             }

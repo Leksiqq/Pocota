@@ -163,7 +163,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 Name = pi.Name,
                 TypeName = Util.BuildTypeName(pi.PropertyType),
                 IsCollection = pi.PropertyType.IsGenericType && pi.PropertyType.GetGenericTypeDefinition() == typeof(ICollection<>),
-                IsNullable = nullabilityInfoContext.Create(pi).ReadState is NullabilityState.Nullable,
+                IsNullable = nullabilityInfoContext.Create(pi).ReadState == NullabilityState.Nullable,
             };
             if (pm.IsCollection)
             {
@@ -185,7 +185,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         NullabilityInfoContext nullabilityInfoContext = new();
         model.AddInheritance(typeof(INotifyPropertyChanged));
         model.AddUsing(typeof(NotifyCollectionChangedEventArgs));
-        if(options.EntityType is { })
+        if(options.EntityType != null)
         {
             if (options.EntityType.BaseType != typeof(object))
             {
@@ -207,7 +207,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                     Name = pi.Name,
                     TypeName = BuildTypeName(pi.PropertyType, options.Entities, options.Envelopes, model),
                     IsCollection = pi.PropertyType.IsGenericType && pi.PropertyType.GetGenericTypeDefinition() == typeof(ICollection<>),
-                    IsNullable = nullabilityInfoContext.Create(pi).ReadState is NullabilityState.Nullable,
+                    IsNullable = nullabilityInfoContext.Create(pi).ReadState == NullabilityState.Nullable,
                 };
                 if (pm.IsCollection)
                 {
@@ -220,7 +220,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 model.Properties.Add(pm);
             }
         }
-        else if(options.MethodInfo is { })
+        else if(options.MethodInfo != null)
         {
             foreach (ParameterInfo pi in options.MethodInfo.GetParameters())
             {
@@ -229,7 +229,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 {
                     Name = $"{pi.Name![..1].ToUpper()}{pi.Name[1..]}",
                     TypeName = BuildTypeName(pi.ParameterType, options.Entities, options.Envelopes, model),
-                    IsNullable = nullabilityInfoContext.Create(pi).ReadState is NullabilityState.Nullable,
+                    IsNullable = nullabilityInfoContext.Create(pi).ReadState == NullabilityState.Nullable,
                 };
                 model.Properties.Add(pm);
             }
@@ -262,7 +262,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
             {
                 model.AddUsing(typeof(Task));
                 Type itemType = mi.ReturnType.GetGenericArguments()[0];
-                if (options.ContractType.GetCustomAttributes<EntityAttribute>().Where(a => a.EntityType.Name == itemType.Name).FirstOrDefault() is null)
+                if (options.ContractType.GetCustomAttributes<EntityAttribute>().Where(a => a.EntityType.Name == itemType.Name).FirstOrDefault() == null)
                 {
                     model.AddUsing(itemType);
                 }
@@ -294,7 +294,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
             }
             foreach (ParameterInfo pi in mi.GetParameters())
             {
-                if (options.ContractType.GetCustomAttributes<EntityAttribute>().Where(a => a.EntityType.Name == pi.ParameterType.Name).FirstOrDefault() is null)
+                if (options.ContractType.GetCustomAttributes<EntityAttribute>().Where(a => a.EntityType.Name == pi.ParameterType.Name).FirstOrDefault() == null)
                 {
                     model.AddUsing(pi.ParameterType);
                 }
@@ -306,9 +306,9 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
                 {
                     Name = pi.Name!,
                     TypeName = Util.BuildTypeName(pi.ParameterType),
-                    IsNullable = nullabilityInfoContext.Create(pi).ReadState is NullabilityState.Nullable,
+                    IsNullable = nullabilityInfoContext.Create(pi).ReadState == NullabilityState.Nullable,
                 };
-                if(mm.ConvertingParameters is { })
+                if(mm.ConvertingParameters != null)
                 {
                     pm.Name = $"{mm.Parameters.Last().Name}.{pm.Name[..1].ToUpper()}{pm.Name[1..]}";
                     mm.ConvertingParameters.Add(pm);
@@ -357,7 +357,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         model.AddInheritance(typeof(JsonConverter<>).MakeGenericType([options.EntityType!]));
         foreach (PropertyInfo pi in options.EntityType!.GetProperties())
         {
-            if (pi.GetCustomAttribute<JsonIgnoreAttribute>() is null)
+            if (pi.GetCustomAttribute<JsonIgnoreAttribute>() == null)
             {
                 model.AddUsing(pi.PropertyType);
                 PropertyModel pm = new()
@@ -381,7 +381,7 @@ internal class CSharpSourceGenerator: IClientSourceGenerator
         model.AddUsing(typeof(IServiceProvider));
         foreach (PropertyInfo pi in options.EntityType!.GetProperties())
         {
-            if (pi.GetCustomAttribute<JsonIgnoreAttribute>() is null)
+            if (pi.GetCustomAttribute<JsonIgnoreAttribute>() == null)
             {
                 PropertyModel pm = new()
                 {

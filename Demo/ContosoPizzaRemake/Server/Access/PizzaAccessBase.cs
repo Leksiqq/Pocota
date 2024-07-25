@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.PizzaAccessBase                     //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-21T16:41:59.                                 //
+// at 2024-07-25T16:23:24.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -39,11 +39,11 @@ public class PizzaAccessBase: IAccessCalculator
                     switch (entry.Metadata.Name)
                     {
                         case "Sauce":
-                            if(value.Sauce is {})
+                            if(value.Sauce != null)
                             {
                                 IAccessCalculator accessCalculator = _services.GetRequiredKeyedService<IAccessCalculator>(typeof(Sauce));
                                 AccessKind access = accessCalculator.Calculate(value.Sauce);
-                                if(pocotaEntity.Access is AccessKind.Forbidden && access is AccessKind.Anonym)
+                                if(pocotaEntity.Access == AccessKind.Forbidden && access == AccessKind.Anonym)
                                 {
                                     pocotaEntity.Access = AccessKind.Anonym;
                                 }
@@ -61,13 +61,13 @@ public class PizzaAccessBase: IAccessCalculator
                     switch (entry.Metadata.Name)
                     {
                         case "Toppings":
-                            if(value.Toppings is {} && value.Toppings.Count > 0)
+                            if(value.Toppings != null && value.Toppings.Count > 0)
                             {
                                 IAccessCalculator accessCalculator = _services.GetRequiredKeyedService<IAccessCalculator>(typeof(Topping));
                                 foreach(Topping item in value.Toppings)
                                 {
                                     AccessKind access = accessCalculator.Calculate(item);
-                                    if(pocotaEntity.Access is AccessKind.Forbidden && access is AccessKind.Anonym)
+                                    if(pocotaEntity.Access == AccessKind.Forbidden && access == AccessKind.Anonym)
                                     {
                                         pocotaEntity.Access = AccessKind.Anonym;
                                     }

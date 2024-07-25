@@ -24,7 +24,7 @@ public static class PocotaWpfAppExtension
             )
         );
         #endregion
-        if(mainWindowType is { })
+        if (mainWindowType != null)
         {
             services.AddKeyedTransient(
                 s_mainWindowServiceKey, 

@@ -35,7 +35,7 @@ public abstract class PocotaEntity: IPocotaEntity, INotifyPropertyChanged
         {
             if (_access != value)
             {
-                if (value is AccessKind.Full || value is AccessKind.Readonly || value is AccessKind.Anonym)
+                if (value == AccessKind.Full || value == AccessKind.Readonly || value == AccessKind.Anonym)
                 {
                     _access = value;
                 }

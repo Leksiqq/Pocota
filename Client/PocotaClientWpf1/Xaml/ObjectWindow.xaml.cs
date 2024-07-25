@@ -57,7 +57,7 @@ public partial class ObjectWindow : Window, IServiceRelated, INotifyPropertyChan
     }
     private string? ConvertName(object? value, object? parameter = null)
     {
-        return value is { } ? (string?)_namesConverter.Convert(value, typeof(string), parameter, CultureInfo.CurrentCulture) : string.Empty;
+        return value != null ? (string?)_namesConverter.Convert(value, typeof(string), parameter, CultureInfo.CurrentCulture) : string.Empty;
     }
     private void ObjectEditor_CurrentInputChanged(object sender, EventArgs e)
     {

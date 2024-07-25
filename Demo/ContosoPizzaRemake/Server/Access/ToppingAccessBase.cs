@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Models.ToppingAccessBase                   //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-06-21T16:41:59.                                 //
+// at 2024-07-25T16:23:24.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -50,13 +50,13 @@ public class ToppingAccessBase: IAccessCalculator
                     switch (entry.Metadata.Name)
                     {
                         case "Pizzas":
-                            if(value.Pizzas is {} && value.Pizzas.Count > 0)
+                            if(value.Pizzas != null && value.Pizzas.Count > 0)
                             {
                                 IAccessCalculator accessCalculator = _services.GetRequiredKeyedService<IAccessCalculator>(typeof(Pizza));
                                 foreach(Pizza item in value.Pizzas)
                                 {
                                     AccessKind access = accessCalculator.Calculate(item);
-                                    if(pocotaEntity.Access is AccessKind.Forbidden && access is AccessKind.Anonym)
+                                    if(pocotaEntity.Access == AccessKind.Forbidden && access == AccessKind.Anonym)
                                     {
                                         pocotaEntity.Access = AccessKind.Anonym;
                                     }
