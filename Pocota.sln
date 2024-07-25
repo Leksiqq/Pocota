@@ -54,6 +54,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LifetimeVisualizer", "..\Li
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EchoConsole", "..\EchoConsole\EchoConsole.csproj", "{32C9AC0F-294B-487B-BFE0-DDB5B3EC9C14}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "..\ConsoleApp1\ConsoleApp1.csproj", "{9175C631-E2A7-4BEA-843C-34D00DDB504C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -128,6 +130,10 @@ Global
 		{32C9AC0F-294B-487B-BFE0-DDB5B3EC9C14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32C9AC0F-294B-487B-BFE0-DDB5B3EC9C14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32C9AC0F-294B-487B-BFE0-DDB5B3EC9C14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9175C631-E2A7-4BEA-843C-34D00DDB504C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9175C631-E2A7-4BEA-843C-34D00DDB504C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9175C631-E2A7-4BEA-843C-34D00DDB504C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9175C631-E2A7-4BEA-843C-34D00DDB504C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
