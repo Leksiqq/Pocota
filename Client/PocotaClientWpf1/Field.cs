@@ -88,6 +88,7 @@ public class Field
             if(_propertyInfo != null)
             {
                 _propertyInfo?.SetValue(Target, value);
+                _owner?.OnValueChanged();
             }
         }
     }

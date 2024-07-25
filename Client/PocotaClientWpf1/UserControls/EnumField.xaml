@@ -15,6 +15,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Xaml/Dictionaries/Dictionary1.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <l:ConverterProxy Converter="{Binding  ElementName=ef}" x:Key="Converter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
@@ -37,7 +38,7 @@
             x:Name="ComboBox"
             IsReadOnly="{Binding IsReadonly}"
             ItemsSource="{Binding Items, ElementName=ef}"
-            SelectedItem="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            SelectedItem="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource Converter}, ConverterParameter=Value}"
             >
             <ComboBox.Resources>
                 <l:BindingProxy x:Key="TypeBindingProxy" Value="{Binding Type}"/>

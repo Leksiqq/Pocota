@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Windows;
 namespace Net.Leksi.Pocota.Client;
-public partial class MethodWindow : Window
+public partial class MethodWindow : Window, IServiceKeyRelated
 {
     private const string s_target = "target";
     public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(nameof(Target), typeof(object), typeof(MethodWindow));

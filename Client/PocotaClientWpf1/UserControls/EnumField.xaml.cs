@@ -1,8 +1,10 @@
-﻿using System.Windows;
+﻿using System.Globalization;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 namespace Net.Leksi.Pocota.Client.UserControls;
-public partial class EnumField : UserControl, ICommand, IFieldOwner
+public partial class EnumField : UserControl, ICommand, IFieldOwner, IValueConverter
 {
     public event EventHandler? CanExecuteChanged
     {
@@ -28,6 +30,7 @@ public partial class EnumField : UserControl, ICommand, IFieldOwner
        typeof(EnumField)
     );
     private readonly FieldOwnerCore _fieldOwnerCore;
+    private bool _ignoreValueChanged = false;
     FieldOwnerCore IFieldOwner.FieldOwnerCore => _fieldOwnerCore;
     public Field? Field
     {
@@ -102,6 +105,29 @@ public partial class EnumField : UserControl, ICommand, IFieldOwner
                 Items.Add(true);
                 Items.Add(false);
             }
+        }
+    }
+    public object? Convert(object? value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if ("Value".Equals(parameter))
+        {
+            _ignoreValueChanged = false;
+        }
+        return value;
+    }
+    public object? ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if("Value".Equals(parameter))
+        {
+            _ignoreValueChanged = true;
+        }
+        return value;
+    }
+    public void OnValueChanged()
+    {
+        if(!_ignoreValueChanged)
+        {
+            ComboBox.SelectedItem = Field?.Value;
         }
     }
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)

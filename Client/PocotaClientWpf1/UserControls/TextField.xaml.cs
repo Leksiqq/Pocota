@@ -226,16 +226,14 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
             TextBox.VerticalScrollBarVisibility = Field.Type == typeof(string) ? ScrollBarVisibility.Auto : ScrollBarVisibility.Hidden;
         }
     }
-
-    private void Field_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        TextBox.Text = (string?)Convert(Field!.Value, typeof(string), "Text", CultureInfo.CurrentCulture);
-    }
-
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
         ((IFieldOwner)this).FieldOwnerCore!.OnPropertyChanged(e);
         base.OnPropertyChanged(e);
+    }
+    private void Field_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        TextBox.Text = (string?)Convert(Field!.Value, typeof(string), "Text", CultureInfo.CurrentCulture);
     }
     private static string? ToString(object? value, Type type)
     {
@@ -326,7 +324,6 @@ public partial class TextField : UserControl, IValueConverter, IFieldOwner, ICom
             Editor.CurrentInput = null;
         }
     }
-
     private static IEnumerable<DependencyObject> GetAncestors(DependencyObject obj)
     {
         for (var cur = obj; cur != null; cur = VisualTreeHelper.GetParent(cur))

@@ -52,7 +52,6 @@ public static class PocotaWpfAppExtension
                 Application app = createApplication.Invoke(s);
                 app.Resources[Constants.ServiceProvider] = s;
                 app.Resources[Constants.Localizer] = s.GetRequiredService<Localizer>();
-                app.Resources["LocalizeConverter"] = s.GetRequiredService<LocalizeConverter>();
                 app.Resources[Constants.NamesConverter] = s.GetRequiredService<INamesConverter>();
                 JsonSerializerOptions commonJSO = new()
                 {
@@ -68,19 +67,23 @@ public static class PocotaWpfAppExtension
                 return app;
             }
         );
-        services.AddTransient<LocalizeConverter>();
         services.AddTransient<Localizer>();
         services.AddTransient<MethodWindow>();
         services.AddTransient<ObjectWindow>();
         services.AddTransient<WindowsWindow>();
 
         ConnectorsMethodsList methods = new();
+        List<ServiceDescriptor> pocotaContextDescriptors = [];
         foreach(ServiceDescriptor sd in services)
         {
             if (typeof(Connector).IsAssignableFrom(sd.ServiceType))
             {
                 methods.AddConnectorType(sd.ServiceType);
             }
+        }
+        foreach(ServiceDescriptor sd in pocotaContextDescriptors)
+        {
+            services.Add(sd);
         }
         services.AddSingleton(s => {
             methods.Services = s;

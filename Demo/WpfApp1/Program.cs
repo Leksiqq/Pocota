@@ -59,13 +59,13 @@ static class Program
         host.RunPocotaWpfApp(app =>
         {
             app.ShutdownMode = System.Windows.ShutdownMode.OnMainWindowClose;
-            if (app.TryGetLifetimeObserver(out LifetimeObserver? lto))
-            {
-                LifetimeVisualizer.Start(lto!);
-                Net.Leksi.WpfMarkup.NotifyInstanceCreated.InstanceCreated += (s, e) => {
-                    lto!.TraceObject(s!);
-                };
-            }
+            //if (app.TryGetLifetimeObserver(out LifetimeObserver? lto))
+            //{
+            //    LifetimeVisualizer.Start(lto!);
+            //    Net.Leksi.WpfMarkup.NotifyInstanceCreated.InstanceCreated += (s, e) => {
+            //        lto!.TraceObject(s!);
+            //    };
+            //}
         });
     }
 }

@@ -7,7 +7,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 namespace Net.Leksi.Pocota.Client.UserControls;
-public partial class ObjectField : UserControl, ICommand, IValueConverter, IServiceRelated, IFieldOwner, INotifyPropertyChanged
+public partial class ObjectField : UserControl, ICommand, IValueConverter, IServiceKeyRelated, IFieldOwner, INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler? CanExecuteChanged
@@ -161,7 +161,9 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                         if (_editWindow == null || !_editWindow.IsLoaded)
                         {
 
-                            _editWindow = new ObjectWindow(_serviceKey, Window);
+                            _editWindow = Application.Current.GetServiceProvider().GetRequiredService<ObjectWindow>();
+                            Application.Current.AttachWindow(_editWindow, Window);
+                            _editWindow.Init(_serviceKey);
                             WeakEventManager<Window, EventArgs>.AddHandler(_editWindow, "Closed", ExternalEditWindow_Closed);
                             _editWindow.Target = Field.Value;
                             _editWindow.PropertyName = Field.PropertyName;
@@ -203,17 +205,6 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             }
         }
     }
-    private void ExternalEditWindow_Closed(object? sender, EventArgs e)
-    {
-        if(sender is Window window)
-        {
-            if(_editWindow == window)
-            {
-                _editWindow = null;
-            }
-            WeakEventManager<Window, EventArgs>.RemoveHandler(window, "Closed", ExternalEditWindow_Closed);
-        }
-    }
     public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (Field != null && Field.IsReady)
@@ -248,12 +239,21 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             PropertyChanged?.Invoke(this, _ObjectStateChangedEventArgs);
         }
     }
-
+    private void ExternalEditWindow_Closed(object? sender, EventArgs e)
+    {
+        if (sender is Window window)
+        {
+            if (_editWindow == window)
+            {
+                _editWindow = null;
+            }
+            WeakEventManager<Window, EventArgs>.RemoveHandler(window, "Closed", ExternalEditWindow_Closed);
+        }
+    }
     private void Field_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         PropertyChanged?.Invoke(this, _ObjectStateChangedEventArgs);
     }
-
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
         ((IFieldOwner)this).FieldOwnerCore!.OnPropertyChanged(e);
@@ -265,11 +265,11 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
         {
             if (dop is Window window)
             {
-                //Window = window;
-                //if (window is IServiceRelated sr)
-                //{
-                //    _serviceKey = sr.ServiceKey;
-                //}
+                Window = window;
+                if (window is IServiceKeyRelated sr)
+                {
+                    _serviceKey = sr.ServiceKey!;
+                }
                 break;
             }
         }

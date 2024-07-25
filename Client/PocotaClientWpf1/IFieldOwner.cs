@@ -7,4 +7,5 @@ public interface IFieldOwner
     string? PropertyName { get; set; }
     FieldOwnerCore? FieldOwnerCore { get; }
     void OnFieldAssigned();
+    void OnValueChanged() { }
 }
