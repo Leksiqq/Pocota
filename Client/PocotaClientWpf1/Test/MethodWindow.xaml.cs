@@ -44,7 +44,7 @@ public partial class MethodWindow : Window, IServiceKeyRelated
     {
         _namesConverter = Application.Current.GetNamesConverter();
         Closed += Window1_Closed;
-        Activated += MethodWindow_Activated;
+        //Activated += MethodWindow_Activated;
         InitializeComponent();
     }
 

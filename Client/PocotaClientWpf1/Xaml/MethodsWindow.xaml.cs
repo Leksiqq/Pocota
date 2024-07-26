@@ -46,7 +46,7 @@ public partial class MethodsWindow : Window, ICommand
         if (parameter is ConnectorMethod cm)
         {
             MethodWindow methodWindow = Application.Current.GetRequiredService<MethodWindow>();
-            Application.Current.AttachWindow(methodWindow, this);
+            //Application.Current.AttachWindow(methodWindow, this);
             methodWindow.Init(cm);
             methodWindow.Show();
         }

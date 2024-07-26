@@ -1,14 +1,11 @@
 ﻿using ContosoPizza.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Nel.Leksi.Util;
 using Net.Leksi.Pocota.Client;
 using Net.Leksi.Pocota.Client.UserControls;
 using Net.Leksi.Util;
 using Net.Leksi.WpfMarkup;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace WpfApp1;
 

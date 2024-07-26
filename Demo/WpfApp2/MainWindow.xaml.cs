@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
 
 namespace WpfApp2
 {
@@ -14,7 +15,7 @@ namespace WpfApp2
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("here");
+            (Application.Current.Resources["ServiceProvider"] as IServiceProvider)!.GetRequiredService<Window1>().Show();
         }
     }
 }
