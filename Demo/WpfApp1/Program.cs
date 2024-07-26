@@ -1,15 +1,20 @@
 ﻿using ContosoPizza.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Nel.Leksi.Util;
 using Net.Leksi.Pocota.Client;
 using Net.Leksi.Pocota.Client.UserControls;
 using Net.Leksi.Util;
 using Net.Leksi.WpfMarkup;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace WpfApp1;
 
 static class Program
 {
+    private static Timer? s_timer;
     [STAThread]
     public static void Main(string[] args)
     {
@@ -53,19 +58,26 @@ static class Program
             lto.Trace<StyleCombiner>(true);
             lto.Trace<Unsort>(true);
             lto.Trace<XamlServiceProviderCatcher>(true);
-        });
+        }, true);
         using IHost host = builder.Build();
 
         host.RunPocotaWpfApp(app =>
         {
-            app.ShutdownMode = System.Windows.ShutdownMode.OnMainWindowClose;
-            //if (app.TryGetLifetimeObserver(out LifetimeObserver? lto))
-            //{
-            //    LifetimeVisualizer.Start(lto!);
-            //    Net.Leksi.WpfMarkup.NotifyInstanceCreated.InstanceCreated += (s, e) => {
-            //        lto!.TraceObject(s!);
-            //    };
-            //}
+            app.ShutdownMode = ShutdownMode.OnMainWindowClose;
+            if (app.Resources["LifetimeObserver"] is LifetimeObserver lto)
+            {
+                LifetimeVisualizer.Start(lto!);
+                Net.Leksi.WpfMarkup.NotifyInstanceCreated.InstanceCreated += (s, e) =>
+                {
+                    lto!.TraceObject(s!);
+                };
+                Net.Leksi.Pocota.Client.NotifyInstanceCreated.InstanceCreated += (s, e) =>
+                {
+                    lto!.TraceObject(s!);
+                };
+            }
+
+            //WpfSpy.Instance.Start(RandomMethodWindowShower.Instance);
         });
     }
 }

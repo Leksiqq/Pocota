@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Net.Leksi.Util;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -128,11 +127,6 @@ public static class PocotaWpfAppExtension
             services.Remove(sd);
         }
         return services;
-    }
-    public static bool TryGetLifetimeObserver(this Application app, out LifetimeObserver? lifetimeObserver)
-    {
-        lifetimeObserver = GetServiceProvider(app).GetService<LifetimeObserver>();
-        return lifetimeObserver != null;
     }
     public static void RunPocotaWpfApp(this IHost host, Action<Application>? config = null)
     {

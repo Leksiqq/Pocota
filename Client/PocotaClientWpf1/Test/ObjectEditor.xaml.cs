@@ -1,5 +1,4 @@
-﻿using Net.Leksi.Util;
-using Net.Leksi.WpfMarkup;
+﻿using Net.Leksi.WpfMarkup;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -65,10 +64,7 @@ public partial class ObjectEditor : UserControl, IValueConverter
         _localizer = Application.Current.GetLocalizer();
         PropertiesViewSource = new CollectionViewSource();
         InitializeComponent();
-        if (Application.Current.TryFindResource("LifetimeObserver") is LifetimeObserver lto)
-        {
-            lto.TraceObject(this);
-        }
+        NotifyInstanceCreated.Notify(this);
     }
     public void Clear()
     {

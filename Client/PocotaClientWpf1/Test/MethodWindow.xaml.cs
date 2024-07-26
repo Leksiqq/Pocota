@@ -44,8 +44,20 @@ public partial class MethodWindow : Window, IServiceKeyRelated
     {
         _namesConverter = Application.Current.GetNamesConverter();
         Closed += Window1_Closed;
+        Activated += MethodWindow_Activated;
         InitializeComponent();
     }
+
+    private Timer? _timer;
+    private void MethodWindow_Activated(object? sender, EventArgs e)
+    {
+        _timer =  new(s => {
+            _timer = null;
+            Dispatcher.Invoke(() => Close()); 
+        });
+        _timer.Change(3000, 0);
+    }
+
     public void Init(ConnectorMethod connectorMethod)
     {
         if (connectorMethod != null)

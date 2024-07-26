@@ -80,7 +80,8 @@
                                 Margin="0"
                                 Style="{StaticResource PlayButtonStyle}" 
                                 Command="{Binding Value, Source={StaticResource Window}}"
-                                CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                d:CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                CommandParameter="{Binding}"
                                 />
                         </StackPanel>
                     </DataTemplate>

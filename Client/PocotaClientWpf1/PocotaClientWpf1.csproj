@@ -25,19 +25,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Net.Leksi.LifetimeObserver" Version="1.1.*" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Net.Leksi.Localization" Version="1.0.0" />
+    <PackageReference Include="Net.Leksi.WpfMarkupExtension" Version="3.0.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PocotaClient\PocotaClient.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)'=='Debug'">
-    <ProjectReference Include="..\..\..\Localization\Localization\Localization.csproj" />
-    <ProjectReference Include="..\..\..\WPF\WpfMarkupExtension\WpfMarkupExtension\WpfMarkupExtension.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)'=='Release'">
-    <PackageReference Include="Net.Leksi.WpfMarkupExtension" Version="3.0.*" />
-    <PackageReference Include="Net.Leksi.Localization" Version="1.0.*" />
   </ItemGroup>
 
 </Project>

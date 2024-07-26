@@ -1,5 +1,4 @@
-﻿using Net.Leksi.Util;
-using Net.Leksi.WpfMarkup;
+﻿using Net.Leksi.WpfMarkup;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -13,10 +12,7 @@ public class PropertyTemplateSelector: DataTemplateSelector
     public string TextDataTemplateKey { get; set; } = null!;
     public PropertyTemplateSelector() 
     {
-        if (Application.Current.TryFindResource("LifetimeObserver") is LifetimeObserver lto)
-        {
-            lto.TraceObject(this);
-        }
+        NotifyInstanceCreated.Notify(this);
     }
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
