@@ -109,16 +109,20 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
                 _windowsByLauncher.Add(launcher, [window]);
             }
         }
-        window.Activated += WindowActivated;
-        window.Closed += WindowClosed;
+        //window.Activated += WindowActivated;
+        //window.Closed += WindowClosed;
+        WeakEventManager<Window, EventArgs>.AddHandler(window, "Activated", WindowActivated);
+        WeakEventManager<Window, EventArgs>.AddHandler(window, "Closed", WindowClosed);
     }
     private void WindowClosed(object? sender, EventArgs e)
     {
         if (sender is Window window)
         {
             ++_entersCount;
-            window.Activated -= WindowActivated;
-            window.Closed -= WindowClosed;
+            //window.Activated -= WindowActivated;
+            //window.Closed -= WindowClosed;
+            WeakEventManager<Window, EventArgs>.RemoveHandler(window, "Activated", WindowActivated);
+            WeakEventManager<Window, EventArgs>.RemoveHandler(window, "Closed", WindowClosed);
             if (_activeWindow == window)
             {
                 _activeWindow = null;
