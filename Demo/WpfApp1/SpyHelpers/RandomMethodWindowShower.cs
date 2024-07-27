@@ -64,7 +64,7 @@ internal class RandomMethodWindowShower: IWpfSpyRunner
         }
         else if (window is MethodWindow && e.EventKind == EventKind.WindowActivated)
         {
-            //_expositionQueue.Enqueue(new Tuple<WeakReference<Window>, DateTime>(new(methodWindow), _prevShow));
+            _expositionQueue.Enqueue(new Tuple<WeakReference<Window>, DateTime>(new(window), _prevShow));
         }
     }
 }

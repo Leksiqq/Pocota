@@ -63,6 +63,7 @@ static class Program
             app.ShutdownMode = ShutdownMode.OnMainWindowClose;
             if (app.Resources["LifetimeObserver"] is LifetimeObserver lto)
             {
+                lto.NextTracedCount += Lto_NextTracedCount;
                 LifetimeVisualizer.Start(lto!);
                 Net.Leksi.WpfMarkup.NotifyInstanceCreated.InstanceCreated += (s, e) =>
                 {
@@ -74,7 +75,13 @@ static class Program
                 };
             }
 
-            //WpfSpy.Instance.Start(RandomMethodWindowShower.Instance);
+            WpfSpy.Instance.Start(RandomMethodWindowShower.Instance);
         });
+    }
+
+    private static void Lto_NextTracedCount(object? sender, EventArgs e)
+    {
+        GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, true);
+        GC.WaitForPendingFinalizers();
     }
 }

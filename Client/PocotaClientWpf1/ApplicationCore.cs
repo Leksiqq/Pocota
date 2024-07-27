@@ -109,7 +109,6 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
                 _windowsByLauncher.Add(launcher, [window]);
             }
         }
-        window.Resources[Constants.Localizer] = Application.Current.GetLocalizer();
         window.Activated += WindowActivated;
         window.Closed += WindowClosed;
     }
@@ -134,6 +133,7 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
             if(_launcherByWindow.TryGetValue(window, out var launcher))
             {
                 _windowsByLauncher[launcher].Remove(window);
+                _launcherByWindow.Remove(window);
             }
             if(toClose != null)
             {
@@ -145,6 +145,28 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
             if(--_entersCount == 0)
             {
                 RefreshWindowMenuItems();
+                int numLeaks = 0;
+                foreach(
+                    var w in 
+                    _windowsByLauncher.Keys.Concat(_launcherByWindow.Values).Concat(_launcherByWindow.Keys)
+                        .Concat(_windowsByLauncher.Values.SelectMany(v => v)).ToHashSet()
+                )
+                {
+                    Console.Write($"{w} ");
+                    bool found = false;
+                    foreach(var w1 in Application.Current.Windows)
+                    {
+                        if(w1 == w)
+                        {
+                            found = true;
+                        }
+                    }
+                    if (!found)
+                    {
+                        ++numLeaks;
+                    }
+                }
+                Console.WriteLine($"\nnumLeaks: {numLeaks}, numWin: {Application.Current.Windows.Count}");
             }
         }
     }
