@@ -64,7 +64,7 @@ static class Program
             if (app.Resources["LifetimeObserver"] is LifetimeObserver lto)
             {
                 lto.NextTracedCount += Lto_NextTracedCount;
-                LifetimeVisualizer.Start(lto!);
+                LifetimeVisualizer.Instance.Start(lto!);
                 Net.Leksi.WpfMarkup.NotifyInstanceCreated.InstanceCreated += (s, e) =>
                 {
                     lto!.TraceObject(s!);

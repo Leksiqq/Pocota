@@ -12,7 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Net.Leksi.LifetimeObserver" Version="1.2.*" />
-    <PackageReference Include="Net.Leksi.LifetimeVisualizer" Version="1.2.*" />
+    <PackageReference Include="Net.Leksi.LifetimeVisualizer" Version="1.3.*" />
     <PackageReference Include="Net.Leksi.WpfMarkupExtension" Version="3.0.*" />
   </ItemGroup>
 
