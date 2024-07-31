@@ -4,9 +4,8 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
-using static Net.Leksi.Pocota.Client.Constants;
 namespace Net.Leksi.Pocota.Client;
-public partial class ObjectWindow : Window, IServiceKeyRelated, INotifyPropertyChanged, IEditWindow, IValueConverter
+public partial class ObjectWindow : Window, IConnectorNameRelated, INotifyPropertyChanged, IEditWindow, IValueConverter
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     private readonly PropertyChangedEventArgs _propertyChangedEventArgs = new(null);
@@ -14,7 +13,7 @@ public partial class ObjectWindow : Window, IServiceKeyRelated, INotifyPropertyC
     private object? _target;
     private string? _propertyName;
     private IInputElement? _currentInput = null;
-    public string ServiceKey { get; private set; } = string.Empty;
+    public string ConnectorName { get; private set; } = string.Empty;
     public object? Target
     {
         get => _target;
@@ -39,15 +38,18 @@ public partial class ObjectWindow : Window, IServiceKeyRelated, INotifyPropertyC
             }
         }
     }
-    public string ObjectTitle => GetType().FullName!;//$"{(Core.Launcher?.Owner is IEditWindow ew ? $"{ew.ObjectTitle}/" : string.Empty)}{ConvertName(PropertyName, Target?.GetType())}";
+    public string ObjectTitle => $"{(Application.Current.GetApplicationCore().GetLauncher(this) is IEditWindow ew 
+        ? $"{ew.ObjectTitle}/" 
+        : string.Empty)}{ConvertName(PropertyName, Target?.GetType())}"
+    ;
     public ObjectWindow()
     {
         _namesConverter = Application.Current.GetServiceProvider().GetRequiredService<INamesConverter>();
         InitializeComponent();
     }
-    public void Init(string serviceKey)
+    public void Init(string connectorName)
     {
-        ServiceKey = serviceKey;
+        ConnectorName = connectorName;
     }
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

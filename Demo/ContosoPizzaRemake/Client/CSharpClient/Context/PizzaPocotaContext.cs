@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // ContosoPizza.Client.PizzaPocotaContext                  //
 // was generated automatically from ContosoPizza.IContract //
-// at 2024-07-25T16:23:24.                                 //
+// at 2024-07-31T17:13:13.                                 //
 // Modifying this file will break the program!             //
 /////////////////////////////////////////////////////////////
 
@@ -15,7 +15,7 @@ namespace ContosoPizza.Client;
 
 public class PizzaPocotaContext: PocotaContext
 {
-    public PizzaPocotaContext(IServiceProvider services, string serviceKey): base(services, serviceKey) 
+    public PizzaPocotaContext(IServiceProvider services, string name): base(services, name) 
     {
         s_entityCreators.Add(typeof(Pizza), (id, ctx) => new Pizza(id, ctx));
         s_entityCreators.Add(typeof(Sauce), (id, ctx) => new Sauce(id, ctx));

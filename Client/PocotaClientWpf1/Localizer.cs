@@ -45,7 +45,7 @@ public class Localizer: LocalizationBase
     public string Property => GetString();
     public string Remove => GetString();
     public string Return => GetString();
-    public string ServiceKey => GetString();
+    public string ConnectorName => GetString();
     public string ShowNamespace => GetString();
     public string SortPosition => GetString();
     public string Undo => GetString();

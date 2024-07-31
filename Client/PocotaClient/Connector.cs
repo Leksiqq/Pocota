@@ -17,7 +17,7 @@ public abstract class Connector
     protected readonly Dictionary<MethodInfo, Type?> _methodsOptionsTypes = [];
     protected PocotaContext _context = null!;
     public HttpStatusCode StatusCode { get; private set; }
-    public string ServiceKey {  get; private init; }
+    public string Name {  get; private init; }
     public Uri? BaseAddress
     {
         get => _baseAddress;
@@ -46,7 +46,7 @@ public abstract class Connector
             }
         }
     }
-    public Connector(IServiceProvider services, string serviceKey, Uri? baseUri)
+    public Connector(IServiceProvider services, string name, Uri? baseUri)
     {
         _services = services;
         _httpClient = new HttpClient();
@@ -58,7 +58,7 @@ public abstract class Connector
         _timeout = _httpClient.Timeout;
         _baseAddress = _httpClient.BaseAddress;
         _serializationOptions.Converters.Add(_exceptionJsonConverter);
-        ServiceKey = serviceKey;
+        Name = name;
     }
     public Type? GetMethodOptionsType(MethodInfo methodInfo)
     {

@@ -4,11 +4,11 @@ using System.Globalization;
 using System.Text.Json;
 using System.Windows;
 namespace Net.Leksi.Pocota.Client;
-public partial class MethodWindow : Window, IServiceKeyRelated
+public partial class MethodWindow : Window, IConnectorNameRelated, IEditWindow
 {
     private const string s_target = "target";
     public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(nameof(Target), typeof(object), typeof(MethodWindow));
-    public static readonly DependencyProperty ServiceKeyProperty = DependencyProperty.Register(nameof(ServiceKey), typeof(string), typeof(MethodWindow));
+    public static readonly DependencyProperty ServiceKeyProperty = DependencyProperty.Register(nameof(ConnectorName), typeof(string), typeof(MethodWindow));
     public static readonly DependencyProperty ReturnTypeProperty = DependencyProperty.Register(nameof(ReturnType), typeof(Type), typeof(MethodWindow));
     public static readonly DependencyProperty MethodNameProperty = DependencyProperty.Register(nameof(MethodName), typeof(string), typeof(MethodWindow));
     public static readonly DependencyProperty ObjectTitleProperty = DependencyProperty.Register(nameof(ObjectTitle), typeof(string), typeof(MethodWindow));
@@ -29,7 +29,7 @@ public partial class MethodWindow : Window, IServiceKeyRelated
         get => (string)GetValue(ObjectTitleProperty);
         set => SetValue(ObjectTitleProperty, value);
     }
-    public string ServiceKey
+    public string ConnectorName
     {
         get => (string)GetValue(ServiceKeyProperty);
         set => SetValue(ServiceKeyProperty, value);
@@ -62,14 +62,14 @@ public partial class MethodWindow : Window, IServiceKeyRelated
     {
         if (connectorMethod != null)
         {
-            ServiceKey = connectorMethod.ServiceKey;
+            ConnectorName = connectorMethod.ConnectorName;
             MethodName = connectorMethod.Method.Name;
-            ObjectTitle = $"{ConvertName(ServiceKey!)}:{ConvertName(connectorMethod.Method.Name, connectorMethod.Connector)}()";
+            ObjectTitle = $"{ConvertName(ConnectorName!)}:{ConvertName(connectorMethod.Method.Name, connectorMethod.Connector)}()";
             ReturnType = connectorMethod.Method.GetParameters()
                 .Where(p => p.Name == s_target).FirstOrDefault()?.ParameterType
                     ?? connectorMethod.Method.ReturnType.GetGenericArguments()[0];
             Type targetType = Application.Current.GetServiceProvider()
-                    .GetRequiredKeyedService<Connector>(ServiceKey)
+                    .GetRequiredKeyedService<Connector>(ConnectorName)
                     .GetMethodOptionsType(connectorMethod.Method)!;
             if (targetType != null)
             {

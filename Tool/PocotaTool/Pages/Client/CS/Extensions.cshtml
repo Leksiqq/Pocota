@@ -10,15 +10,15 @@ public static class @Model.ClassName@(Model.Inheritances.Count > 0 ? $": {string
 {
     public static IServiceCollection Add@{}@Model.ContractName@{}(
         this IServiceCollection services,
-        string servicesKey = "@Model.ContractName",
+        string name = "@Model.ContractName",
         Uri? baseUri = null
     )
     {
-        services.AddScoped@{}(serv => new @Model.ContractName@{}Connector@{}(serv, servicesKey, baseUri));
-        services.AddScoped@{}(serv => new @Model.ContractName@{}PocotaContext@{}(serv, servicesKey));
+        services.AddScoped@{}(serv => new @Model.ContractName@{}Connector@{}(serv, name, baseUri));
+        services.AddScoped@{}(serv => new @Model.ContractName@{}PocotaContext@{}(serv, name));
         services.AddScoped@{}@Html.Raw($"<{Model.ContractName}JsonConverterFactory>")@{}();
-        services.AddKeyedScoped@{}@Html.Raw("<PocotaContext>")@{}(servicesKey, (serv, key) => serv.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}PocotaContext>")@{}());
-        services.AddKeyedScoped@{}@Html.Raw("<Connector>")@{}(servicesKey, (serv, key) => serv.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}Connector>")@{}());
+        services.AddKeyedScoped@{}@Html.Raw("<PocotaContext>")@{}(name, (serv, key) => serv.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}PocotaContext>")@{}());
+        services.AddKeyedScoped@{}@Html.Raw("<Connector>")@{}(name, (serv, key) => serv.GetRequiredService@{}@Html.Raw($"<{Model.ContractName}Connector>")@{}());
 @foreach(PropertyModel pm in Model.Properties)
 {
     <text>        services.AddTransient@{}@Html.Raw($"<{pm.Name}JsonConverter>")@{}();

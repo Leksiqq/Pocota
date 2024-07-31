@@ -11,7 +11,7 @@ public class PocotaContext
     private ulong _idGen = 0;
     protected readonly Dictionary<Type, Func<ulong, PocotaContext, IEntityOwner>> s_entityCreators = [];
     protected readonly IServiceProvider _services;
-    public string ServiceKey { get; private init; }
+    public string Name { get; private init; }
     public bool KeyOnlyJson { get; internal set; } = true;
     internal PocotaConfig? PocotaConfig 
     { 
@@ -32,10 +32,10 @@ public class PocotaContext
             }
         }
     }
-    public PocotaContext(IServiceProvider services, string serviceKey)
+    public PocotaContext(IServiceProvider services, string name)
     {
         _services = services;
-        ServiceKey = serviceKey;
+        Name = name;
     }
     public T CreateEntity<T>() where T : PocotaEntity
     {

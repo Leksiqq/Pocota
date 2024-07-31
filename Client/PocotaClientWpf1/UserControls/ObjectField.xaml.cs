@@ -7,7 +7,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 namespace Net.Leksi.Pocota.Client.UserControls;
-public partial class ObjectField : UserControl, ICommand, IValueConverter, IServiceKeyRelated, IFieldOwner, INotifyPropertyChanged
+public partial class ObjectField : UserControl, ICommand, IValueConverter, IConnectorNameRelated, IFieldOwner, INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler? CanExecuteChanged
@@ -37,7 +37,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
     private static readonly PropertyChangedEventArgs _ObjectStateChangedEventArgs = new(null);
     private ObjectWindow? _editWindow = null;
     private readonly FieldOwnerCore _fieldOwnerCore;
-    private string _serviceKey = string.Empty;
+    private string _connectorName = string.Empty;
     FieldOwnerCore IFieldOwner.FieldOwnerCore => _fieldOwnerCore;
     public Field? Field
     {
@@ -55,7 +55,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
         set => SetValue(PropertyNameProperty, value);
     }
     public Window Window { get; private set; } = null!;
-    public string ServiceKey => _serviceKey;
+    public string ConnectorName => _connectorName;
     public bool EditorOpen => ObjectEditor?.Visibility == Visibility.Visible;
     public ObjectState ObjectState
     {
@@ -148,7 +148,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
                 if ("Create".Equals(parameter))
                 {
                     Field.Value = Application.Current.GetServiceProvider()
-                        .GetRequiredKeyedService<PocotaContext>(ServiceKey).CreateInstance(Field.Type);
+                        .GetRequiredKeyedService<PocotaContext>(ConnectorName).CreateInstance(Field.Type);
                 }
                 else if ("EditExternal".Equals(parameter))
                 {
@@ -163,7 +163,7 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
 
                             _editWindow = Application.Current.GetServiceProvider().GetRequiredService<ObjectWindow>();
                             Application.Current.AttachWindow(_editWindow, Window);
-                            _editWindow.Init(_serviceKey);
+                            _editWindow.Init(_connectorName);
                             WeakEventManager<Window, EventArgs>.AddHandler(_editWindow, "Closed", ExternalEditWindow_Closed);
                             _editWindow.Target = Field.Value;
                             _editWindow.PropertyName = Field.PropertyName;
@@ -266,9 +266,9 @@ public partial class ObjectField : UserControl, ICommand, IValueConverter, IServ
             if (dop is Window window)
             {
                 Window = window;
-                if (window is IServiceKeyRelated sr)
+                if (window is IConnectorNameRelated sr)
                 {
-                    _serviceKey = sr.ServiceKey!;
+                    _connectorName = sr.ConnectorName!;
                 }
                 break;
             }

@@ -33,13 +33,13 @@ static class Program
         builder.Services.AddSingleton<Localizer>(s => s.GetRequiredService<MyLocalizer>());
         builder.Services.RemoveService(typeof(INamesConverter));
         builder.Services.AddSingleton<INamesConverter, NamesConverter>();
-        builder.Services.AddTransient<MethodWindow>();
         builder.Services.AddLifetimeObserver(lto =>
         {
             //PocotaClientWpf1
             lto.Trace<ObjectEditor>(true);
             lto.Trace<PropertyTemplateSelector>(true);
             lto.Trace<MethodWindow>();
+            lto.Trace<ObjectWindow>();
 
             //WpfMarkupExtension
             lto.Trace<BindingProxy>(true);
@@ -74,6 +74,8 @@ static class Program
                     lto!.TraceObject(s!);
                 };
             }
+
+            app.GetApplicationCore().NeedToCheckAndShowLeaks = true;
 
             WpfSpy.Instance.Start(RandomMethodWindowShower.Instance);
         });

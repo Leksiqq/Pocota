@@ -2,6 +2,7 @@
 using Net.Leksi.Util;
 using System.Windows;
 using System.Windows.Controls;
+using System.Xml.Linq;
 
 namespace WpfApp1;
 
@@ -56,7 +57,7 @@ internal class RandomMethodWindowShower: IWpfSpyRunner
                 in
                 Utilities.GetVisualDescendants(window)
                 .OfType<Button>()
-                .Where(b => Utilities.FindResourceKey(window.Resources, b.Style) == "PlayButtonStyle")
+                .Where(b => Utilities.FindResourceKey(b, b.Style) == "PlayButtonStyle")
             )
             {
                 buttonList.Add(item);
@@ -65,6 +66,23 @@ internal class RandomMethodWindowShower: IWpfSpyRunner
         else if (window is MethodWindow && e.EventKind == EventKind.WindowActivated)
         {
             _expositionQueue.Enqueue(new Tuple<WeakReference<Window>, DateTime>(new(window), _prevShow));
+            foreach (
+                var item
+                in
+                Utilities.GetVisualDescendants(window)
+                .OfType<Button>()
+                .Where(b => Utilities.FindResourceKey(b, b.Style) is string key && (key == "CreateButtonStyle" || key == "EditExternalButtonStyle"))
+            )
+            {
+                item.IsEnabledChanged += (s, e) =>
+                {
+                    Utilities.PushButton(item);
+                };
+            }
+        }
+        else if (window is ObjectWindow && e.EventKind == EventKind.WindowActivated)
+        {
         }
     }
+
 }

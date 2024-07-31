@@ -53,9 +53,9 @@
                             Margin="0"
                             />
                     </DataTemplate>
-                    <DataTemplate x:Key="ServiceKey">
+                    <DataTemplate x:Key="ConnectorName">
                         <TextBox 
-                            Text="{Binding ServiceKey, Mode=OneTime}" 
+                            Text="{Binding ConnectorName, Mode=OneTime}" 
                             Style="{StaticResource ReadonlyDataGridCellTextBoxStyle}"
                             Margin="0"
                             />
@@ -96,7 +96,7 @@
                         x:Key="NameConverter"
                         />
                     <local:DataGridConverter 
-                        FieldName="ServiceKey" 
+                        FieldName="ConnectorName" 
                         DataGridManager="{Binding Value.ConnectorsDataGridManager, Source={StaticResource Window}}" 
                         x:Key="ServiceKeyConverter"
                         />
@@ -147,7 +147,7 @@
                         </Binding>
                     </DataGridTemplateColumn.HeaderTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn CellTemplate="{StaticResource ServiceKey}">
+                <DataGridTemplateColumn CellTemplate="{StaticResource ConnectorName}">
                     <DataGridTemplateColumn.HeaderTemplate>
                         <Binding Path="Value">
                             <Binding.Source>
@@ -155,8 +155,8 @@
                                     <l:ParameterizedResource.Replaces>
                                         <x:Array Type="sys:Object">
                                             <sys:String>$converter:ServiceKeyConverter</sys:String>
-                                            <sys:String>$field:ServiceKey</sys:String>
-                                            <l:BindingProxy Name="$name" Value="{Binding ServiceKey, Source={StaticResource Localizer}}"/>
+                                            <sys:String>$field:ConnectorName</sys:String>
+                                            <l:BindingProxy Name="$name" Value="{Binding ConnectorName, Source={StaticResource Localizer}}"/>
                                         </x:Array>
                                     </l:ParameterizedResource.Replaces>
                                 </l:ParameterizedResource>

@@ -35,7 +35,7 @@
         <TextBlock DockPanel.Dock="Top" FontSize="20" HorizontalAlignment="Center">
             <TextBlock.Text>
                 <MultiBinding StringFormat="{}{0}:{1}">
-                    <Binding Path="ServiceKey"/>
+                    <Binding Path="ConnectorName"/>
                     <Binding Path="Target" Converter="{local:TypeNameConverter}" ConverterParameter="Short" Mode="OneWay"/>
                 </MultiBinding>
             </TextBlock.Text>

@@ -27,6 +27,7 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
     private readonly Dictionary<Window, HashSet<Window>> _windowsByLauncher = [];
     private Window? _activeWindow = null;
     private int _entersCount = 0;
+    public bool NeedToCheckAndShowLeaks { get; set; } = false;
     public ObservableCollection<object> WindowMenuItems { get; private init; } = [];
     public ApplicationCore()
     {
@@ -109,18 +110,18 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
                 _windowsByLauncher.Add(launcher, [window]);
             }
         }
-        //window.Activated += WindowActivated;
-        //window.Closed += WindowClosed;
         WeakEventManager<Window, EventArgs>.AddHandler(window, "Activated", WindowActivated);
         WeakEventManager<Window, EventArgs>.AddHandler(window, "Closed", WindowClosed);
+    }
+    public Window? GetLauncher(Window window)
+    {
+        return _launcherByWindow.TryGetValue(window, out Window? launcher) ? launcher : null;
     }
     private void WindowClosed(object? sender, EventArgs e)
     {
         if (sender is Window window)
         {
             ++_entersCount;
-            //window.Activated -= WindowActivated;
-            //window.Closed -= WindowClosed;
             WeakEventManager<Window, EventArgs>.RemoveHandler(window, "Activated", WindowActivated);
             WeakEventManager<Window, EventArgs>.RemoveHandler(window, "Closed", WindowClosed);
             if (_activeWindow == window)
@@ -149,28 +150,31 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
             if(--_entersCount == 0)
             {
                 RefreshWindowMenuItems();
-                int numLeaks = 0;
-                foreach(
-                    var w in 
-                    _windowsByLauncher.Keys.Concat(_launcherByWindow.Values).Concat(_launcherByWindow.Keys)
-                        .Concat(_windowsByLauncher.Values.SelectMany(v => v)).ToHashSet()
-                )
+                if (NeedToCheckAndShowLeaks)
                 {
-                    Console.Write($"{w} ");
-                    bool found = false;
-                    foreach(var w1 in Application.Current.Windows)
+                    int numLeaks = 0;
+                    foreach (
+                        var w in
+                        _windowsByLauncher.Keys.Concat(_launcherByWindow.Values).Concat(_launcherByWindow.Keys)
+                            .Concat(_windowsByLauncher.Values.SelectMany(v => v)).ToHashSet()
+                    )
                     {
-                        if(w1 == w)
+                        Console.Write($"{w} ");
+                        bool found = false;
+                        foreach (var w1 in Application.Current.Windows)
                         {
-                            found = true;
+                            if (w1 == w)
+                            {
+                                found = true;
+                            }
+                        }
+                        if (!found)
+                        {
+                            ++numLeaks;
                         }
                     }
-                    if (!found)
-                    {
-                        ++numLeaks;
-                    }
+                    Console.WriteLine($"\nnumLeaks: {numLeaks}, numWin: {Application.Current.Windows.Count}");
                 }
-                Console.WriteLine($"\nnumLeaks: {numLeaks}, numWin: {Application.Current.Windows.Count}");
             }
         }
     }
