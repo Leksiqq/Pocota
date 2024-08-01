@@ -55,7 +55,7 @@ static class Program
             lto.Trace<StyleCombiner>(true);
             lto.Trace<Unsort>(true);
             lto.Trace<XamlServiceProviderCatcher>(true);
-        }, true);
+        }, false);
         using IHost host = builder.Build();
 
         host.RunPocotaWpfApp(app =>

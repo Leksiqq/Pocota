@@ -100,6 +100,10 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
     {
         if(launcher != null)
         {
+            if (!launcher.IsLoaded)
+            {
+                throw new ArgumentException($"{nameof(launcher)} is closed!");
+            }
             _launcherByWindow.Add(window, launcher);
             if (_windowsByLauncher.TryGetValue(launcher, out var windows))
             {
@@ -117,11 +121,18 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
     {
         return _launcherByWindow.TryGetValue(window, out Window? launcher) ? launcher : null;
     }
+    private static string WindowToString(Window window)
+    {
+        return $"{{{window.Title}:{window.GetHashCode()}}}";
+    }
     private void WindowClosed(object? sender, EventArgs e)
     {
         if (sender is Window window)
         {
             ++_entersCount;
+            Console.WriteLine($"WindowClosed: {WindowToString(window)}, enters: {_entersCount}");
+            Console.WriteLine($"1) _launcherByWindow: [{string.Join(' ', _launcherByWindow.Select(e => $"{{{WindowToString(e.Key)},{WindowToString(e.Value)}}}"))}]");
+            Console.WriteLine($"1) _windowsByLauncher: [{string.Join(' ', _windowsByLauncher.Select(e => $"{{{WindowToString(e.Key)},[{string.Join(' ', e.Value.Select(w => WindowToString(w)))}]}}"))}]");
             WeakEventManager<Window, EventArgs>.RemoveHandler(window, "Activated", WindowActivated);
             WeakEventManager<Window, EventArgs>.RemoveHandler(window, "Closed", WindowClosed);
             if (_activeWindow == window)
@@ -136,10 +147,17 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
             if (_windowsByLauncher.TryGetValue(window, out HashSet<Window>? toClose))
             {
                 _windowsByLauncher.Remove(window);
+                Console.WriteLine($"2) _launcherByWindow: [{string.Join(' ', _launcherByWindow.Select(e => $"{{{WindowToString(e.Key)},{WindowToString(e.Value)}}}"))}]");
+                Console.WriteLine($"2) _windowsByLauncher: [{string.Join(' ', _windowsByLauncher.Select(e => $"{{{WindowToString(e.Key)},[{string.Join(' ', e.Value.Select(w => WindowToString(w)))}]}}"))}]");
                 foreach (var item in toClose)
                 {
                     item.Close();
                 }
+            }
+            else
+            {
+                Console.WriteLine($"2) _launcherByWindow: [{string.Join(' ', _launcherByWindow.Select(e => $"{{{WindowToString(e.Key)},{WindowToString(e.Value)}}}"))}]");
+                Console.WriteLine($"2) _windowsByLauncher: [{string.Join(' ', _windowsByLauncher.Select(e => $"{{{WindowToString(e.Key)},[{string.Join(' ', e.Value.Select(w => WindowToString(w)))}]}}"))}]");
             }
             if (--_entersCount == 0)
             {
@@ -153,7 +171,7 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
                             .Concat(_windowsByLauncher.Values.SelectMany(v => v)).ToHashSet()
                     )
                     {
-                        Console.Write($"{w.Title} ");
+                        Console.Write(WindowToString(w));
                         bool found = false;
                         foreach (var w1 in Application.Current.Windows)
                         {
@@ -164,8 +182,10 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
                         }
                         if (!found)
                         {
+                            Console.Write($"[zombie]");
                             ++numLeaks;
                         }
+                        Console.Write(" ");
                     }
                     Console.WriteLine($"\nnumLeaks: {numLeaks}, numWin: {Application.Current.Windows.Count}");
                     if(numLeaks > 0)
