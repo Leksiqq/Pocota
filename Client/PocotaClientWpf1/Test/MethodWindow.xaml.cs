@@ -43,21 +43,9 @@ public partial class MethodWindow : Window, IConnectorNameRelated, IEditWindow
     public MethodWindow()
     {
         _namesConverter = Application.Current.GetNamesConverter();
-        Closed += Window1_Closed;
-        //Activated += MethodWindow_Activated;
+        Closed += Window_Closed;
         InitializeComponent();
     }
-
-    private Timer? _timer;
-    private void MethodWindow_Activated(object? sender, EventArgs e)
-    {
-        _timer =  new(s => {
-            _timer = null;
-            Dispatcher.Invoke(() => Close()); 
-        });
-        _timer.Change(3000, 0);
-    }
-
     public void Init(ConnectorMethod connectorMethod)
     {
         if (connectorMethod != null)
@@ -92,7 +80,7 @@ public partial class MethodWindow : Window, IConnectorNameRelated, IEditWindow
             InsertInputMode.Text = (string?)oe.Convert(oe.CurrentInput?.IsInsertMode, typeof(string), "InsertInputMode", CultureInfo.CurrentCulture);
         }
     }
-    private void Window1_Closed(object? sender, EventArgs e)
+    private void Window_Closed(object? sender, EventArgs e)
     {
         ObjectEditor.Clear();
     }

@@ -45,8 +45,16 @@ public partial class ObjectWindow : Window, IConnectorNameRelated, INotifyProper
     public ObjectWindow()
     {
         _namesConverter = Application.Current.GetServiceProvider().GetRequiredService<INamesConverter>();
+        Closed += ObjectWindow_Closed;
         InitializeComponent();
     }
+
+    private void ObjectWindow_Closed(object? sender, EventArgs e)
+    {
+        ObjectEditor.Clear();
+        Target = null;
+    }
+
     public void Init(string connectorName)
     {
         ConnectorName = connectorName;

@@ -51,6 +51,7 @@
             </StatusBarItem>
         </StatusBar>
         <uc:ObjectEditor 
+            x:Name="ObjectEditor"
             DockPanel.Dock="Top"
             Target="{Binding Target}" 
             ServiceProvider="{StaticResource WindowSP}" 

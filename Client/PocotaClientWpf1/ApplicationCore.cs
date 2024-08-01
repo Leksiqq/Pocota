@@ -128,26 +128,20 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
             {
                 _activeWindow = null;
             }
-            if(_windowsByLauncher.TryGetValue(window, out HashSet<Window>? toClose))
+            if(_launcherByWindow.TryGetValue(window, out Window? launcher) && _windowsByLauncher.TryGetValue(launcher, out HashSet<Window>? launched))
             {
-                foreach(var item in toClose)
-                {
-                    _launcherByWindow.Remove(item);
-                }
+                launched.Remove(window);
             }
-            if(_launcherByWindow.TryGetValue(window, out var launcher))
+            _launcherByWindow.Remove(window);
+            if (_windowsByLauncher.TryGetValue(window, out HashSet<Window>? toClose))
             {
-                _windowsByLauncher[launcher].Remove(window);
-                _launcherByWindow.Remove(window);
-            }
-            if(toClose != null)
-            {
+                _windowsByLauncher.Remove(window);
                 foreach (var item in toClose)
                 {
                     item.Close();
                 }
             }
-            if(--_entersCount == 0)
+            if (--_entersCount == 0)
             {
                 RefreshWindowMenuItems();
                 if (NeedToCheckAndShowLeaks)
@@ -159,7 +153,7 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
                             .Concat(_windowsByLauncher.Values.SelectMany(v => v)).ToHashSet()
                     )
                     {
-                        Console.Write($"{w} ");
+                        Console.Write($"{w.Title} ");
                         bool found = false;
                         foreach (var w1 in Application.Current.Windows)
                         {
@@ -174,6 +168,10 @@ public class ApplicationCore: DependencyObject, IValueConverter, ICommand
                         }
                     }
                     Console.WriteLine($"\nnumLeaks: {numLeaks}, numWin: {Application.Current.Windows.Count}");
+                    if(numLeaks > 0)
+                    {
+                        Environment.Exit(numLeaks);
+                    }
                 }
             }
         }
